@@ -1,4 +1,15 @@
 venv/
 .venv/
 *.env
-
+__pycache__/
+*.pyc
+instance/
+*.sqlite3
+.DS_Store
+.idea/
+.vscode/
+*.log
+coverage/
+htmlcov/
+.tox/
+.pytest_cache/
