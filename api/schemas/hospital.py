@@ -8,3 +8,7 @@ class HospitalCreate(BaseModel):
     hospital_license: str
     password: str
 
+class HospitalLogin(BaseModel):
+    hospital_email: EmailStr
+    password: str
+
