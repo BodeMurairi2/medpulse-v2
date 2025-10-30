@@ -5,6 +5,6 @@ class HospitalCreate(BaseModel):
     hospital_email: EmailStr
     hospital_country: str
     hospital_city: str
-    hospital_licence: str
+    hospital_license: str
     password: str
 
