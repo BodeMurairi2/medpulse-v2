@@ -91,7 +91,7 @@ def generate_appointment_report(request: AppointmentReportRequest) -> Appointmen
     """Generate report of appointments in the given period"""
     dummy_appointments = [
         AppointmentSummary(
-            appointment_date=1,
+            appointment_id=1,
             appointment_date=datetime(2024, 10, 15, 10, 0),
             patient_name="Faith Irakoze",
             doctor_name="Dr. Amina Mugisha",
