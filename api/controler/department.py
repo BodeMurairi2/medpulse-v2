@@ -3,6 +3,7 @@
 from fastapi.routing import APIRouter
 from fastapi import HTTPException, Query
 from services.department import DepartmentService
+from schemas.department import Department
 
 department_router = APIRouter(prefix="/department",
                               tags=["Departments"]
@@ -36,12 +37,12 @@ async def get_department(query:str):
     return service.get_department(department_name=query)
 
 @department_router.post("/add")
-async def add_department(department):
+async def add_department(department:Department):
     return service.add_department(department_data=department)
 
 @department_router.put("/update/{department_name}")
-async def update_department(department_name: str, department):
-    return service.update_department(department_name=department_name, department_data=department)
+async def update_department(department_name: str, department:Department):
+    return service.edit_department(department_name=department_name, department_data=department)
 
 @department_router.delete("/delete/{department_name}")
 async def delete_department(department_name: str):
