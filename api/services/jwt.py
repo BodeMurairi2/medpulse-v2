@@ -1,6 +1,7 @@
 import jwt
 from datetime import datetime, timedelta
 from decouple import config
+from api.services.token_blacklist import is_token_blacklisted
 
 JWT_SECRET = config("SECRET")
 JWT_ALGORITHM = config("ALGORITHM")
@@ -14,6 +15,8 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     return encoded_jwt
 
 def decode_access_token(token: str):
+    if is_token_blacklisted():
+        return None
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         return payload

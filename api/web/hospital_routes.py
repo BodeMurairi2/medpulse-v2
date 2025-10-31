@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Header
 from sqlalchemy.orm import Session
 from api.data.database import get_db
 from api.data.hospital_model import Hospital
@@ -6,6 +6,7 @@ from api.schemas.hospital import HospitalLogin
 from api.schemas.hospital import HospitalCreate
 from api.services.harsh import hash_password, verify_password
 from api.services.jwt import create_access_token
+from api.services.token_blacklist import add_to_blacklist
 from datetime import datetime
 
 router = APIRouter()
@@ -53,3 +54,13 @@ def login_hospital(login_data: HospitalLogin, db: Session = Depends(get_db)):
         "token_type": "bearer",
         "hospital_id": hospital.hospital_id
     }
+@router.post("/logout")
+def logout(authorization : str = Header(...)):
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=400, detail="Invalid authorization header")
+
+    
+    token = authorization.split(" ")[1]
+    add_to_blacklist(token)
+
+    return {"message": "Logged out successfully"}
