@@ -21,3 +21,7 @@ async def get_doctors_list():
 @router.get("/list/{doctor_name}")
 async def get_doctor(doctor_name:str):
     return service.get_doctor(doctor_name=doctor_name)
+
+@router.get("/list/stats/{doctor_name}")
+async def get_doctor_statistic(doctor_name):
+    return service.get_doctor_statistics(doctor_name=doctor_name)

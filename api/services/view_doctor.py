@@ -55,9 +55,18 @@ class View_doctor:
             doctor_data = search_user(user_name=doctor_name,
                                       database=doctor,
                                       session= db)
-        
+
         if not doctor_data:
             return HTTPException(status_code=400, detail="Doctor not found")
-
-        with SessionLocal() as db:
-            return get_doctor_stats(db_session=db, doctor_id=doctor_data.doctor_id)
+        
+        doctor_info = {}
+        for doct in doctor_data:
+            doct_name = f"{doct.first_name} {doct.last_name}"
+            doct_key = doct.doctor_id
+            
+            with SessionLocal() as db:
+                stats = get_doctor_stats(db_session=db, doctor_id=doct_key)
+            
+            doctor_info[doct_name] = stats
+        
+        return doctor_info

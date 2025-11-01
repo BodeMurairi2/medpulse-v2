@@ -1,23 +1,23 @@
 #!/usr/bin/env python3
 
 from sqlalchemy import func
-from data import MedicalRecord, PrescriptionManagement, LabTestResult, PatientRegistration
+from data.hospital_model import MedicalRecord, Prescription, LabTestResult, Patient
 
 def get_doctor_stats(db_session, doctor_id):
     """ Function that returns stats related to a doctor activities
     at tbe hospital
     """
     # Count medical records linked to this doctor
-    record_count = db_session.query(func.count(MedicalRecord.id))\
+    record_count = db_session.query(func.count(MedicalRecord.record_id))\
         .filter(MedicalRecord.doctor_id == doctor_id)\
         .scalar()
 
     # Count prescriptions issued by this doctor
-    prescription_count = db_session.query(func.count(PrescriptionManagement.id))\
-        .filter(PrescriptionManagement.doctor_id == doctor_id)\
+    prescription_count = db_session.query(func.count(Prescription.prescription_id))\
+        .filter(Prescription.doctor_id == doctor_id)\
         .scalar()
 
-    lab_test_count = db_session.query(func.count(LabTestResult.id))\
+    lab_test_count = db_session.query(func.count(LabTestResult.test_id))\
         .filter(LabTestResult.doctor_id == doctor_id)\
         .scalar()
 
@@ -34,8 +34,8 @@ def get_patients_by_doctor(db_session, doctor_id):
     The latest patient entries appear first.
     """
     patients = (
-        db_session.query(PatientRegistration.first_name, PatientRegistration.last_name)
-        .join(MedicalRecord, MedicalRecord.patient_id == PatientRegistration.id)
+        db_session.query(Patient.first_name, Patient.last_name)
+        .join(MedicalRecord, MedicalRecord.patient_id == Patient.id)
         .filter(MedicalRecord.doctor_id == doctor_id)
         .distinct()
         .all()
