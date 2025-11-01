@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.routing import APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from controler.department import department_router
+from controler.view_doctor import router as doctor_view_router
 
 app = FastAPI(title="MedPulse API",
               description="Hospital Database Management system",
@@ -30,6 +31,7 @@ app.add_middleware(
 )
 
 app.include_router(department_router)
+app.include_router(doctor_view_router)
 
 @app.get("/")
 async def root():

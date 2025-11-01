@@ -40,7 +40,6 @@ class Department(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     hospital = relationship("Hospital", back_populates="departments")
-
     def __repr__(self):
         return f"<Department(id={self.department_id}, name={self.department_name})>"
 
