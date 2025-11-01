@@ -9,10 +9,10 @@ class Department(BaseModel):
     department_name: str = Field(..., title="Department Name", min_length=3, max_length=50)
     department_description:str = Field(..., title="Department Description", min_length=10, max_length=400)
     department_email: EmailStr = Field(..., title="Department Email", description="A valid email address for the department")
+    hospital_id:int
     phone: str = Field(..., title="Department Phone", min_length=7, max_length=15)
     location: str = Field(..., title="Department Location", min_length=5, max_length=150)
-    head_doctor: str = Field(..., title="Department Head Doctor or Manager", min_length=3, max_length=100)
-    number_staff: int = Field(..., title="Number of Staff in Department", gt=1)
+    number_of_staff: int = Field(..., title="Number of Staff in Department", gt=1)
     status: bool = Field(..., title="Department Status", description="Indicates if the department is active or inactive")
     created_at: datetime = Field(default_factory=datetime.utcnow, title="Creation Timestamp")
     updated_at: datetime = Field(default_factory=datetime.utcnow, title="Last Update Timestamp")

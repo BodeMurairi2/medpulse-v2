@@ -1,86 +1,111 @@
 #!/usr/bin/env python3
 
+import os
+from dotenv import load_dotenv
 from fastapi import HTTPException
+from rapidfuzz import fuzz
+from sqlalchemy import func
+from data.database import SessionLocal
+from data.hospital_model import Department as dept
 from schemas.department import Department
 
+load_dotenv()
 
 class DepartmentService:
     """Service class for Department Operations"""
 
-    def __init__(self):
-        self.departments = [
-            {
-                "department_name": "Cardiology",
-                "department_description": "Handles all heart-related medical issues and treatments.",
-                "department_email": "cardiologysaintetienne@admin.com",
-                "phone": "18005551234",
-                "location": "Building A, Floor 3",
-                "head_doctor": "Dr. John Smith",
-                "number_staff": 25,
-                "status": True
-            },
-            {
-                "department_name": "Neurology",
-                "department_description": "Specializes in disorders of the nervous system including the brain and spinal cord.",
-                "department_email": "bodemurairi2@gmail.com",
-                "phone": "18005554321",
-                "location": "Building B, Floor 2",
-                "head_doctor": "Dr. Jane Doe",
-                "number_staff": 30,
-                "status": True
-            },
-            {
-                "department_name": "Pediatrics",
-                "department_description": "Provides medical care for infants, children, and adolescents.",
-                "department_email": "bodemurairi2@gmail.com",
-                "phone": "18005559876",
-                "location": "Building C, Floor 1",
-                "head_doctor": "Dr. Emily White",
-                "number_staff": 20,
-                "status": True
-            }
-        ]
-
-    def _find_department(self, department_name: str) -> dict:
-        """Find a department by name (case-insensitive)."""
-        for department in self.departments:
-            if department_name.lower() == department["department_name"].lower():
-                return department
-        raise HTTPException(status_code=404, detail=f"Department '{department_name}' not found")
-
-    def get_departments(self) -> list[Department]:
+    def get_departments(self) -> list[dept]:
         """Get all departments."""
-        return self.departments
+        with SessionLocal() as db:
+            return db.query(dept).all()
 
-    def search_departments(self, query: str) -> list[Department]:
-        """Search departments by partial name (case-insensitive)."""
-        results = [
-            dept for dept in self.departments
-            if query.lower() in dept["department_name"].lower()
-        ]
-        if not results:
-            raise HTTPException(status_code=404, detail="No departments found matching the query")
-        return results
+    def get_department(self, department_name: str) -> list[dept]:
+        """Search departments using partial matching with RapidFuzz."""
+        threshold = int(os.getenv("threshold", 50))  # default 50 if not set
 
-    def get_department(self, department_name: str) -> Department:
-        """Get a single department by name."""
-        return self._find_department(department_name)
+        with SessionLocal() as db:
+            # Filter in SQL first
+            candidates = db.query(dept).filter(
+                func.trim(dept.department_name).ilike(f"%{department_name}%")
+            ).all()
 
-    def add_department(self, department_data: Department) -> Department:
+            # Apply RapidFuzz partial matching
+            department_list = [
+                d for d in candidates
+                if fuzz.partial_ratio(department_name.lower(), (d.department_name or '').lower()) >= threshold
+            ]
+
+        if not department_list:
+            raise HTTPException(status_code=404, detail="No matching departments found")
+
+        return department_list
+
+    def add_department(self, department_data: Department) -> dept:
         """Add a new department."""
-        if any(d["department_name"].lower() == department_data.department_name.lower() for d in self.departments):
-            raise HTTPException(status_code=400, detail="Department already exists")
-        self.departments.append(department_data.model_dump())
-        return department_data
+        with SessionLocal() as db:
+            # Check for duplicate
+            existing = db.query(dept).filter(
+                func.lower(dept.department_name) == department_data.department_name.lower()
+            ).first()
+            if existing:
+                raise HTTPException(status_code=400, detail="Department already exists")
 
-    def edit_department(self, department_data: Department, department_name: str) -> Department:
+            new_department = dept(
+                department_name=department_data.department_name,
+                department_description=department_data.department_description,
+                email=department_data.department_email,
+                phone=department_data.phone,
+                hospital_id=department_data.hospital_id,
+                location=department_data.location,
+                number_of_staff=department_data.number_of_staff,
+                status=department_data.status
+            )
+            db.add(new_department)
+            db.commit()
+            db.refresh(new_department)
+
+        return new_department
+
+    def edit_department(self, department_data: Department, department_name: str) -> dept:
         """Edit an existing department."""
-        department = self._find_department(department_name)
-        department.update(department_data.model_dump())
-        return department
+        with SessionLocal() as db:
+            department = db.query(dept).filter(
+                func.lower(dept.department_name) == department_name.lower()
+            ).first()
+            if not department:
+                raise HTTPException(status_code=404, detail=f"Department '{department_name}' not found")
+
+            # Update fields
+            department.department_name = department_data.department_name
+            department.department_description = department_data.department_description
+            department.email = department_data.department_email
+            department.phone = department_data.phone
+            department.hospital_id = department_data.hospital_id
+            department.location = department_data.location
+            department.number_of_staff = department_data.number_of_staff
+            department.status = department_data.status
+
+            db.commit()
+            db.refresh(department)
+
+        return {"message": "New department created successfuly",
+                "department": department
+                }
 
     def delete_department(self, department_name: str) -> dict:
-        """Deactivate a department"""
-        department = self._find_department(department_name)
-        department["status"] = False
-        return {"detail": f"Department '{department_name}' marked as inactive"}
+        """Deactivate a department."""
+        with SessionLocal() as db:
+            department = db.query(dept).filter(
+                func.lower(dept.department_name) == department_name.lower()
+            ).first()
+            if not department:
+                raise HTTPException(status_code=404, detail=f"Department '{department_name}' not found")
+
+            # Soft delete
+            department.status = False
+            db.commit()
+            db.refresh(department)
+
+        return {"detail": f"Department '{department_name}' marked as inactive",
+                "department": department
+                }
