@@ -79,6 +79,7 @@ class Patient(Base):
     gender = Column(String)
     date_of_birth = Column(Date)
     home_address = Column(String)
+    email = Column(String)
     phone_number = Column(String)
     emergency_contact_name = Column(String)
     emergency_contact_phone = Column(String)
