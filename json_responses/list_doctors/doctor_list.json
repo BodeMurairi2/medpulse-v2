@@ -1,0 +1,183 @@
+// Status 200 (dns:0ms,tcp:0.19999999925494194ms,req:12.700000001117587ms,res:2.5ms)
+{
+  "Cardiology": [
+    {
+      "first_name": "Alice",
+      "last_name": "Smith",
+      "gender": "Female",
+      "phone_number": "243810000001",
+      "email": "alice.smith@example.com"
+    }
+  ],
+  "Neurology": [
+    {
+      "first_name": "Bob",
+      "last_name": "Johnson",
+      "gender": "Male",
+      "phone_number": "243810000002",
+      "email": "bob.johnson@example.com"
+    }
+  ],
+  "Pediatrics": [
+    {
+      "first_name": "Carol",
+      "last_name": "Williams",
+      "gender": "Female",
+      "phone_number": "243810000003",
+      "email": "carol.williams@example.com"
+    }
+  ],
+  "Orthopedics": [
+    {
+      "first_name": "David",
+      "last_name": "Brown",
+      "gender": "Male",
+      "phone_number": "243810000004",
+      "email": "david.brown@example.com"
+    }
+  ],
+  "Radiology": [
+    {
+      "first_name": "Eve",
+      "last_name": "Jones",
+      "gender": "Female",
+      "phone_number": "243810000005",
+      "email": "eve.jones@example.com"
+    }
+  ],
+  "Dermatology": [
+    {
+      "first_name": "Frank",
+      "last_name": "Garcia",
+      "gender": "Male",
+      "phone_number": "243810000006",
+      "email": "frank.garcia@example.com"
+    }
+  ],
+  "Gastroenterology": [
+    {
+      "first_name": "Grace",
+      "last_name": "Martinez",
+      "gender": "Female",
+      "phone_number": "243810000007",
+      "email": "grace.martinez@example.com"
+    }
+  ],
+  "Oncology": [
+    {
+      "first_name": "Henry",
+      "last_name": "Rodriguez",
+      "gender": "Male",
+      "phone_number": "243810000008",
+      "email": "henry.rodriguez@example.com"
+    }
+  ],
+  "Ophthalmology": [
+    {
+      "first_name": "Isabella",
+      "last_name": "Lopez",
+      "gender": "Female",
+      "phone_number": "243810000009",
+      "email": "isabella.lopez@example.com"
+    }
+  ],
+  "ENT": [
+    {
+      "first_name": "Jack",
+      "last_name": "Gonzalez",
+      "gender": "Male",
+      "phone_number": "243810000010",
+      "email": "jack.gonzalez@example.com"
+    }
+  ],
+  "Psychiatry": [
+    {
+      "first_name": "Karen",
+      "last_name": "Wilson",
+      "gender": "Female",
+      "phone_number": "243810000011",
+      "email": "karen.wilson@example.com"
+    }
+  ],
+  "Urology": [
+    {
+      "first_name": "Leo",
+      "last_name": "Anderson",
+      "gender": "Male",
+      "phone_number": "243810000012",
+      "email": "leo.anderson@example.com"
+    }
+  ],
+  "Nephrology": [
+    {
+      "first_name": "Mia",
+      "last_name": "Thomas",
+      "gender": "Female",
+      "phone_number": "243810000013",
+      "email": "mia.thomas@example.com"
+    }
+  ],
+  "Endocrinology": [
+    {
+      "first_name": "Nathan",
+      "last_name": "Taylor",
+      "gender": "Male",
+      "phone_number": "243810000014",
+      "email": "nathan.taylor@example.com"
+    }
+  ],
+  "Hematology": [
+    {
+      "first_name": "Olivia",
+      "last_name": "Moore",
+      "gender": "Female",
+      "phone_number": "243810000015",
+      "email": "olivia.moore@example.com"
+    }
+  ],
+  "Rheumatology": [
+    {
+      "first_name": "Paul",
+      "last_name": "Jackson",
+      "gender": "Male",
+      "phone_number": "243810000016",
+      "email": "paul.jackson@example.com"
+    }
+  ],
+  "Pulmonology": [
+    {
+      "first_name": "Quinn",
+      "last_name": "Martin",
+      "gender": "Female",
+      "phone_number": "243810000017",
+      "email": "quinn.martin@example.com"
+    }
+  ],
+  "Allergy": [
+    {
+      "first_name": "Ryan",
+      "last_name": "Lee",
+      "gender": "Male",
+      "phone_number": "243810000018",
+      "email": "ryan.lee@example.com"
+    }
+  ],
+  "Infectious Disease": [
+    {
+      "first_name": "Sophia",
+      "last_name": "Perez",
+      "gender": "Female",
+      "phone_number": "243810000019",
+      "email": "sophia.perez@example.com"
+    }
+  ],
+  "Emergency": [
+    {
+      "first_name": "Thomas",
+      "last_name": "White",
+      "gender": "Male",
+      "phone_number": "243810000020",
+      "email": "thomas.white@example.com"
+    }
+  ]
+}

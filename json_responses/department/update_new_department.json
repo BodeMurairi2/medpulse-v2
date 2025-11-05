@@ -1,0 +1,18 @@
+// update an existing department
+
+// parameter
+{"department_name": "string"}
+
+// request body
+{
+  "department_name": "string",
+  "department_description": "stringstri",
+  "department_email": "user@example.com",
+  "hospital_id": 0,
+  "phone": "strings",
+  "location": "string",
+  "number_of_staff": 2,
+  "status": true,
+  "created_at": "2025-11-05T11:22:42.272Z",
+  "updated_at": "2025-11-05T11:22:42.272Z"
+}
