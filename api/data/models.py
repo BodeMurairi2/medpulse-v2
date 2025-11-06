@@ -24,7 +24,6 @@ class Patient(Base):
     email = Column(String(100), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    # Relationships
     appointments = relationship("Appointment", back_populates="patient")
 
 class Staff(Base):
@@ -47,11 +46,10 @@ class Appointment(Base):
     doctor_id = Column(Integer, ForeignKey("staff.id"), nullable=False)
     department_id = Column(Integer, ForeignKey("departments.id"), nullable=False)
     appointment_date = Column(DateTime, nullable=False)
-    status = Column(String(50), default="scheduled")  # scheduled, completed, cancelled, no-show
+    status = Column(String(50), default="scheduled")
     notes = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    # Relationships
     patient = relationship("Patient", back_populates="appointments")
     doctor = relationship("Staff", foreign_keys=[doctor_id])
     department = relationship("Department")

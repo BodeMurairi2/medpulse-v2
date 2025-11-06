@@ -1,145 +1,181 @@
-#!/usr/bin/env python3
-
+from sqlalchemy.orm import Session
+from sqlalchemy import func
 from schemas.reports import (
     PatientReportRequest, PatientReportResponse, PatientSummary,
     DoctorReportRequest, DoctorReportResponse, DoctorSummary,
     AppointmentReportRequest, AppointmentReportResponse, AppointmentSummary
 )
-from datetime import datetime, date
+from data.models import Patient, Staff, Appointment, Department
+from datetime import datetime
 
-def generate_patient_report(request: PatientReportRequest) -> PatientReportResponse:
+def generate_patient_report(request: PatientReportRequest, db: Session) -> PatientReportResponse:
     """Generate report of patients registered/visited in the given period"""
-    dummy_patients = [
-        PatientSummary(
-            patient_id=1,
-            full_name="Faith Irakoze",
-            age=22,
-            gender="Female",
-            contact="+250788123456",
-            last_visit=date(2024, 10, 25),
-            total_visits=5
-        ),
-        PatientSummary(
-            patient_id=2,
-            full_name="Karangwa Arnold",
-            age=30,
-            gender="Male",
-            contact="+250788654321",
-            last_visit=date(2024, 10, 28),
-            total_visits=3
-        ),
-        PatientSummary(
-            patient_id=3,
-            full_name="Alice Teta",
-            age=28,
-            gender="Female",
-            contact="+250788987654",
-            last_visit=date(2024, 10, 20),
-            total_visits=7
+
+    # Query patients created in the date range
+    patients_query = db.query(Patient).filter(
+        func.date(Patient.created_at) >= request.start_date,
+        func.date(Patient.created_at) <= request.end_date
+    )
+
+    patients = patients_query.all()
+
+    # Build patient summaries
+    patient_summaries = []
+    for patient in patients:
+        # Get last visit date
+        last_appointment = db.query(Appointment).filter(
+            Appointment.patient_id == patient.id,
+            Appointment.status == "completed"
+        ).order_by(Appointment.appointment_date.desc()).first()
+
+        # Count total visits
+        total_visits = db.query(Appointment).filter(
+            Appointment.patient_id == patient.id,
+            Appointment.status == "completed"
+        ).count()
+
+        # Calculate age
+        today = datetime.now().date()
+        age = today.year - patient.date_of_birth.year - (
+            (today.month, today.day) < (patient.date_of_birth.month, patient.date_of_birth.day)
         )
-    ]
+
+        patient_summaries.append(PatientSummary(
+            patient_id=patient.id,
+            full_name=patient.full_name,
+            age=age,
+            gender=patient.gender,
+            contact=patient.contact,
+            last_visit=last_appointment.appointment_date.date() if last_appointment else None,
+            total_visits=total_visits
+        ))
+
+    # Count new patients (those created in this period)
+    new_patients_count = len(patients)
+
     return PatientReportResponse(
         generated_at=datetime.now(),
         period=f"{request.start_date} to {request.end_date}",
-        total_patients=len(dummy_patients),
-        new_patients=1,
-        patients=dummy_patients
+        total_patients=len(patient_summaries),
+        new_patients=new_patients_count,
+        patients=patient_summaries
     )
 
-def generate_doctor_report(request: DoctorReportRequest) -> DoctorReportResponse:
+def generate_doctor_report(request: DoctorReportRequest, db: Session) -> DoctorReportResponse:
     """Generate performance report for doctors in the given period"""
-    dummy_doctors = [
-        DoctorSummary(
-            doctor_id=1,
-            full_name="Dr. Amina Mugisha",
-            specialization="General Medicine",
-            department="General Medicine",
-            total_appointments=38,
-            completed_appointments=35,
-            cancelled_appointments=1,
-            total_patients_seen=34
-        ),
-        DoctorSummary(
-            doctor_id=2,
-            full_name="Dr. Alex Kagame",
-            specialization="Cardiology",
-            department="Cardiology",
-            total_appointments=45,
-            completed_appointments=40,
-            cancelled_appointments=3,
-            total_patients_seen=38
-        ),
-        DoctorSummary(
-            doctor_id=3,
-            full_name="Dr. Micheal Chen",
-            specialization="Pediatrics",
-            department="Pediatrics",
-            total_appointments=52,
-            completed_appointments=48,
-            cancelled_appointments=2,
-            total_patients_seen=45
+
+    # Use request dates directly
+    start_date = request.start_date
+    end_date = request.end_date
+
+    # Query doctors
+    doctors_query = db.query(Staff).filter(Staff.role == "Doctor")
+
+    if request.department:
+        # Join with department to filter by name
+        doctors_query = doctors_query.join(Department).filter(
+            Department.name == request.department
         )
-    ]
+
+    doctors = doctors_query.all()
+
+    # Build doctor summaries
+    doctor_summaries = []
+    for doctor in doctors:
+        # Get department name
+        department = db.query(Department).filter(
+            Department.id == doctor.department_id
+        ).first()
+
+        # Count appointments in date range
+        appointments = db.query(Appointment).filter(
+            Appointment.doctor_id == doctor.id,
+            func.date(Appointment.appointment_date) >= start_date,
+            func.date(Appointment.appointment_date) <= end_date
+        ).all()
+
+        total_appointments = len(appointments)
+        completed = sum(1 for a in appointments if a.status == "completed")
+        cancelled = sum(1 for a in appointments if a.status == "cancelled")
+
+        # Count unique patients seen
+        unique_patients = db.query(Appointment.patient_id).filter(
+            Appointment.doctor_id == doctor.id,
+            Appointment.status == "completed",
+            func.date(Appointment.appointment_date) >= start_date,
+            func.date(Appointment.appointment_date) <= end_date
+        ).distinct().count()
+
+        doctor_summaries.append(DoctorSummary(
+            doctor_id=doctor.id,
+            full_name=doctor.full_name,
+            specialization=doctor.specialization or "General",
+            department=department.name if department else "Unassigned",
+            total_appointments=total_appointments,
+            completed_appointments=completed,
+            cancelled_appointments=cancelled,
+            total_patients_seen=unique_patients
+        ))
+
     return DoctorReportResponse(
         generated_at=datetime.now(),
-        period=f"{request.start_date} to {request.end_date}",
-        total_doctors=len(dummy_doctors),
-        doctors=dummy_doctors
+        period=f"{start_date} to {end_date}",
+        total_doctors=len(doctor_summaries),
+        doctors=doctor_summaries
     )
 
-def generate_appointment_report(request: AppointmentReportRequest) -> AppointmentReportResponse:
+def generate_appointment_report(request: AppointmentReportRequest, db: Session) -> AppointmentReportResponse:
     """Generate report of appointments in the given period"""
-    dummy_appointments = [
-        AppointmentSummary(
-            appointment_id=1,
-            appointment_date=datetime(2024, 10, 15, 10, 0),
-            patient_name="Faith Irakoze",
-            doctor_name="Dr. Amina Mugisha",
-            department="General Medicine",
-            status="Completed",
-            notes="Regular checkup"
-        ),
-        AppointmentSummary(
-            appointment_id=2,
-            appointment_date=datetime(2024, 10, 16, 14, 30),
-            patient_name="Karangwa Arnold",
-            doctor_name="Dr. Alex Kagame",
-            department="Cardiology",
-            status="Completed",
-            notes="Follow-up on heart condition"
-        ),
-        AppointmentSummary(
-            appointment_id=3,
-            appointment_date=datetime(2024, 10, 18, 9, 0),
-            patient_name="Alice Teta",
-            doctor_name="Dr. Micheal Chen",
-            department="Pediatrics",
-            status="Cancelled",
-            notes="Patient cancelled due to emergency"
-        ),
-        AppointmentSummary(
-            appointment_id=4,
-            appointment_date=datetime(2024, 11, 20, 11, 0),
-            patient_name="Faith Irakoze",
-            doctor_name="Dr. Amina Mugisha",
-            department="General Medicine",
-            status="no-show",
-            notes=None
-        )
-    ]
 
-    completed = sum(1 for a in dummy_appointments if a.status == "completed")
-    cancelled = sum(1 for a in dummy_appointments if a.status == "cancelled")
-    scheduled = sum(1 for a in dummy_appointments if a.status == "scheduled")
-    no_show = sum(1 for a in dummy_appointments if a.status == "no-show")
+    # Query appointments in date range
+    appointments_query = db.query(Appointment).filter(
+        func.date(Appointment.appointment_date) >= request.start_date,
+        func.date(Appointment.appointment_date) <= request.end_date
+    )
+
+    # Filter by status if provided
+    if request.status:
+        appointments_query = appointments_query.filter(Appointment.status == request.status)
+
+    # Filter by department if provided
+    if request.department:
+        appointments_query = appointments_query.join(Department).filter(
+            Department.name == request.department
+        )
+
+    appointments = appointments_query.all()
+
+    # Build appointment summaries
+    appointment_summaries = []
+    for appointment in appointments:
+        # Get related data
+        patient = db.query(Patient).filter(Patient.id == appointment.patient_id).first()
+        doctor = db.query(Staff).filter(Staff.id == appointment.doctor_id).first()
+        department = db.query(Department).filter(Department.id == appointment.department_id).first()
+
+        appointment_summaries.append(AppointmentSummary(
+            appointment_id=appointment.id,
+            appointment_date=appointment.appointment_date,
+            patient_name=patient.full_name if patient else "Unknown",
+            doctor_name=doctor.full_name if doctor else "Unknown",
+            department=department.name if department else "Unknown",
+            status=appointment.status,
+            notes=appointment.notes
+        ))
+
+    # Calculate statistics
+    completed = sum(1 for a in appointments if a.status == "completed")
+    cancelled = sum(1 for a in appointments if a.status == "cancelled")
+    scheduled = sum(1 for a in appointments if a.status == "scheduled")
+    no_show = sum(1 for a in appointments if a.status == "no-show")
 
     return AppointmentReportResponse(
         generated_at=datetime.now(),
         period=f"{request.start_date} to {request.end_date}",
-        total_appointments=len(dummy_appointments),
+        total_appointments=len(appointments),
         completed=completed,
         cancelled=cancelled,
         scheduled=scheduled,
         no_show=no_show,
-        appointments=dummy_appointments
+        appointments=appointment_summaries
     )
