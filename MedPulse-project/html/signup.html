@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hospital Sign Up - MedPulse</title>
+  <link rel="stylesheet" href="../css/login&signup.css" />
+</head>
+<body>
+  <div class="overlay-bg"></div> 
+  <div class="auth-container">
+    <h1>Hospital Sign Up</h1>
+    <form id="signupForm">
+      <label for="hospitalName">Hospital Name</label>
+      <input type="text" id="hospitalName" name="hospitalName" required />
+
+      <label for="email">Official Email Address</label>
+      <input type="email" id="email" name="email" required />
+
+      <label for="country">Country</label>
+      <input type="text" id="country" name="country" required />
+
+      <label for="city">City</label>
+      <input type="text" id="city" name="city" required />
+
+      <label for="license">Hospital License</label>
+      <input type="text" id="license" name="license" required />
+
+      <label for="password">Create Password</label>
+      <input type="password" id="password" name="password" required />
+
+      <label for="confirmPassword">Confirm Password</label>
+      <input type="password" id="confirmPassword" name="confirmPassword" required />
+
+      <button type="submit">Sign Up</button>
+      <p class="switch">Already registered? <a href="login.html">Log in here</a></p>
+
+      <p id="signupMessage" style="color:red;"></p>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById("signupForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const msgEl = document.getElementById("signupMessage");
+      msgEl.style.color = "red";
+      msgEl.textContent = "";
+
+      // Collect values
+      const hospitalName = document.getElementById("hospitalName").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const country = document.getElementById("country").value.trim();
+      const city = document.getElementById("city").value.trim();
+      const license = document.getElementById("license").value.trim();
+      const password = document.getElementById("password").value;
+      const confirmPassword = document.getElementById("confirmPassword").value;
+
+      // Password confirmation check
+      if (password !== confirmPassword) {
+        msgEl.textContent = "Passwords do not match!";
+        return;
+      }
+
+      const payload = {
+        hospital_name: hospitalName,
+        hospital_email: email,
+        hospital_country: country,
+        hospital_city: city,
+        hospital_license: license,
+        password: password
+      };
+
+      try {
+        const response = await fetch("http://127.0.0.1:8000/hospital/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          msgEl.textContent = data.detail || "Sign up failed!";
+        } else {
+          msgEl.style.color = "green";
+          msgEl.textContent = "Sign up successful! Redirecting to login...";
+          console.log("Signup response:", data);
+
+          setTimeout(() => {
+            window.location.href = "login.html";
+          }, 1500);
+        }
+      } catch (err) {
+        msgEl.textContent = "Network error: " + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
