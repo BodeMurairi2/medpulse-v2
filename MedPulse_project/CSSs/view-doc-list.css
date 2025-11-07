@@ -1,0 +1,59 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)),
+              url('../MedPulse images/Doctors-together.webp') no-repeat center center fixed;
+  background-size: cover;
+  color: #fff;
+  background-color: #f0f3f7;
+  padding: 40px;
+}
+
+
+.doctor-table {
+  background-color: rgba(255, 255, 255, 0.4); /* semi-transparent */
+  backdrop-filter: blur(8px); /* creates the blur effect */
+  -webkit-backdrop-filter: blur(8px); /* for Safari support */
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+
+h2 {
+  text-align: center;
+  color: #f9f9fa;
+  margin-bottom: 30px;
+}
+
+.department-section {
+  margin-bottom: 40px;
+}
+
+.department-section h3 {
+  color: #fdfbfb;
+  margin-bottom: 15px;
+  border-bottom: 2px solid #080808;
+  padding-bottom: 5px;
+}
+
+.doctor-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.doctor-table th,
+.doctor-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #0f0f0f;
+  text-align: left;
+}
+
+.doctor-table th {
+  background-color: #e6f0fa;
+  color: #19446f;
+  font-weight: 600;
+}
+
+/* .doctor-table tr:hover {
+  background-color: #f5faff;
+} */
