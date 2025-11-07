@@ -1,39 +1,39 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const departments = [
-    {
-      name: "Cardiology",
-      description: "Heart and vascular care",
-      email: "cardio@example.com",
-      location: "Floor 2001 KG 11",
-      number_of_staff: 55,
-      updated_at: "2025-11-01T10:14:54.921935+02:00",
-      hospital_id: 1,
-      department_id: 1,
-      phone: "243856707011",
-      status: true,
-      created_at: "2025-01-15T08:00:00"
-    },
-    {
-      name: "Neurology",
-      description: "Brain and nervous system",
-      email: "neuro@example.com",
-      location: "Floor 2002 KG 12",
-      number_of_staff: 40,
-      updated_at: "2025-10-20T09:30:00",
-      hospital_id: 1,
-      department_id: 2,
-      phone: "243856707022",
-      status: true,
-      created_at: "2025-02-10T09:00:00"
-    }
-    // Add more departments here
-  ];
-
   const searchInput = document.getElementById('searchInput');
   const departmentList = document.getElementById('departmentList');
 
+  let departments = [];
   let activeDepartmentName = null;
 
+  // Fetch departments from the API
+  function fetchDepartments() {
+    fetch('http://127.0.0.1:8080/department/all')
+      .then(response => response.json())
+      .then(data => {
+        // Map API response to consistent format
+        departments = data.map(dept => ({
+          name: dept.department_name,
+          description: dept.department_description,
+          email: dept.email,
+          location: dept.location,
+          number_of_staff: dept.number_of_staff,
+          updated_at: dept.updated_at,
+          hospital_id: dept.hospital_id,
+          department_id: dept.department_id,
+          phone: dept.phone,
+          status: dept.status,
+          created_at: dept.created_at
+        }));
+
+        // Sort alphabetically
+        departments.sort((a, b) => a.name.localeCompare(b.name));
+
+        displayDepartments(departments); // Display all initially
+      })
+      .catch(err => console.error('Error fetching departments:', err));
+  }
+
+  // Render departments
   function displayDepartments(filtered) {
     departmentList.innerHTML = '';
 
@@ -43,21 +43,15 @@ document.addEventListener('DOMContentLoaded', () => {
       card.innerHTML = `
         <h3>${dept.name}</h3>
         <p>${dept.description}</p>
-        <button class="details-button">View more details</button>
+        <button class="details-button">${activeDepartmentName === dept.name ? 'Hide details' : 'View more details'}</button>
       `;
 
       const detailsBtn = card.querySelector('.details-button');
-      detailsBtn.addEventListener('click', () => {
-        if (activeDepartmentName === dept.name) {
-          activeDepartmentName = null;
-        } else {
-          activeDepartmentName = dept.name;
-        }
-        displayDepartments(filtered); // Re-render with updated state
-      });
+      detailsBtn.addEventListener('click', () => toggleDepartmentDetails(dept, card));
 
       departmentList.appendChild(card);
 
+      // Show details if this card is active
       if (activeDepartmentName === dept.name) {
         const details = document.createElement('div');
         details.className = 'department-details';
@@ -67,25 +61,31 @@ document.addEventListener('DOMContentLoaded', () => {
           <p><strong>Location:</strong> ${dept.location}</p>
           <p><strong>Number of Staff:</strong> ${dept.number_of_staff}</p>
           <p><strong>Status:</strong> ${dept.status ? "Active" : "Inactive"}</p>
-          <p><strong>Hospital ID:</strong> ${dept.hospital_id}</p>
-          <p><strong>Department ID:</strong> ${dept.department_id}</p>
-          <p><strong>Created At:</strong> ${dept.created_at}</p>
-          <p><strong>Updated At:</strong> ${dept.updated_at}</p>
         `;
         card.appendChild(details);
       }
     });
   }
 
+  function toggleDepartmentDetails(dept, cardElement) {
+    if (activeDepartmentName === dept.name) {
+      activeDepartmentName = null; // hide
+    } else {
+      activeDepartmentName = dept.name; // show
+    }
+    displayDepartments(departments.filter(d => d.name.toLowerCase().includes(searchInput.value.toLowerCase())));
+  }
+
+  // Search filter
   searchInput.addEventListener('input', () => {
     const query = searchInput.value.toLowerCase();
+    activeDepartmentName = null; // reset active on new search
     const filtered = departments.filter(dept =>
       dept.name.toLowerCase().includes(query)
     );
-    activeDepartmentName = null;
     displayDepartments(filtered);
   });
 
-  departments.sort((a, b) => a.name.localeCompare(b.name));
-  displayDepartments(departments);
+  // Fetch departments on page load
+  fetchDepartments();
 });
