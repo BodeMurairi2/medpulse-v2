@@ -5,5 +5,3 @@ def add_to_blacklist(token: str):
 
 def is_token_blacklisted(token: str) -> bool:
     return token in BLACK_LISTED_TOKENS
-
-

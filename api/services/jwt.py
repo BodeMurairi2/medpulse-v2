@@ -15,12 +15,16 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     return encoded_jwt
 
 def decode_access_token(token: str):
-    if is_token_blacklisted():
-        return None
     try:
+        if is_token_blacklisted(token):
+            return None
         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         return payload
     except jwt.ExpiredSignatureError:
         return None
     except jwt.InvalidTokenError:
         return None
+
+
+print("JWT_SECRET:", JWT_SECRET)
+print("JWT_ALGORITHM:", JWT_ALGORITHM)
