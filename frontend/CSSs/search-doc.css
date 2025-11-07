@@ -1,10 +1,9 @@
 body {
   font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)),
+  background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)),
               url('../MedPulse images/Doctors-together.webp') no-repeat center center fixed;
   background-size: cover;
   color: #070707;
-  /* background-color: #e33120; */
   padding: 40px;
 }
 
@@ -16,7 +15,6 @@ body {
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
-
 
 h2 {
   color: #090909;
@@ -38,6 +36,25 @@ h2 {
   color: #aaa;
 }
 
+/* Updated button styling */
+.search-button {
+  display: block;
+  width: 200px; /* smaller width */
+  margin: 0 auto 20px auto; /* center horizontally and add bottom spacing */
+  padding: 12px;
+  font-size: 16px;
+  background-color: #28a745; /* green button */
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.search-button:hover {
+  background-color: #218838; /* darker green on hover */
+}
+
 .doctor-list {
   list-style: none;
   padding-left: 0;
@@ -53,7 +70,7 @@ h2 {
   transition: background-color 0.3s ease;
 }
 
-
+/* Optional hover effect for doctor items */
 /* .doctor-list li:hover {
   background-color: #d0e6f8;
 } */
