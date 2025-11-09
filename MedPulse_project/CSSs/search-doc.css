@@ -1,0 +1,71 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)),
+              url('../MedPulse images/Doctors-together.webp') no-repeat center center fixed;
+  background-size: cover;
+  color: #070707;
+  /* background-color: #e33120; */
+  padding: 40px;
+}
+
+.details-container {
+  max-width: 700px;
+  margin: auto;
+  background-color: rgba(169, 161, 161, 0.4);
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+
+h2 {
+  color: #090909;
+  margin-bottom: 40px;
+}
+
+.search-bar {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #0a0a0a;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  color: #f9f5f5;
+  background-color: #060606;
+}
+
+.search-bar::placeholder {
+  color: #aaa;
+}
+
+.doctor-list {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 30px;
+}
+
+.doctor-list li {
+  padding: 10px 15px;
+  background-color: #e5d7d7;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+
+.doctor-list li:hover {
+  background-color: #75c407;
+}
+
+.doctor-details {
+  background-color: #8f8787;
+  padding: 20px;
+  border-left: 5px solid #343333;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.hidden {
+  display: none;
+}
