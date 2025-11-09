@@ -4,7 +4,7 @@ body {
   margin: 0;
   font-family: 'Poppins', sans-serif;
   background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-              url('../Medpulse images/Hospital image3.jpg') no-repeat center center fixed;
+              url('../MedPulse_Images/Hospital image3.jpg') no-repeat center center fixed;
   background-size: cover;
   color: #333;
 }

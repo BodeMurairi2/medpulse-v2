@@ -2,7 +2,7 @@ body {
   margin: 0;
   font-family: 'Poppins', sans-serif;
   background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
-              url('../MedPulse images/Doctors-together.webp') no-repeat center center fixed;
+              url('../MedPulse_Images/Doctors-together.webp') no-repeat center center fixed;
   background-size: cover;
   color: #fff;
 }

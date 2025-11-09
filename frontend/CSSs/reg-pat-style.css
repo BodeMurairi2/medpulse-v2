@@ -3,7 +3,7 @@ body {
   font-family: 'Segoe UI', sans-serif;
   background-color: #f0f3f7;
   background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
-                  url('../MedPulse images/registration image.jpg');
+                  url('../MedPulse_Images/registration image.jpg');
   background-size:cover;
   background-position:center;
   background-repeat: no-repeat;
