@@ -7,7 +7,7 @@ body, html {
 
 
 .hero {
-  background-image: url('Medpulse images/Image 1.jpg');
+  background-image: url('../Medpulse_Images/Image1.jpg');
   background-size: cover;
   background-position: center;
   height: 100vh;
