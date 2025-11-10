@@ -32,6 +32,7 @@ app.add_middleware(
 
 app.include_router(department_router)
 app.include_router(doctor_view_router)
+app.include_router(reports_router)
 
 @app.get("/")
 async def root():

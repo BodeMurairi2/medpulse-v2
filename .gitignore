@@ -20,3 +20,4 @@ build/
 .envrc
 .pyrel/
 .ipynb_checkpoints/
+migrations/
