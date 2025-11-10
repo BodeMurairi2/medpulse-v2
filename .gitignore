@@ -14,3 +14,10 @@ htmlcov/
 .tox/
 .pytest_cache/
 migrations/
+*.egg-info/
+dist/
+build/
+.envrc
+.pyrel/
+.ipynb_checkpoints/
+migrations/

@@ -7,4 +7,8 @@ alembic
 python-dotenv
 httpx
 pytest
+psycopg2
+databases[postgresql]
+pytest-asyncio
+rapidfuzz
 pytest-asyncio

@@ -1,0 +1,70 @@
+// Status 200 list of doctors per department
+
+[
+  {
+    "department_description": "this is a test department. Do not pay attention to it",
+    "department_name": "test department name",
+    "email": "test_email@example.com",
+    "location": "Floor 2001 KG 11",
+    "number_of_staff": 55,
+    "updated_at": "2025-11-01T10:14:54.921935+02:00",
+    "hospital_id": 1,
+    "department_id": 1,
+    "phone": "243856707011",
+    "status": true,
+    "created_at": "2025-11-01T10:14:54.921935+02:00"
+  },
+  {
+    "department_description": "Specializes in disorders of the nervous system including the brain and spinal cord.",
+    "department_name": "Neurology",
+    "email": "bodemurairi2@gmail.com",
+    "location": "Building B, Floor 2",
+    "number_of_staff": 30,
+    "updated_at": "2025-11-01T10:28:20.408013+02:00",
+    "hospital_id": 1,
+    "department_id": 3,
+    "phone": "18005554321",
+    "status": true,
+    "created_at": "2025-11-01T10:28:20.408013+02:00"
+  },
+  {
+    "department_description": "Provides medical care for infants, children, and adolescents.",
+    "department_name": "Pediatrics",
+    "email": "bodemurairi2@gmail.com",
+    "location": "Building C, Floor 1",
+    "number_of_staff": 20,
+    "updated_at": "2025-11-01T10:28:20.408013+02:00",
+    "hospital_id": 1,
+    "department_id": 4,
+    "phone": "18005559876",
+    "status": true,
+    "created_at": "2025-11-01T10:28:20.408013+02:00"
+  },
+  {
+    "department_description": "provide care to patient in needs of scanner",
+    "department_name": "Radiology",
+    "email": "test@example.com",
+    "location": "KG 11 floor 10",
+    "number_of_staff": 45,
+    "updated_at": "2025-11-01T11:33:35.642354+02:00",
+    "hospital_id": 1,
+    "department_id": 5,
+    "phone": "243856707011",
+    "status": false,
+    "created_at": "2025-11-01T11:28:26.669237+02:00"
+  },
+  {
+    "department_description": "Handles all heart-related medical issues and treatments.",
+    "department_name": "Cardiology",
+    "email": "cardiologysaintetienne@admin.com",
+    "location": "Building A, Floor 3",
+    "number_of_staff": 25,
+    "updated_at": "2025-11-03T12:53:57.028823+02:00",
+    "hospital_id": 1,
+    "department_id": 2,
+    "phone": "18005551234",
+    "status": false,
+    "created_at": "2025-11-01T10:28:20.408013+02:00"
+  }
+]
+
