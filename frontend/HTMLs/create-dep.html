@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Department</title>
+  <link rel="stylesheet" href="../CSSs/create-dep.css" />
+</head>
+<body>
+  <div class="details-container">
+    <h2>Create New Department</h2>
+
+    <form id="createForm">
+      <input type="text" placeholder="Department Name" id="department_name" required />
+      <textarea placeholder="Department Description" id="department_description" required></textarea>
+      <input type="email" placeholder="Email" id="email" required />
+      <input type="text" placeholder="Location" id="location" required />
+      <input type="text" placeholder="Phone Number" id="phone" required />
+      <input type="number" placeholder="Number of Staff" id="number_of_staff" required />
+      <input type="number" placeholder="Hospital ID" id="hospital_id" required />
+      <input type="number" placeholder="Department ID" id="department_id" required />
+      <select id="status">
+        <option value="true">Active</option>
+        <option value="false">Inactive</option>
+      </select>
+
+      <button type="submit" class="create-button">Create</button>
+    </form>
+
+    <div id="popupMessage" class="popup hidden">Successfully created a new department!</div>
+  </div>
+
+  <script src="../JSs/create-dep.js"></script>
+</body>
+</html>

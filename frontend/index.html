@@ -1,260 +1,31 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MedPulse — Live healthier. Feel better.</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-  <script src="https://kit.fontawesome.com/a2e0d1e3b5.js" crossorigin="anonymous"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MedPulse - Hospital Portal</title>
+  <link rel="stylesheet" href="CSSs/style.css" />
 </head>
 <body>
-
-  <!-- HEADER -->
-  <header>
-    <!-- Top Header -->
-    <div class="topbar">
-      <div class="logo">
-        <a href="index.html">
-          <img src="../frontend/images/main_logo_1.png" alt="MedPulse Logo">
-        </a>
+  <div class="hero">
+    <div class="overlay">
+      <div class="text-content fade-in">
+        <h2 class="welcome">Welcome to</h2>
+        <h1 class="brand">MedPulse</h1>
+        <p class="slogan">First, Accurate and Reliable.</p>
       </div>
-      <div class="top-links">
-        <a href="#" id="individuals-link"><i class="fas fa-user"></i> For Individuals</a>
-        <a href="#" id="organizations-link"><i class="fas fa-users"></i> For Organizations</a>
-      </div>
-    </div>
-
-    <!-- Navigation Bar -->
-    <nav class="main-nav">
-      <ul id="nav-menu">
-        <li><a href="#help">How We Can Help</a></li>
-        <li><a href="#stories">Success Stories</a></li>
-        <li><a href="#about">Who We Are</a></li>
-        <li><a href="#faq">FAQs</a></li>
-        <li><a href="#support">Support</a></li>
-      </ul>
-      <div class="nav-buttons">
-        <a href="#login" class="login">Member Login</a>
-        <a href="#eligible" class="cta">Am I Eligible?</a>
-      </div>
-    </nav>
-  </header>
-
-  <!-- HERO SECTION -->
-  <section class="hero">
-    <div class="hero-overlay"></div>
-    <div class="hero-content">
-      <div class="hero-text">
-        <h2>WELCOME TO MEDPULSE</h2>
-        <h1>Live healthier.<br>Feel better.</h1>
-        <p>MedPulse is your personalized virtual care program designed to help you achieve your best health — one small step at a time.</p>
-        <a href="#getstarted" class="cta">Get Started →</a>
+      <div class="portal fade-in">
+        <h3>Hospital Portal</h3>
+        <div class="buttons">
+          <a href="HTMLs/login.html" class="btn login">LOG IN</a>
+          <a href="HTMLs/signup.html" class="btn signup">SIGN UP</a>
+        </div>
       </div>
     </div>
-  </section>
+  </div>
 
-  <!-- VIDEO INSPIRATION SECTION -->
-  <section class="video-section">
-    <h2>Be Inspired to Take the Next Step</h2>
-    <p>Watch how MedPulse is changing lives through personalized digital healthcare support.</p>
-    <div class="video-wrapper">
-      <video controls poster="https://images.unsplash.com/photo-1606813902912-5b80e2d7e7c5?auto=format&fit=crop&w=900&q=80">
-        <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
-        Your browser does not support HTML video.
-      </video>
-    </div>
-  </section>
+  <script src="JSs/script.js"></script>
+</body> 
 
-  <!-- FEATURES SECTION -->
-  <section id="help" class="features">
-    <h2>How We Can Help</h2>
-    <div class="feature">
-      <h3>Personalized Coaching</h3>
-      <p>One-on-one coaching from certified health experts guiding you through healthier habits.</p>
-    </div>
-    <div class="feature">
-      <h3>Connected Devices</h3>
-      <p>Smart devices automatically sync with your account to track your health journey.</p>
-    </div>
-    <div class="feature">
-      <h3>Community Support</h3>
-      <p>Join thousands of people sharing experiences, motivation, and progress together.</p>
-    </div>
-  </section>
-
-  <!-- ABOUT OUR PROVIDED SERVICES -->
-  <section id="about" class="section alt-bg">
-    <h2>About Our Provided Services</h2>
-    <p>MedPulse brings together advanced healthcare, personalized coaching, and recovery tools to make health improvement simpler and faster.</p>
-    <div class="grid-3">
-      <div class="card">
-        <h3>Primary & Specialist Care</h3>
-        <p>Consult general physicians or specialists in cardiology, pediatrics, mental health, and more.</p>
-      </div>
-      <div class="card">
-        <h3>Telehealth Visits</h3>
-        <p>Meet your doctor remotely through secure HD video and get prescriptions digitally.</p>
-      </div>
-      <div class="card">
-        <h3>Diagnostics & Labs</h3>
-        <p>Track lab tests, receive instant result alerts, and access reports directly in your portal.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- HEALTH MANAGEMENT -->
-  <section id="recovery" class="section">
-    <h2>Get Help Managing & Improving Your Health</h2>
-    <p>The MedPulse app connects your care with daily health tracking—helping you recover and thrive.</p>
-    <div class="grid-3">
-      <div class="card">
-        <h3>Personalized Recovery Plans</h3>
-        <p>Get tailored plans for diet, medication, therapy, and follow-up after hospital visits.</p>
-      </div>
-      <div class="card">
-        <h3>Daily Health Insights</h3>
-        <p>AI analyzes your health patterns to offer proactive tips and reminders.</p>
-      </div>
-      <div class="card">
-        <h3>Progress Dashboard</h3>
-        <p>Track your recovery goals, vitals, and milestones with real-time updates.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- CONNECT WITH OTHERS -->
-  <section id="community" class="section alt-bg">
-    <h2>Connect With Others in Our Program</h2>
-    <p>Join a vibrant community. Share progress, find support, and stay motivated with others on the same journey.</p>
-    <div class="grid-3">
-      <div class="card">
-        <h3>Support Groups</h3>
-        <p>Join condition-based groups for advice and connection.</p>
-      </div>
-      <div class="card">
-        <h3>Community Challenges</h3>
-        <p>Participate in fitness, wellness, or nutrition challenges with others.</p>
-      </div>
-      <div class="card">
-        <h3>One-on-One Coaching</h3>
-        <p>Connect with mentors or health coaches for motivation and guidance.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- LEARN MORE -->
-  <section id="learn" class="section">
-    <h2>Learn More About Your Health</h2>
-    <p>Explore expert articles and guides designed to keep you informed and inspired.</p>
-    <a href="#" class="btn-secondary">Visit the Knowledge Hub</a>
-  </section>
-
-  <!-- FAQ SECTION -->
-  <section id="faq" class="faq alt-bg">
-    <h2>Frequently Asked Questions</h2>
-    <div class="faq-item">
-      <button class="faq-question">What is MedPulse?</button>
-      <div class="faq-answer">MedPulse is a digital health platform offering personalized guidance, smart tracking, and expert coaching.</div>
-    </div>
-    <div class="faq-item">
-      <button class="faq-question">How do I join?</button>
-      <div class="faq-answer">You can check your eligibility and sign up directly through our website.</div>
-    </div>
-    <div class="faq-item">
-      <button class="faq-question">Is MedPulse available worldwide?</button>
-      <div class="faq-answer">Currently, MedPulse serves multiple regions and continues expanding globally.</div>
-    </div>
-  </section>
-
-  <!-- CONTACT SECTION -->
-  <section id="contact" class="section">
-    <h2>Contact Us</h2>
-    <p>Have questions or need assistance? Our support team is available 24/7.</p>
-    <form class="contact-form">
-      <input type="text" placeholder="Full Name" required />
-      <input type="email" placeholder="Email Address" required />
-      <textarea placeholder="Your Message"></textarea>
-      <button type="submit" class="btn-primary">Send Message</button>
-    </form>
-  </section>
-
-  <!-- FOOTER -->
-  <footer>
-    <div class="footer-grid">
-      <div>
-        <h4>MedPulse</h4>
-        <a href="#">About Us</a>
-        <a href="#">Mission</a>
-        <a href="#">Careers</a>
-        <a href="#">Press</a>
-      </div>
-      <div>
-        <h4>Programs</h4>
-        <a href="#">Diabetes Care</a>
-        <a href="#">Hypertension</a>
-        <a href="#">Mental Wellness</a>
-        <a href="#">Weight Management</a>
-      </div>
-      <div>
-        <h4>Resources</h4>
-        <a href="#">Blog</a>
-        <a href="#">FAQs</a>
-        <a href="#">Privacy</a>
-        <a href="#">Support</a>
-      </div>
-      <div>
-        <h4>Contact</h4>
-        <a href="#">Email Us</a>
-        <a href="#">+250 788 123 456</a>
-        <a href="#">Kigali, Rwanda</a>
-      </div>
-    </div>
-    <div class="footer-bottom">© 2025 MedPulse. All rights reserved.</div>
-  </footer>
-
-  <script>
-    // FAQ Toggle
-    document.querySelectorAll('.faq-question').forEach(btn => {
-      btn.addEventListener('click', () => {
-        btn.classList.toggle('active');
-        const answer = btn.nextElementSibling;
-        answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
-      });
-    });
-
-    // Switch navigation for Individuals/Organizations
-    const navMenu = document.getElementById('nav-menu');
-    const individualsLink = document.getElementById('individuals-link');
-    const organizationsLink = document.getElementById('organizations-link');
-
-    const individualNav = `
-      <li><a href="#help">How We Can Help</a></li>
-      <li><a href="#stories">Success Stories</a></li>
-      <li><a href="#about">Who We Are</a></li>
-      <li><a href="#faq">FAQs</a></li>
-      <li><a href="#support">Support</a></li>
-    `;
-    const organizationNav = `
-      <li><a href="#partnerships">Partnerships</a></li>
-      <li><a href="#enterprise">Enterprise Solutions</a></li>
-      <li><a href="#resources">Resources</a></li>
-      <li><a href="#faq">FAQs</a></li>
-      <li><a href="#contact">Contact</a></li>
-    `;
-
-    individualsLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      navMenu.innerHTML = individualNav;
-    });
-
-    organizationsLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      navMenu.innerHTML = organizationNav;
-    });
-  </script>
-
-</body>
 </html>
+
