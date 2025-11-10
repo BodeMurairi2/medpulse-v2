@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patient Dashboard - MedPulse</title>
+  <link rel="stylesheet" href="patient.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <h1 class="nav-brand">MedPulse</h1>
+      <div class="nav-links">
+        <a href="dashboard.html" class="active">Dashboard</a>
+        <a href="records.html">Medical Records</a>
+        <a href="transcriptions.html">Transcriptions</a>
+        <a href="appointments.html">Appointments</a>
+        <a href="qr-code.html">My QR Code</a>
+        <a href="../index.html">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <div class="welcome-section">
+      <h2>Welcome, <span id="patientName">Patient Name</span></h2>
+      <p class="patient-id">Patient ID: <span id="patientId">P-12345</span></p>
+    </div>
+
+    <div class="dashboard-grid">
+      <div class="dashboard-card">
+        <div class="card-icon">📋</div>
+        <h3>Medical Records</h3>
+        <p>View your complete medical history</p>
+        <a href="records.html" class="card-link">View Records →</a>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="card-icon">📄</div>
+        <h3>Medical Transcriptions</h3>
+        <p>Access your medical reports and transcriptions</p>
+        <a href="transcriptions.html" class="card-link">View Transcriptions →</a>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="card-icon">📅</div>
+        <h3>Book Appointment</h3>
+        <p>Schedule an appointment with your doctor</p>
+        <a href="appointments.html" class="card-link">Book Now →</a>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="card-icon">📱</div>
+        <h3>My QR Code</h3>
+        <p>Share your QR code for quick access</p>
+        <a href="qr-code.html" class="card-link">View QR Code →</a>
+      </div>
+    </div>
+
+    <div class="recent-activity">
+      <h3>Recent Activity</h3>
+      <div class="activity-list">
+        <div class="activity-item">
+          <span class="activity-date">2024-01-15</span>
+          <span class="activity-text">Appointment scheduled with Dr. Smith</span>
+        </div>
+        <div class="activity-item">
+          <span class="activity-date">2024-01-10</span>
+          <span class="activity-text">New medical transcription received</span>
+        </div>
+        <div class="activity-item">
+          <span class="activity-date">2024-01-05</span>
+          <span class="activity-text">Medical records updated</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Load patient information from localStorage
+    window.addEventListener('DOMContentLoaded', () => {
+      const patientId = localStorage.getItem('patientId') || 'P-12345';
+      document.getElementById('patientId').textContent = patientId;
+      
+      // In real app, patient name would come from backend
+      const patientName = 'Patient Name'; // This would be fetched from backend
+      document.getElementById('patientName').textContent = patientName;
+    });
+  </script>
+</body>
+</html>
+
