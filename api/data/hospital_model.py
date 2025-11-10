@@ -80,6 +80,7 @@ class Patient(Base):
     date_of_birth = Column(Date)
     home_address = Column(String)
     email = Column(String)
+    password_hash = Column(String)
     phone_number = Column(String)
     emergency_contact_name = Column(String)
     emergency_contact_phone = Column(String)

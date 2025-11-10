@@ -23,3 +23,16 @@ class DoctorClass(BaseModel):
                 "Phone number must be valid, digits with optional +, spaces, hyphens, or parentheses"
             )
         return phone
+
+class DoctorCreate(BaseModel):
+    first_name: str
+    last_name: str
+    gender: str | None = None
+    department: str | None = None
+    phone_number: str | None = None
+    email: EmailStr
+    password: str
+
+class DoctorLogin(BaseModel):
+    email:EmailStr
+    password:str
