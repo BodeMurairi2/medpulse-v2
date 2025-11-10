@@ -3,34 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const popup = document.getElementById('popupMessage');
   const statusBtn = document.getElementById('statusToggle');
 
-  // Simulated department data (replace with real fetch if needed)
-  const department = {
-    department_id: 2,
-    created_at: "2025-02-10T09:00:00",
-    department_name: "Neurology",
-    department_description: "Brain and nervous system",
-    email: "neuro@example.com",
-    location: "Floor 2002 KG 12",
-    phone: "243856707022",
-    number_of_staff: 40,
-    hospital_id: 1,
-    status: true
-  };
-
-  // Populate current info
-  document.getElementById('department_id').textContent = department.department_id;
-  document.getElementById('created_at').textContent = department.created_at;
-  document.getElementById('department_name').value = department.department_name;
-  document.getElementById('department_description').value = department.department_description;
-  document.getElementById('email').value = department.email;
-  document.getElementById('location').value = department.location;
-  document.getElementById('phone').value = department.phone;
-  document.getElementById('number_of_staff').value = department.number_of_staff;
-  document.getElementById('hospital_id').value = department.hospital_id;
-  statusBtn.textContent = department.status ? "Active" : "Inactive";
-  if (!department.status) statusBtn.classList.add('inactive');
-
-  // Toggle status
+  // Toggle status active/inactive
   statusBtn.addEventListener('click', () => {
     if (statusBtn.textContent === "Active") {
       statusBtn.textContent = "Inactive";
@@ -41,31 +14,51 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Handle form submission
-  form.addEventListener('submit', (e) => {
+  // Handle form submission (PUT request)
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
+    const departmentName = document.getElementById('department_name').value.trim();
+    if (!departmentName) {
+      alert("Please enter a department name before submitting.");
+      return;
+    }
+
+    const createdAtText = document.getElementById('created_at').textContent.trim();
     const updatedDepartment = {
-      department_id: department.department_id,
-      created_at: department.created_at,
-      department_name: document.getElementById('department_name').value,
-      department_description: document.getElementById('department_description').value,
-      email: document.getElementById('email').value,
-      location: document.getElementById('location').value,
-      phone: document.getElementById('phone').value,
-      number_of_staff: parseInt(document.getElementById('number_of_staff').value),
+      department_name: departmentName,
+      department_description: document.getElementById('department_description').value.trim(),
+      department_email: document.getElementById('email').value.trim(),
       hospital_id: parseInt(document.getElementById('hospital_id').value),
+      phone: document.getElementById('phone').value.trim(),
+      location: document.getElementById('location').value.trim(),
+      number_of_staff: parseInt(document.getElementById('number_of_staff').value),
       status: statusBtn.textContent === "Active",
-      updated_at: new Date().toISOString()
+      created_at: createdAtText || new Date().toISOString(), // keep displayed or fallback
+      updated_at: new Date().toISOString(),
     };
 
-    console.log("Updated department:", updatedDepartment);
+    try {
+      const response = await fetch(`http://localhost:8080/department/update/${departmentName}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedDepartment),
+      });
 
-    popup.classList.remove('hidden');
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to update department');
+      }
 
-    setTimeout(() => {
-      popup.classList.add('hidden');
-      window.location.href = "../HTMLs/view-dep-list.html";
-    }, 2000);
+      popup.textContent = 'Successfully updated the department!';
+      popup.classList.remove('hidden');
+
+      setTimeout(() => {
+        popup.classList.add('hidden');
+        window.location.href = "../HTMLs/view-dep-list.html";
+      }, 2000);
+    } catch (err) {
+      alert(`Error updating department: ${err.message}`);
+    }
   });
 });
