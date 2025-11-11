@@ -5,6 +5,7 @@ from fastapi.routing import APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from controler.department import department_router
 from controler.view_doctor import router as doctor_view_router
+from controler.reports import router as reports_router
 
 app = FastAPI(title="MedPulse API",
               description="Hospital Database Management system",
