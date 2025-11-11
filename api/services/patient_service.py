@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from sqlalchemy.orm import Session, joinedload
 from data.models import Patient, Consultation, Prescription, LabTest, Appointment, Staff, Department
 

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from api.data.database import SessionLocal
 from api.data.models import Department, Staff, Patient, Appointment, Consultation, Prescription, LabTest
 from datetime import datetime, date, timedelta
@@ -22,7 +24,7 @@ def seed_reports_data():
         else:
             print("Departments already exist, skipping...")
 
-        # --- Doctors ---
+
         if db.query(Staff).count() == 0:
             doctors = [
                 Staff(
@@ -56,7 +58,7 @@ def seed_reports_data():
         else:
             print("Doctors already exist, skipping...")
 
-        # --- Patients ---
+
         if db.query(Patient).count() == 0:
             patients = []
             first_names = ["Alice", "Bob", "Charlie", "Diana", "Emmanuel", "Faith",
@@ -90,7 +92,7 @@ def seed_reports_data():
         else:
             print("Patients already exist, skipping...")
 
-        # --- Appointments ---
+
         if db.query(Appointment).count() == 0:
             statuses = ["completed", "completed", "completed", "completed", "cancelled", "no-show", "scheduled"]
             appointments = []
@@ -132,7 +134,7 @@ def seed_reports_data():
         else:
             print("Appointments already exist, skipping...")
 
-        # --- Consultations ---
+
         if db.query(Consultation).count() == 0:
             consultations = []
             start_date = datetime(2024, 10, 1)
@@ -153,7 +155,7 @@ def seed_reports_data():
         else:
             print("Consultations already exist, skipping...")
 
-        # --- Prescriptions ---
+
         if db.query(Prescription).count() == 0:
             prescriptions = []
             meds = ["Amoxicillin", "Ibuprofen", "Metformin", "Paracetamol", "Atorvastatin"]
@@ -176,7 +178,6 @@ def seed_reports_data():
         else:
             print("Prescriptions already exist, skipping...")
 
-        # --- Lab Tests ---
         if db.query(LabTest).count() == 0:
             lab_tests = []
             tests = ["Blood test", "X-ray", "Urine test", "MRI", "CT scan"]

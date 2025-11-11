@@ -8,7 +8,7 @@ class ReportType(str, Enum):
     DOCTORS = "doctors"
     APPOINTMENTS = "appointments"
 
-# Patient Schemas
+
 class PatientReportRequest(BaseModel):
     start_date: date
     end_date: date
@@ -31,7 +31,7 @@ class PatientReportResponse(BaseModel):
     new_patients: int
     patients: List[PatientSummary]
 
-# Doctor Schemas
+
 class DoctorReportRequest(BaseModel):
     start_date: date
     end_date: date
@@ -54,7 +54,7 @@ class DoctorReportResponse(BaseModel):
     total_doctors: int
     doctors: List[DoctorSummary]
 
-# Appointment Schemas
+
 class AppointmentReportRequest(BaseModel):
     start_date: date
     end_date: date

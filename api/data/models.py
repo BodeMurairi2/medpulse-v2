@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from sqlalchemy import Column, Integer, String, Date, DateTime, Text, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
