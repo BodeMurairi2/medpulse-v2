@@ -45,7 +45,6 @@ class Department(Base):
     def __repr__(self):
         return f"<Department(id={self.department_id}, name={self.department_name})>"
 
-
 # Doctors
 class Doctor(Base):
     __tablename__ = "doctors"
@@ -68,7 +67,6 @@ class Doctor(Base):
 
     def __repr__(self):
         return f"<Doctor(id={self.doctor_id}, name={self.first_name} {self.last_name})>"
-
 
 #  Patients
 class Patient(Base):

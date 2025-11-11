@@ -12,3 +12,10 @@ databases[postgresql]
 pytest-asyncio
 rapidfuzz
 pytest-asyncio
+bcrypt
+email-validator
+PyJWT
+python-multipart
+passlib[bcrypt]
+python-decouple
+redis

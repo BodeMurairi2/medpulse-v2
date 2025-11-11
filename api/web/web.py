@@ -1,11 +1,21 @@
 #!/usr/bin/env python3
 import uvicorn
+import os
 from fastapi import FastAPI
 from fastapi.routing import APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from controler.department import department_router
 from controler.view_doctor import router as doctor_view_router
 from controler.reports import router as reports_router
+from controler.hospital_routes import router as hospital_router
+from controler.doctor_portal import doctor_portal_router as doctor_portal_router
+from controler.doctor_routes import router as doctor_router
+from dotenv import load_dotenv
+
+load_dotenv()
+
+print("Environment Variables Load")
+print("DATABASE_URL:", os.getenv("DATABASE_URL"))
 
 app = FastAPI(title="MedPulse API",
               description="Hospital Database Management system",
@@ -34,6 +44,9 @@ app.add_middleware(
 app.include_router(department_router)
 app.include_router(doctor_view_router)
 app.include_router(reports_router)
+app.include_router(hospital_router)
+app.include_router(doctor_portal_router)
+app.include_router(doctor_router)
 
 @app.get("/")
 async def root():
