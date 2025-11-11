@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 import uvicorn
 from fastapi import FastAPI
-from fastapi.routing import APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from controler.department import department_router
 from controler.reports import router as reports_router
+from controler.patient_controller import router as patients_router
 
-app = FastAPI(title="MedPulse API",
-              description="Hospital Database Management system",
-              version="1.0.0"
-              )
+app = FastAPI(
+    title="MedPulse API",
+    description="Hospital Database Management System",
+    version="1.0.0"
+)
 
 origins = [
     "http://localhost:5500",
@@ -18,7 +19,7 @@ origins = [
     "http://127.0.0.1:5500",
     "http://127.0.0.1:8000",
     "http://127.0.0.1:3000"
-    ]
+]
 
 app.add_middleware(
     CORSMiddleware,
@@ -30,13 +31,11 @@ app.add_middleware(
 
 app.include_router(department_router)
 app.include_router(reports_router)
+app.include_router(patients_router)
 
 @app.get("/")
 async def root():
     return {"message": "Welcome to MedPulse API"}
 
 if __name__ == "__main__":
-    uvicorn.run("web.web:app",
-                port=8080,
-                reload=True
-                )
+    uvicorn.run("web.web:app", port=8080, reload=True)
