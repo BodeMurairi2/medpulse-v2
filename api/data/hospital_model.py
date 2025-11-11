@@ -19,10 +19,12 @@ class Hospital(Base):
 
     doctors = relationship("Doctor", back_populates="hospital")
     departments = relationship("Department", back_populates="hospital")
+    medical_records = relationship("MedicalRecord", back_populates="hospital")
+    lab_tests = relationship("LabTestResult", back_populates="hospital")
+    prescriptions = relationship("Prescription", back_populates="hospital")
 
     def __repr__(self):
         return f"<Hospital(id={self.hospital_id}, name={self.hospital_name})>"
-
 
 # Departments
 class Department(Base):
@@ -101,6 +103,7 @@ class MedicalRecord(Base):
     __tablename__ = "medical_records"
     record_id = Column(Integer, primary_key=True, autoincrement=True)
     patient_id = Column(Integer, ForeignKey("patients.patient_id"))
+    hospital_id = Column(Integer, ForeignKey("hospitals.hospital_id"))
     doctor_id = Column(Integer, ForeignKey("doctors.doctor_id"))
     diagnosis = Column(String)
     treatment = Column(String)
@@ -113,6 +116,7 @@ class MedicalRecord(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     patient = relationship("Patient", back_populates="medical_records")
+    hospital = relationship("Hospital", back_populates="medical_records")
     doctor = relationship("Doctor", back_populates="medical_records")
     prescriptions = relationship("Prescription", back_populates="medical_record")
     lab_tests = relationship("LabTestResult", back_populates="medical_record")
@@ -127,6 +131,7 @@ class LabTestResult(Base):
     test_id = Column(Integer, primary_key=True, autoincrement=True)
     record_id = Column(Integer, ForeignKey("medical_records.record_id"))
     patient_id = Column(Integer, ForeignKey("patients.patient_id"))
+    hospital_id = Column(Integer, ForeignKey("hospitals.hospital_id"))
     doctor_id = Column(Integer, ForeignKey("doctors.doctor_id"))
     test_name = Column(String)
     result_value = Column(String)
@@ -138,6 +143,7 @@ class LabTestResult(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     patient = relationship("Patient", back_populates="lab_tests")
+    hospital = relationship("Hospital", back_populates="lab_tests")
     doctor = relationship("Doctor", back_populates="lab_tests")
     medical_record = relationship("MedicalRecord", back_populates="lab_tests")
 
@@ -151,6 +157,7 @@ class Prescription(Base):
     prescription_id = Column(Integer, primary_key=True, autoincrement=True)
     patient_id = Column(Integer, ForeignKey("patients.patient_id"))
     doctor_id = Column(Integer, ForeignKey("doctors.doctor_id"))
+    hospital_id = Column(Integer, ForeignKey("hospitals.hospital_id"))
     record_id = Column(Integer, ForeignKey("medical_records.record_id"))
     medicine_name = Column(String)
     frequency = Column(String)
@@ -163,6 +170,7 @@ class Prescription(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     patient = relationship("Patient", back_populates="prescriptions")
+    hospital = relationship("Hospital", back_populates="prescriptions")
     doctor = relationship("Doctor", back_populates="prescriptions")
     medical_record = relationship("MedicalRecord", back_populates="prescriptions")
 
