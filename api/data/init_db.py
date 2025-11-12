@@ -1,4 +1,4 @@
-from .models import Base
+from .hospital_model import Base
 from .database import engine
 import os
 from dotenv import load_dotenv

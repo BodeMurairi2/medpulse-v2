@@ -1,24 +1,21 @@
 #!/usr/bin/env python3
 
 from sqlalchemy.orm import Session, joinedload
-from data.models import Patient, Consultation, Prescription, LabTest, Appointment, Staff, Department
+from data.hospital_model import Hospital, Department, Doctor, Patient, MedicalRecord, LabTestResult, Prescription, LabTestFile
 
-def get_patient_records_by_email(db: Session, email: str):
+def get_patient_records_by_id(db: Session, patient_id: int):
     patient = (
         db.query(Patient)
         .options(
-            joinedload(Patient.consultations)
-                .joinedload(Consultation.doctor)
-                .joinedload(Staff.department),
+            joinedload(Patient.medical_records)
+                .joinedload(MedicalRecord.doctor)
+                .joinedload(Doctor.hospital),
             joinedload(Patient.prescriptions)
-                .joinedload(Prescription.doctor)
-                .joinedload(Staff.department),
-            joinedload(Patient.lab_tests),
-            joinedload(Patient.appointments)
-                .joinedload(Appointment.doctor)
-                .joinedload(Staff.department)
+                .joinedload(Prescription.doctor),
+            joinedload(Patient.lab_tests)
+                .joinedload(LabTestResult.files)
         )
-        .filter(Patient.email == email)
+        .filter(Patient.patient_id == patient_id)
         .first()
     )
 
@@ -26,51 +23,45 @@ def get_patient_records_by_email(db: Session, email: str):
         return None
 
     return {
-        "id": patient.id,
-        "full_name": patient.full_name,
+        "id": patient.patient_id,
+        "full_name": f"{patient.first_name} {patient.middle_name or ''} {patient.second_name or ''}".strip(),
         "date_of_birth": patient.date_of_birth,
         "gender": patient.gender,
-        "contact": patient.contact,
+        "contact": patient.phone_number,
         "email": patient.email,
-        "consultations": [
+        "medical_records": [
             {
-                "doctor_name": c.doctor.full_name if c.doctor else None,
-                "department_name": (
-                    c.doctor.department.name if c.doctor and c.doctor.department else None
-                ),
-                "date": c.date,
-                "notes": c.notes,
+                "doctor_name": f"{mr.doctor.first_name} {mr.doctor.last_name}" if mr.doctor else None,
+                "hospital_name": mr.hospital_name or (mr.hospital.hospital_name if mr.hospital else None),
+                "diagnosis": mr.diagnosis,
+                "treatment": mr.treatment,
+                "notes": mr.notes,
+                "follow_up_date": mr.follow_up_date,
+                "record_date": mr.record_date,
             }
-            for c in patient.consultations
+            for mr in patient.medical_records
         ],
         "prescriptions": [
             {
-                "medication": p.medication,
+                "medicine_name": p.medicine_name,
                 "dosage": p.dosage,
+                "frequency": p.frequency,
                 "duration": p.duration,
-                "date_issued": p.date_issued,
+                "notes": p.notes,
+                "doctor_name": f"{p.doctor.first_name} {p.doctor.last_name}" if p.doctor else None,
+                "record_id": p.record_id
             }
             for p in patient.prescriptions
         ],
         "lab_tests": [
             {
                 "test_name": l.test_name,
-                "result": l.result,
-                "reference_range": l.reference_range,
-                "date_conducted": l.date_conducted,
+                "result_value": l.result_value,
+                "result_date": l.result_date,
+                "notes": l.notes,
+                "doctor_name": l.doctor_name,
+                "files": [f.file_url for f in l.files]  # Lab test files URLs
             }
             for l in patient.lab_tests
-        ],
-        "appointments": [
-            {
-                "doctor_name": a.doctor.full_name if a.doctor else None,
-                "department_name": (
-                    a.department.name if a.department else None
-                ),
-                "appointment_date": a.appointment_date,
-                "status": a.status,
-                "notes": a.notes,
-            }
-            for a in patient.appointments
-        ],
+        ]
     }
