@@ -5,7 +5,7 @@
 
 # Doctor credentials
 EMAIL="l.kwizera1@alustudent.com"
-PASSWORD="laura"
+PASSWORD="laura2"
 
 # Make POST request to doctor login endpoint
 http POST http://localhost:8080/doctor_portal/login \
