@@ -3,21 +3,24 @@
 import requests
 
 patient_id = 1
+doctor_id = 22
 
-Endpoint = f"http://localhost:8080/doctor_portal/patients/new_consultation/{patient_id}"
+Endpoint = f"http://localhost:8080/doctor_portal/patients/new_prescription/{patient_id}"
 
 consultation_data = {
-    "hospital_id": 6,
     "patient_id": patient_id,
-    "doctor_id": 22,
-    "diagnosis": "Common Cold",
-    "treatment": "Rest and hydration",
+    "doctor_id": doctor_id,
+    "medicine_name": "Restamox",
+    "frequency": "Twice a day",
+    "duration": "7 days",
+    "dosage": "500mg",
     "notes": "Patient should recover in a week.",
-    "follow_up_date": "2025-11-18",
-    "created_by": "Dr. Laura Kwizera"
+    "prescribed_by": "Dr. Laura Kwizera",
+    "prescription_date": "2025-11-18",           # optional
+    "prescription_details": "Take after meals"  # optional
 }
 
-token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkb2N0b3JfaWQiOjIyLCJleHAiOjE3NjI4Nzg2MTl9.D_8WPFPGsL0udYod9z2ZTDjXBfFKhYq381wRQVCC8Lk"
+token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkb2N0b3JfaWQiOjIyLCJleHAiOjE3NjI5MjIyNjF9.HhY5PVshztg6rqovJfUacynwlT57TR5T3XXbsXifwwc"
 
 headers = {
     "Authorization": f"Bearer {token}"

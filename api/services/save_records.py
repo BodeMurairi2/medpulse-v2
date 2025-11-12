@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
+from datetime import date
 from fastapi import HTTPException, status
-from data.hospital_model import Patient, Doctor, MedicalRecord, Prescription, LabTestResult
+from data.hospital_model import Patient, Doctor, MedicalRecord, Prescription, LabTestResult, Hospital
 from data.database import SessionLocal
 from services.search_patient import search_user
 from schemas.medical_record import MedicalRecord as medical_record_schema
@@ -38,14 +39,19 @@ class Record:
             if not patient:
                 raise HTTPException(status_code=404, detail="Patient not found.")
 
+            # get hospital name from doctor_id and lookup into hospital table
+            hospital_id = session.query(Doctor).filter(Doctor.doctor_id == doctor_id).first().hospital_id
+            hospital_name = session.query(Hospital).filter(Hospital.hospital_id == hospital_id).first().hospital_name
+            
             new_record = MedicalRecord(
                 patient_id=patient_id,
                 doctor_id=doctor_id,
                 diagnosis=record.diagnosis,
                 treatment=record.treatment,
                 notes=record.notes,
-                hospital_id=record.hospital_id if hasattr(record, "hospital_id") else None,
-                hospital_name=record.hospital_name if hasattr(record, "hospital_name") else None,
+                hospital_id=hospital_id,
+                hospital_name=hospital_name,
+                created_by=record.created_by,
                 follow_up_date=record.follow_up_date if hasattr(record, "follow_up_date") else None,
                 record_date=record.record_date if hasattr(record, "record_date") else None
             )
@@ -68,6 +74,10 @@ class Record:
                 MedicalRecord.patient_id == patient_id
             ).order_by(MedicalRecord.record_date.desc(), MedicalRecord.record_id.desc()).first()
             
+            # find hospital name
+            hospital_id = record.hospital_id
+            hospital_name = session.query(Hospital).filter(Hospital.hospital_id == hospital_id).first().hospital_name
+
             if not record:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Medical record not found for the patient.")
             
@@ -75,14 +85,16 @@ class Record:
                 patient_id=patient_id,
                 doctor_id=doctor_id,
                 record_id=record.record_id,
-                hospital_id=record.hospital_id,
-                hospital_name=record.hospital_name,
+                hospital_id=hospital_id,
+                hospital_name=hospital_name,
                 medicine_name=prescription_data.medicine_name,
-                prescribed_by=prescription_data.prescribed_by,
                 frequency=prescription_data.frequency,
                 duration=prescription_data.duration,
                 dosage=prescription_data.dosage,
-                notes=prescription_data.notes
+                notes=prescription_data.notes,
+                prescribed_by=prescription_data.prescribed_by,
+                prescription_date=prescription_data.prescription_date or date.today(),
+                prescription_details=prescription_data.prescription_details or None
             )
 
             session.add(new_prescription)

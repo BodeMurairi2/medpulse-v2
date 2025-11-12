@@ -80,3 +80,9 @@ def create_new_consultation(patient_id:int,
     return record.save_consultation(record = consultation, patient_id=patient_id, doctor_id=doctor_id)
 
 @doctor_portal_router.post("/patients/new_prescription/{patient_id}")
+def create_new_prescription(patient_id:int, 
+                            prescription: prescription_schema = Body(...),
+                            doctor_id: int = Depends(get_current_doctor)
+                            ):
+    """Create a new prescription"""
+    return record.save_prescription(prescription_data = prescription, patient_id=patient_id, doctor_id=doctor_id)

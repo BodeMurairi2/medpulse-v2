@@ -8,8 +8,8 @@ class MedicalRecord(BaseModel):
     """Pydantic model for medical record creation"""
     patient_id: int
     doctor_id: int
-    hospital_id: int
-    hospital_name: str = Field(..., title="Hospital Name")
+    hospital_id: Optional[int] = Field(None, title="Hospital ID")
+    hospital_name: Optional[str] = Field(None, title="Hospital Name")
     diagnosis: str = Field(..., title="Enter diagnosis")
     treatment: str = Field(..., title="Enter treatment")
     notes: str = Field(..., title="Doctor notes")
@@ -23,8 +23,8 @@ class PrescriptionInfo(BaseModel):
     patient_id: int
     doctor_id: int
     record_id: Optional[int] = None
-    hospital_id: int
-    hospital_name: str = Field(..., title="Hospital Name")
+    hospital_id: Optional[int] = None
+    hospital_name: Optional[str] = Field(None, title="Hospital Name")
     medicine_name: str = Field(..., title="Medicine Name")
     frequency: str = Field(..., title="Dosage Frequency")
     duration: str = Field(..., title="Duration of the medicine")
@@ -40,8 +40,8 @@ class LabTestInfo(BaseModel):
     patient_id: int
     doctor_id: int
     record_id: Optional[int] = None
-    hospital_id: int
-    hospital_name: str = Field(..., title="Hospital Name")
+    hospital_id: Optional[int] = None
+    hospital_name: Optional[str] = Field(None, title="Hospital Name")
     test_name: str = Field(..., title="Name of the lab test")
     result_value: str = Field(..., title="Results of the lab test")
     result_date: date = Field(default_factory=lambda: datetime.utcnow().date())
