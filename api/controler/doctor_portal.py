@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-from fastapi import APIRouter, HTTPException, Depends, Header, status, Body
+from fastapi import APIRouter, HTTPException, Depends, Header, status, Body, UploadFile, File
 from sqlalchemy.orm import Session
 from data.database import get_db
-from data.hospital_model import Doctor
+from data.hospital_model import Doctor, LabTestResult, LabTestFile
 from schemas.doctor import DoctorLogin
 from schemas.medical_record import MedicalRecord as medical_record_schema
 from schemas.medical_record import PrescriptionInfo as prescription_schema
@@ -13,6 +13,7 @@ from services.jwt import create_access_token
 from services.token_blacklist import add_to_blacklist
 from services.save_records import Record
 from auth.doctor_dependencies import get_current_doctor
+from services.upload import upload_user_document
 
 doctor_portal_router = APIRouter(
     prefix="/doctor_portal",
@@ -85,4 +86,35 @@ def create_new_prescription(patient_id:int,
                             doctor_id: int = Depends(get_current_doctor)
                             ):
     """Create a new prescription"""
-    return record.save_prescription(prescription_data = prescription, patient_id=patient_id, doctor_id=doctor_id)
+    return record.save_prescription(prescription_data = prescription,
+                                    patient_id=patient_id,
+                                    doctor_id=doctor_id
+                                    )
+
+@doctor_portal_router.post("/patients/new_lab_test/{patient_id}")
+def create_new_lab_test(patient_id:int, 
+                        lab_test: lab_test_schema = Body(...),
+                        doctor_id: int = Depends(get_current_doctor)
+                        ):
+    """Create a new lab test order"""
+    return record.save_lab_test(lab_test_data = lab_test,
+                                patient_id=patient_id,
+                                doctor_id=doctor_id
+                                )
+
+@doctor_portal_router.post("/patients/lab_test/{lab_test_id}/upload_file")
+def upload_lab_test_file(
+    lab_test_id: int,
+    file: UploadFile = File(...),
+    doctor_id: int = Depends(get_current_doctor)
+):
+    """Upload a file for a specific lab test result using Record service"""
+    try:
+        # Use Record service to handle upload and DB save
+        public_url = record.save_lab_test_file(lab_test_id=lab_test_id, file=file)
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Unexpected error: {str(e)}")
+
+    return public_url

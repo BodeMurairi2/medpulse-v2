@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-
 from datetime import date
-from fastapi import HTTPException, status, UploadFile
+from fastapi import File, HTTPException, status, UploadFile
 from data.hospital_model import Patient, Doctor, MedicalRecord, Prescription, LabTestResult, Hospital
+from data.hospital_model import LabTestFile  # for file uploads
 from data.database import SessionLocal
 from services.search_patient import search_user
 from services.upload import upload_user_document  # Make sure this exists and works with UploadFile
@@ -40,9 +40,10 @@ class Record:
             if not patient:
                 raise HTTPException(status_code=404, detail="Patient not found.")
 
-            # get hospital name from doctor_id and lookup into hospital table
-            hospital_id = session.query(Doctor).filter(Doctor.doctor_id == doctor_id).first().hospital_id
-            hospital_name = session.query(Hospital).filter(Hospital.hospital_id == hospital_id).first().hospital_name
+            # get hospital name from doctor_id
+            doctor = session.get(Doctor, doctor_id)
+            hospital_id = doctor.hospital_id
+            hospital_name = session.get(Hospital, hospital_id).hospital_name
             
             new_record = MedicalRecord(
                 patient_id=patient_id,
@@ -53,8 +54,8 @@ class Record:
                 hospital_id=hospital_id,
                 hospital_name=hospital_name,
                 created_by=record.created_by,
-                follow_up_date=record.follow_up_date if hasattr(record, "follow_up_date") else None,
-                record_date=record.record_date if hasattr(record, "record_date") else None
+                follow_up_date=getattr(record, "follow_up_date", None),
+                record_date=getattr(record, "record_date", None)
             )
 
             session.add(new_record)
@@ -74,19 +75,16 @@ class Record:
             record = session.query(MedicalRecord).filter(
                 MedicalRecord.patient_id == patient_id
             ).order_by(MedicalRecord.record_date.desc(), MedicalRecord.record_id.desc()).first()
-            
-            # find hospital name
-            hospital_id = record.hospital_id
-            hospital_name = session.query(Hospital).filter(Hospital.hospital_id == hospital_id).first().hospital_name
-
             if not record:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Medical record not found for the patient.")
             
+            hospital_name = session.get(Hospital, record.hospital_id).hospital_name
+
             new_prescription = Prescription(
                 patient_id=patient_id,
                 doctor_id=doctor_id,
                 record_id=record.record_id,
-                hospital_id=hospital_id,
+                hospital_id=record.hospital_id,
                 hospital_name=hospital_name,
                 medicine_name=prescription_data.medicine_name,
                 frequency=prescription_data.frequency,
@@ -107,44 +105,72 @@ class Record:
     def save_lab_test(
         self, 
         lab_test_data: lab_test_schema, 
-        record_id: int, 
         patient_id: int, 
-        doctor_id: int, 
-        files: list[UploadFile] = None
-    ) -> str:
-        """Save a new lab test result for a medical record with optional multiple file uploads"""
+        doctor_id: int
+    ) -> LabTestResult:
+        """Save a new lab test result for a patient"""
         with SessionLocal() as session:
             patient = session.get(Patient, patient_id)
             if not patient:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found.")
 
-            uploaded_file_urls = []
-            if files:
-                for file in files:
-                    file_name, file_extension = file.filename.rsplit(".", 1)
-                    file_extension = "." + file_extension
-                    file_url = upload_user_document(
-                        file=file,
-                        file_name=file_name,
-                        file_extension=file_extension,
-                        patient_name=patient.user_name,  # adjust attribute if needed
-                        report_type=lab_test_data.test_name
-                    )
-                    uploaded_file_urls.append(file_url)
+            # Get latest medical record for the patient
+            record = session.query(MedicalRecord).filter(
+                MedicalRecord.patient_id == patient_id
+            ).order_by(MedicalRecord.record_date.desc(), MedicalRecord.record_id.desc()).first()
+            if not record:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Medical record not found for the patient.")
+
+            hospital_name = session.get(Hospital, record.hospital_id).hospital_name
 
             new_lab_test = LabTestResult(
                 patient_id=patient_id,
                 doctor_id=doctor_id,
-                record_id=record_id,
+                record_id=record.record_id,
+                hospital_id=record.hospital_id,
+                hospital_name=hospital_name,
                 test_name=lab_test_data.test_name,
                 result_value=lab_test_data.result_value,
-                result_date=lab_test_data.result_date,
+                result_date=lab_test_data.result_date or date.today(),
                 notes=lab_test_data.notes,
-                attached_files=";".join(uploaded_file_urls) if uploaded_file_urls else None
+                doctor_name=lab_test_data.doctor_name
             )
 
             session.add(new_lab_test)
             session.commit()
             session.refresh(new_lab_test)
 
-        return "Lab test result saved successfully."
+            return new_lab_test
+
+    def save_lab_test_file(
+        self,
+        lab_test_id: int,
+        file: UploadFile
+    ) -> str:
+        """Upload a file for a specific lab test result and save in LabTestFile table"""
+        with SessionLocal() as session:
+            lab_test = session.get(LabTestResult, lab_test_id)
+            if not lab_test:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lab test not found")
+
+            # Upload file to Cloudflare R2
+            public_url = upload_user_document(
+                file=file,
+                hospital_name=lab_test.hospital_name,
+                patient_name=f"{lab_test.patient.first_name} {lab_test.patient.second_name or ''}",
+                report_type=lab_test.test_name
+            )
+
+            # Save file record in DB
+            lab_test_file = LabTestFile(
+                lab_test_id=lab_test_id,
+                file_url=public_url
+            )
+            session.add(lab_test_file)
+            session.commit()
+            session.refresh(lab_test_file)
+
+            return {
+                "message":"File uploaded successfully.",
+                "public_url":public_url
+            }

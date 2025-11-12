@@ -35,3 +35,4 @@ def add_doctor(
     db.refresh(new_doctor)
 
     return{"message": "Doctor added successfully", "doctor_id": new_doctor.doctor_id}
+
