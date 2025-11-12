@@ -25,6 +25,3 @@ def decode_access_token(token: str):
     except jwt.InvalidTokenError:
         return None
 
-
-print("JWT_SECRET:", JWT_SECRET)
-print("JWT_ALGORITHM:", JWT_ALGORITHM)

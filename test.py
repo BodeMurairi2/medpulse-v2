@@ -1,7 +1,11 @@
-from api.data.database import Base, engine
-from api.data.hospital_model import Hospital, Department, Doctor, Patient, MedicalRecord, LabTestResult, Prescription
+from sqlalchemy import create_engine
+from api.data.database import Base, DATABASE_URL
+from api.data import hospital_model
 
+engine = create_engine(DATABASE_URL)
+
+Base.metadata.drop_all(bind=engine)
+print("All tables dropped")
 
 Base.metadata.create_all(bind=engine)
-
-print("Tables creates successfuly!")
+print("All tables created successfully.")
