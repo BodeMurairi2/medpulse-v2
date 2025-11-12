@@ -21,3 +21,4 @@ build/
 .pyrel/
 .ipynb_checkpoints/
 migrations/
+test_scripts/

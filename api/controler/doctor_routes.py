@@ -4,6 +4,7 @@ from data.database import get_db
 from data.hospital_model import Doctor
 from schemas.hospital import DoctorCreate
 from services.harsh import hash_password
+from services.send_email import send_otp_email, generate_otp
 from auth.dependencies import get_current_hospital
 
 router = APIRouter(prefix="/doctor", tags=["Doctor"])
@@ -17,7 +18,8 @@ def add_doctor(
     existing_doctor = db.query(Doctor).filter(Doctor.email == doctor_data.email).first()
     if existing_doctor:
         raise HTTPException(status_code=400, detail="Doctor with this email already exists")
-    hashed_password = hash_password(doctor_data.password)
+    generated_password = f"doctor-{generate_otp()}"
+    hashed_password = hash_password(generated_password)
 
     new_doctor = Doctor(
         first_name=doctor_data.first_name,
@@ -29,6 +31,8 @@ def add_doctor(
         password_hash=hashed_password,
         hospital_id=hospital_id
     )
+    
+    send_otp_email(to_email=doctor_data.email, password=generated_password)
     
     db.add(new_doctor)
     db.commit()

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import re
 from datetime import datetime
-from typing import Literal
+from typing import Literal, Optional
 from pydantic import BaseModel, Field, EmailStr, field_validator
 
 class DoctorClass(BaseModel):
@@ -31,7 +31,7 @@ class DoctorCreate(BaseModel):
     department: str | None = None
     phone_number: str | None = None
     email: EmailStr
-    password: str
+    password: Optional[str] = None
 
 class DoctorLogin(BaseModel):
     email:EmailStr
