@@ -68,7 +68,7 @@ class Doctor(Base):
     def __repr__(self):
         return f"<Doctor(id={self.doctor_id}, name={self.first_name} {self.last_name})>"
 
-#  Patients
+# Patients
 class Patient(Base):
     __tablename__ = "patients"
     patient_id = Column(Integer, primary_key=True, autoincrement=True)
@@ -94,7 +94,6 @@ class Patient(Base):
 
     def __repr__(self):
         return f"<Patient(id={self.patient_id}, name={self.first_name} {self.second_name})>"
-
 
 # Medical Records 
 class MedicalRecord(Base):
@@ -122,7 +121,6 @@ class MedicalRecord(Base):
     def __repr__(self):
         return f"<MedicalRecord(id={self.record_id}, patient_id={self.patient_id}, doctor_id={self.doctor_id})>"
 
-
 # Lab Test Results
 class LabTestResult(Base):
     __tablename__ = "lab_test_results"
@@ -137,7 +135,6 @@ class LabTestResult(Base):
     result_date = Column(Date)
     notes = Column(Text)
     doctor_name = Column(String)
-    attached_files = Column(String)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
@@ -145,10 +142,23 @@ class LabTestResult(Base):
     hospital = relationship("Hospital", back_populates="lab_tests")
     doctor = relationship("Doctor", back_populates="lab_tests")
     medical_record = relationship("MedicalRecord", back_populates="lab_tests")
+    files = relationship("LabTestFile", back_populates="lab_test", cascade="all, delete-orphan")  # NEW
 
     def __repr__(self):
         return f"<LabTestResult(id={self.test_id}, test_name={self.test_name})>"
 
+# NEW TABLE: Lab Test Files
+class LabTestFile(Base):
+    __tablename__ = "lab_test_files"
+    file_id = Column(Integer, primary_key=True, autoincrement=True)
+    lab_test_id = Column(Integer, ForeignKey("lab_test_results.test_id", ondelete="CASCADE"))
+    file_url = Column(String, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    lab_test = relationship("LabTestResult", back_populates="files")
+
+    def __repr__(self):
+        return f"<LabTestFile(id={self.file_id}, lab_test_id={self.lab_test_id}, url={self.file_url})>"
 
 # Prescriptions
 class Prescription(Base):

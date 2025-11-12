@@ -19,3 +19,6 @@ python-multipart
 passlib[bcrypt]
 python-decouple
 redis
+botocore
+boto3
+celery

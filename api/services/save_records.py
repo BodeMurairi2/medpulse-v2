@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
 from datetime import date
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, UploadFile
 from data.hospital_model import Patient, Doctor, MedicalRecord, Prescription, LabTestResult, Hospital
 from data.database import SessionLocal
 from services.search_patient import search_user
+from services.upload import upload_user_document  # Make sure this exists and works with UploadFile
 from schemas.medical_record import MedicalRecord as medical_record_schema
 from schemas.medical_record import PrescriptionInfo as prescription_schema
 from schemas.medical_record import LabTestInfo as lab_test_schema
@@ -103,12 +104,33 @@ class Record:
 
         return "Prescription saved successfully."
 
-    def save_lab_test(self, lab_test_data: lab_test_schema, record_id: int, patient_id: int, doctor_id: int) -> str:
-        """Save a new lab test result for a medical record"""
+    def save_lab_test(
+        self, 
+        lab_test_data: lab_test_schema, 
+        record_id: int, 
+        patient_id: int, 
+        doctor_id: int, 
+        files: list[UploadFile] = None
+    ) -> str:
+        """Save a new lab test result for a medical record with optional multiple file uploads"""
         with SessionLocal() as session:
             patient = session.get(Patient, patient_id)
             if not patient:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found.")
+
+            uploaded_file_urls = []
+            if files:
+                for file in files:
+                    file_name, file_extension = file.filename.rsplit(".", 1)
+                    file_extension = "." + file_extension
+                    file_url = upload_user_document(
+                        file=file,
+                        file_name=file_name,
+                        file_extension=file_extension,
+                        patient_name=patient.user_name,  # adjust attribute if needed
+                        report_type=lab_test_data.test_name
+                    )
+                    uploaded_file_urls.append(file_url)
 
             new_lab_test = LabTestResult(
                 patient_id=patient_id,
@@ -118,7 +140,7 @@ class Record:
                 result_value=lab_test_data.result_value,
                 result_date=lab_test_data.result_date,
                 notes=lab_test_data.notes,
-                attached_files=lab_test_data.attached_files
+                attached_files=";".join(uploaded_file_urls) if uploaded_file_urls else None
             )
 
             session.add(new_lab_test)
