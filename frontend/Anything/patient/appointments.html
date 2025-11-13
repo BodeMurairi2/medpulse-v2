@@ -65,6 +65,7 @@
           </div>
 
           <button type="submit" class="submit-btn">Book Appointment</button>
+          <button type="button" class="view-lab-btn" onclick="viewLabResults()">View Lab Results</button>
         </form>
       </div>
 
@@ -110,6 +111,67 @@
     </div>
   </div>
 
+  <!-- Modal for viewing lab results -->
+  <div id="labModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeLabModal()">&times;</span>
+      <h2>Lab Results</h2>
+      <div class="lab-results">
+        <h3>Blood Test Results (Latest)</h3>
+        <table class="lab-table">
+          <thead>
+            <tr>
+              <th>Test</th>
+              <th>Result</th>
+              <th>Reference Range</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Hemoglobin</td>
+              <td>14.2 g/dL</td>
+              <td>12.0-16.0 g/dL</td>
+              <td>Normal</td>
+            </tr>
+            <tr>
+              <td>White Blood Cells</td>
+              <td>7.5 K/uL</td>
+              <td>4.0-11.0 K/uL</td>
+              <td>Normal</td>
+            </tr>
+            <tr>
+              <td>Platelets</td>
+              <td>250 K/uL</td>
+              <td>150-450 K/uL</td>
+              <td>Normal</td>
+            </tr>
+            <tr>
+              <td>Glucose (Fasting)</td>
+              <td>95 mg/dL</td>
+              <td>70-100 mg/dL</td>
+              <td>Normal</td>
+            </tr>
+            <tr>
+              <td>Cholesterol</td>
+              <td>180 mg/dL</td>
+              <td><200 mg/dL</td>
+              <td>Normal</td>
+            </tr>
+            <tr>
+              <td>HDL Cholesterol</td>
+              <td>55 mg/dL</td>
+              <td>>40 mg/dL</td>
+              <td>Normal</td>
+            </tr>
+          </tbody>
+        </table>
+        <p><strong>Test Date:</strong> January 10, 2024</p>
+        <p><strong>Lab:</strong> MedPulse Central Laboratory</p>
+      </div>
+    </div>
+  </div>
+
   <script>
     window.addEventListener('DOMContentLoaded', () => {
       loadDoctors();
@@ -117,10 +179,25 @@
     });
 
     function loadDoctors() {
-      const doctors = JSON.parse(localStorage.getItem('doctors') || '[]');
+      let doctors = JSON.parse(localStorage.getItem('doctors') || '[]');
       const departments = JSON.parse(localStorage.getItem('departments') || '[]');
       const select = document.getElementById('doctor');
-      
+
+      // If no doctors in localStorage, use fallback data
+      if (doctors.length === 0) {
+        doctors = [
+          { id: 1, name: "Dr. John Doe", specialization: "Cardiologist", contact: "+250789123456" },
+          { id: 2, name: "Dr. Jane Smith", specialization: "Dermatologist", contact: "+250789654321" },
+          { id: 3, name: "Dr. Sarah Johnson", specialization: "General Medicine", contact: "+250789111111" },
+          { id: 4, name: "Dr. Michael Brown", specialization: "Laboratory", contact: "+250789222222" },
+          { id: 5, name: "Dr. Emily Davis", specialization: "Radiology", contact: "+250789333333" },
+          { id: 6, name: "Dr. Robert Wilson", specialization: "Cardiology", contact: "+250789444444" },
+          { id: 7, name: "Dr. Lisa Chen", specialization: "Dermatology", contact: "+250789555555" }
+        ];
+        // Save to localStorage for future use
+        localStorage.setItem('doctors', JSON.stringify(doctors));
+      }
+
       doctors.forEach(doctor => {
         const dept = departments.find(d => d.id === doctor.departmentId);
         const option = document.createElement('option');
@@ -248,6 +325,22 @@
         timestamp: new Date().toISOString()
       });
       localStorage.setItem('doctorNotifications', JSON.stringify(notifications));
+    }
+
+    function viewLabResults() {
+      document.getElementById('labModal').style.display = 'block';
+    }
+
+    function closeLabModal() {
+      document.getElementById('labModal').style.display = 'none';
+    }
+
+    // Close lab modal when clicking outside
+    window.onclick = function(event) {
+      const labModal = document.getElementById('labModal');
+      if (event.target == labModal) {
+        labModal.style.display = 'none';
+      }
     }
   </script>
 </body>

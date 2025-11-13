@@ -1,0 +1,18 @@
+GET /api/doctors
+Response:
+{
+  "doctors": [
+    {
+      "id": 1,
+      "name": "Dr. John Doe",
+      "specialization": "Cardiologist",
+      "contact": "+250789123456"
+    },
+    {
+      "id": 2,
+      "name": "Dr. Jane Smith",
+      "specialization": "Dermatologist",
+      "contact": "+250789654321"
+    }
+  ]
+}

@@ -26,8 +26,9 @@
     
     <div class="records-section">
       <div class="filter-bar">
-        <input type="text" placeholder="Search records..." class="search-input" />
-        <select class="filter-select">
+        <input type="text" placeholder="Search records..." class="search-input" id="recordSearch" />
+        <button class="search-btn" onclick="searchRecords()">Search</button>
+        <select class="filter-select" id="recordFilter" onchange="filterRecords()">
           <option>All Records</option>
           <option>Recent</option>
           <option>By Doctor</option>
@@ -36,7 +37,7 @@
       </div>
 
       <div class="records-list">
-        <div class="record-card">
+        <div class="record-card" data-doctor="Dr. Sarah Johnson" data-date="2024-01-15" data-type="General Checkup">
           <div class="record-header">
             <h3>General Checkup</h3>
             <span class="record-date">2024-01-15</span>
@@ -45,11 +46,11 @@
             <p><strong>Doctor:</strong> Dr. Sarah Johnson</p>
             <p><strong>Department:</strong> General Medicine</p>
             <p><strong>Diagnosis:</strong> Routine checkup - All clear</p>
-            <button class="view-btn">View Details</button>
+            <button class="view-btn" onclick="viewRecordDetails('General Checkup', 'Dr. Sarah Johnson', 'General Medicine', 'Routine checkup - All clear', 'Patient presented for routine annual checkup. Vital signs normal. No complaints. Recommended follow-up in one year.')">View Details</button>
           </div>
         </div>
 
-        <div class="record-card">
+        <div class="record-card" data-doctor="Dr. Michael Brown" data-date="2024-01-10" data-type="Blood Test Results">
           <div class="record-header">
             <h3>Blood Test Results</h3>
             <span class="record-date">2024-01-10</span>
@@ -58,11 +59,11 @@
             <p><strong>Doctor:</strong> Dr. Michael Brown</p>
             <p><strong>Department:</strong> Laboratory</p>
             <p><strong>Diagnosis:</strong> Blood work completed - Normal ranges</p>
-            <button class="view-btn">View Details</button>
+            <button class="view-btn" onclick="viewRecordDetails('Blood Test Results', 'Dr. Michael Brown', 'Laboratory', 'Blood work completed - Normal ranges', 'Hemoglobin: 14.2 g/dL (Normal), WBC: 7.5 K/uL (Normal), Platelets: 250 K/uL (Normal), Glucose: 95 mg/dL (Normal)')">View Details</button>
           </div>
         </div>
 
-        <div class="record-card">
+        <div class="record-card" data-doctor="Dr. Emily Davis" data-date="2024-01-05" data-type="X-Ray Examination">
           <div class="record-header">
             <h3>X-Ray Examination</h3>
             <span class="record-date">2024-01-05</span>
@@ -71,12 +72,141 @@
             <p><strong>Doctor:</strong> Dr. Emily Davis</p>
             <p><strong>Department:</strong> Radiology</p>
             <p><strong>Diagnosis:</strong> Chest X-ray - No abnormalities detected</p>
-            <button class="view-btn">View Details</button>
+            <button class="view-btn" onclick="viewRecordDetails('X-Ray Examination', 'Dr. Emily Davis', 'Radiology', 'Chest X-ray - No abnormalities detected', 'PA and lateral chest X-rays show clear lung fields. Heart size normal. No pleural effusion or pneumothorax. Bony thorax unremarkable.')">View Details</button>
+          </div>
+        </div>
+      </div>
+
+      <h3>Medical Consultations</h3>
+      <div class="records-list">
+        <div class="record-card">
+          <div class="record-header">
+            <h3>Cardiology Consultation</h3>
+            <span class="record-date">2024-01-12</span>
+          </div>
+          <div class="record-details">
+            <p><strong>Doctor:</strong> Dr. Robert Wilson</p>
+            <p><strong>Department:</strong> Cardiology</p>
+            <p><strong>Consultation:</strong> Heart rhythm evaluation</p>
+            <button class="view-btn" onclick="viewConsultationDetails('Cardiology Consultation', 'Dr. Robert Wilson', 'Cardiology', 'Heart rhythm evaluation', 'Patient reports occasional palpitations. ECG shows normal sinus rhythm. Holter monitor recommended for 24-hour monitoring. No immediate concerns.')">View Details</button>
+          </div>
+        </div>
+
+        <div class="record-card">
+          <div class="record-header">
+            <h3>Dermatology Consultation</h3>
+            <span class="record-date">2024-01-08</span>
+          </div>
+          <div class="record-details">
+            <p><strong>Doctor:</strong> Dr. Lisa Chen</p>
+            <p><strong>Department:</strong> Dermatology</p>
+            <p><strong>Consultation:</strong> Skin lesion assessment</p>
+            <button class="view-btn" onclick="viewConsultationDetails('Dermatology Consultation', 'Dr. Lisa Chen', 'Dermatology', 'Skin lesion assessment', 'Benign mole on left forearm. No signs of malignancy. Recommended annual monitoring. Educated patient on skin cancer prevention.')">View Details</button>
           </div>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Modal for viewing record details -->
+  <div id="recordModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h2 id="modalTitle"></h2>
+      <div id="modalDetails"></div>
+      <button class="download-btn" onclick="downloadRecord()">Download Record</button>
+    </div>
+  </div>
+
+  <script>
+    function viewRecordDetails(title, doctor, department, diagnosis, details) {
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalDetails').innerHTML = `
+        <p><strong>Doctor:</strong> ${doctor}</p>
+        <p><strong>Department:</strong> ${department}</p>
+        <p><strong>Diagnosis:</strong> ${diagnosis}</p>
+        <p><strong>Details:</strong> ${details}</p>
+      `;
+      document.getElementById('recordModal').style.display = 'block';
+    }
+
+    function viewConsultationDetails(title, doctor, department, consultation, details) {
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalDetails').innerHTML = `
+        <p><strong>Doctor:</strong> ${doctor}</p>
+        <p><strong>Department:</strong> ${department}</p>
+        <p><strong>Consultation:</strong> ${consultation}</p>
+        <p><strong>Details:</strong> ${details}</p>
+      `;
+      document.getElementById('recordModal').style.display = 'block';
+    }
+
+    function closeModal() {
+      document.getElementById('recordModal').style.display = 'none';
+    }
+
+    function downloadRecord() {
+      const title = document.getElementById('modalTitle').textContent;
+      const details = document.getElementById('modalDetails').innerText;
+      const content = `Medical Record: ${title}\n\n${details}`;
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${title.replace(/\s+/g, '_')}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function searchRecords() {
+      const searchTerm = document.getElementById('recordSearch').value.toLowerCase();
+      const cards = document.querySelectorAll('.record-card');
+
+      cards.forEach(card => {
+        const title = card.querySelector('h3').textContent.toLowerCase();
+        const doctor = card.dataset.doctor.toLowerCase();
+        const type = card.dataset.type.toLowerCase();
+
+        if (title.includes(searchTerm) || doctor.includes(searchTerm) || type.includes(searchTerm)) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    function filterRecords() {
+      const filterValue = document.getElementById('recordFilter').value;
+      const cards = document.querySelectorAll('.record-card');
+
+      cards.forEach(card => {
+        if (filterValue === 'All Records') {
+          card.style.display = 'block';
+        } else if (filterValue === 'Recent') {
+          const date = new Date(card.dataset.date);
+          const thirtyDaysAgo = new Date();
+          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+          card.style.display = date >= thirtyDaysAgo ? 'block' : 'none';
+        } else if (filterValue === 'By Doctor') {
+          // For demo, show all - could be enhanced with sorting
+          card.style.display = 'block';
+        } else if (filterValue === 'By Date') {
+          // For demo, show all - could be enhanced with sorting
+          card.style.display = 'block';
+        }
+      });
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      const modal = document.getElementById('recordModal');
+      if (event.target == modal) {
+        modal.style.display = 'none';
+      }
+    }
+  </script>
 </body>
 </html>
 

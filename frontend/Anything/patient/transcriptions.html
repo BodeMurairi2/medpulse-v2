@@ -26,8 +26,9 @@
     
     <div class="transcriptions-section">
       <div class="filter-bar">
-        <input type="text" placeholder="Search transcriptions..." class="search-input" />
-        <select class="filter-select">
+        <input type="text" placeholder="Search transcriptions..." class="search-input" id="transcriptionSearch" />
+        <button class="search-btn" onclick="searchTranscriptions()">Search</button>
+        <select class="filter-select" id="transcriptionFilter" onchange="filterTranscriptions()">
           <option>All Transcriptions</option>
           <option>Recent</option>
           <option>By Doctor</option>
@@ -36,12 +37,12 @@
       </div>
 
       <div class="transcriptions-list">
-        <div class="transcription-card">
+        <div class="transcription-card" data-doctor="Dr. Sarah Johnson" data-date="2024-01-15" data-type="General Consultation">
           <div class="transcription-header">
             <h3>Visit Transcription - January 15, 2024</h3>
             <div class="transcription-actions">
-              <button class="download-btn">Download PDF</button>
-              <button class="view-btn">View</button>
+              <button class="download-btn" onclick="downloadTranscription('General Checkup - January 15, 2024', 'Dr. Sarah Johnson', 'General Consultation', 'Patient presented for routine annual checkup. Vital signs: BP 120/80, HR 72, Temp 98.6°F. Patient reports no significant symptoms. Physical exam unremarkable. Recommended annual follow-up. Prescribed vitamin D supplement for 3 months. Patient educated on healthy lifestyle choices.')">Download PDF</button>
+              <button class="view-btn" onclick="viewTranscription('General Checkup - January 15, 2024', 'Dr. Sarah Johnson', 'General Consultation', 'Patient presented for routine annual checkup. Vital signs: BP 120/80, HR 72, Temp 98.6°F. Patient reports no significant symptoms. Physical exam unremarkable. Recommended annual follow-up. Prescribed vitamin D supplement for 3 months. Patient educated on healthy lifestyle choices. Follow-up appointment scheduled for January 2025.')">View</button>
             </div>
           </div>
           <div class="transcription-details">
@@ -51,12 +52,12 @@
           </div>
         </div>
 
-        <div class="transcription-card">
+        <div class="transcription-card" data-doctor="Dr. Michael Brown" data-date="2024-01-10" data-type="Laboratory Report">
           <div class="transcription-header">
             <h3>Lab Results Transcription - January 10, 2024</h3>
             <div class="transcription-actions">
-              <button class="download-btn">Download PDF</button>
-              <button class="view-btn">View</button>
+              <button class="download-btn" onclick="downloadTranscription('Blood Test Results - January 10, 2024', 'Dr. Michael Brown', 'Laboratory Report', 'Complete Blood Count (CBC): Hemoglobin 14.2 g/dL (Normal), Hematocrit 42% (Normal), WBC 7.5 K/uL (Normal), Platelets 250 K/uL (Normal). Comprehensive Metabolic Panel: Glucose 95 mg/dL (Normal), BUN 15 mg/dL (Normal), Creatinine 0.9 mg/dL (Normal), Liver enzymes normal. Lipid Panel: Total Cholesterol 180 mg/dL (Normal), HDL 55 mg/dL (Good), LDL 100 mg/dL (Optimal). All results within normal reference ranges.')">Download PDF</button>
+              <button class="view-btn" onclick="viewTranscription('Blood Test Results - January 10, 2024', 'Dr. Michael Brown', 'Laboratory Report', 'Complete Blood Count (CBC): Hemoglobin 14.2 g/dL (Normal), Hematocrit 42% (Normal), WBC 7.5 K/uL (Normal), Platelets 250 K/uL (Normal). Comprehensive Metabolic Panel: Glucose 95 mg/dL (Normal), BUN 15 mg/dL (Normal), Creatinine 0.9 mg/dL (Normal), Liver enzymes normal. Lipid Panel: Total Cholesterol 180 mg/dL (Normal), HDL 55 mg/dL (Good), LDL 100 mg/dL (Optimal). All results within normal reference ranges. No abnormalities detected. Patient advised to maintain current healthy lifestyle.')">View</button>
             </div>
           </div>
           <div class="transcription-details">
@@ -66,12 +67,12 @@
           </div>
         </div>
 
-        <div class="transcription-card">
+        <div class="transcription-card" data-doctor="Dr. Emily Davis" data-date="2024-01-05" data-type="Radiology Report">
           <div class="transcription-header">
             <h3>Radiology Report - January 5, 2024</h3>
             <div class="transcription-actions">
-              <button class="download-btn">Download PDF</button>
-              <button class="view-btn">View</button>
+              <button class="download-btn" onclick="downloadTranscription('Chest X-Ray - January 5, 2024', 'Dr. Emily Davis', 'Radiology Report', 'PA and lateral chest X-rays performed. Heart size appears normal. Lung fields are clear bilaterally. No pleural effusion or pneumothorax. Bony thorax appears unremarkable. No acute cardiopulmonary process identified. Impression: Normal chest X-ray.')">Download PDF</button>
+              <button class="view-btn" onclick="viewTranscription('Chest X-Ray - January 5, 2024', 'Dr. Emily Davis', 'Radiology Report', 'PA and lateral chest X-rays performed. Heart size appears normal. Lung fields are clear bilaterally. No pleural effusion or pneumothorax. Bony thorax appears unremarkable. No acute cardiopulmonary process identified. Impression: Normal chest X-ray. Clinical correlation recommended. No further imaging required at this time.')">View</button>
             </div>
           </div>
           <div class="transcription-details">
@@ -80,9 +81,142 @@
             <p><strong>Type:</strong> Radiology Report</p>
           </div>
         </div>
+
+        <div class="transcription-card" data-doctor="Dr. Robert Wilson" data-date="2024-01-03" data-type="Cardiology Consultation">
+          <div class="transcription-header">
+            <h3>Cardiology Consultation - January 3, 2024</h3>
+            <div class="transcription-actions">
+              <button class="download-btn" onclick="downloadTranscription('Cardiology Consultation - January 3, 2024', 'Dr. Robert Wilson', 'Cardiology Consultation', 'Patient referred for evaluation of palpitations. ECG shows normal sinus rhythm. No arrhythmias detected. Holter monitor recommended for 24-hour monitoring. Patient reports occasional skipped beats, no syncope. Family history negative for cardiac disease. Physical exam normal. Plan: Holter monitor placement, cardiology follow-up in 2 weeks.')">Download PDF</button>
+              <button class="view-btn" onclick="viewTranscription('Cardiology Consultation - January 3, 2024', 'Dr. Robert Wilson', 'Cardiology Consultation', 'Patient referred for evaluation of palpitations. ECG shows normal sinus rhythm. No arrhythmias detected. Holter monitor recommended for 24-hour monitoring. Patient reports occasional skipped beats, no syncope. Family history negative for cardiac disease. Physical exam normal. Plan: Holter monitor placement, cardiology follow-up in 2 weeks. Educated patient on when to seek emergency care for cardiac symptoms.')">View</button>
+            </div>
+          </div>
+          <div class="transcription-details">
+            <p><strong>Doctor:</strong> Dr. Robert Wilson</p>
+            <p><strong>Date:</strong> January 3, 2024</p>
+            <p><strong>Type:</strong> Cardiology Consultation</p>
+          </div>
+        </div>
+
+        <div class="transcription-card" data-doctor="Dr. Lisa Chen" data-date="2023-12-28" data-type="Dermatology Consultation">
+          <div class="transcription-header">
+            <h3>Dermatology Consultation - December 28, 2023</h3>
+            <div class="transcription-actions">
+              <button class="download-btn" onclick="downloadTranscription('Dermatology Consultation - December 28, 2023', 'Dr. Lisa Chen', 'Dermatology Consultation', 'Patient presents with pigmented lesion on left forearm. Dermoscopic examination reveals benign nevus. No atypical features. Recommended annual monitoring. Educated patient on ABCDE criteria for melanoma detection. Sunscreen use emphasized. Biopsy not indicated at this time.')">Download PDF</button>
+              <button class="view-btn" onclick="viewTranscription('Dermatology Consultation - December 28, 2023', 'Dr. Lisa Chen', 'Dermatology Consultation', 'Patient presents with pigmented lesion on left forearm. Dermoscopic examination reveals benign nevus. No atypical features. Recommended annual monitoring. Educated patient on ABCDE criteria for melanoma detection. Sunscreen use emphasized. Biopsy not indicated at this time. Follow-up in 12 months or sooner if changes noted.')">View</button>
+            </div>
+          </div>
+          <div class="transcription-details">
+            <p><strong>Doctor:</strong> Dr. Lisa Chen</p>
+            <p><strong>Date:</strong> December 28, 2023</p>
+            <p><strong>Type:</strong> Dermatology Consultation</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- Modal for viewing transcription details -->
+  <div id="transcriptionModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeTranscriptionModal()">&times;</span>
+      <h2 id="transcriptionModalTitle"></h2>
+      <div id="transcriptionModalDetails"></div>
+      <button class="download-btn" onclick="downloadTranscriptionFromModal()">Download PDF</button>
+    </div>
+  </div>
+
+  <script>
+    let currentTranscriptionData = null;
+
+    function viewTranscription(title, doctor, type, details) {
+      document.getElementById('transcriptionModalTitle').textContent = title;
+      document.getElementById('transcriptionModalDetails').innerHTML = `
+        <p><strong>Doctor:</strong> ${doctor}</p>
+        <p><strong>Type:</strong> ${type}</p>
+        <p><strong>Full Transcription:</strong></p>
+        <div class="transcription-content">${details}</div>
+      `;
+      currentTranscriptionData = { title, doctor, type, details };
+      document.getElementById('transcriptionModal').style.display = 'block';
+    }
+
+    function downloadTranscription(title, doctor, type, details) {
+      const content = `Medical Transcription: ${title}\n\nDoctor: ${doctor}\nType: ${type}\n\nFull Transcription:\n${details}`;
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${title.replace(/\s+/g, '_')}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function downloadTranscriptionFromModal() {
+      if (currentTranscriptionData) {
+        downloadTranscription(
+          currentTranscriptionData.title,
+          currentTranscriptionData.doctor,
+          currentTranscriptionData.type,
+          currentTranscriptionData.details
+        );
+      }
+    }
+
+    function closeTranscriptionModal() {
+      document.getElementById('transcriptionModal').style.display = 'none';
+      currentTranscriptionData = null;
+    }
+
+    function searchTranscriptions() {
+      const searchTerm = document.getElementById('transcriptionSearch').value.toLowerCase();
+      const cards = document.querySelectorAll('.transcription-card');
+
+      cards.forEach(card => {
+        const title = card.querySelector('h3').textContent.toLowerCase();
+        const doctor = card.dataset.doctor.toLowerCase();
+        const type = card.dataset.type.toLowerCase();
+
+        if (title.includes(searchTerm) || doctor.includes(searchTerm) || type.includes(searchTerm)) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    function filterTranscriptions() {
+      const filterValue = document.getElementById('transcriptionFilter').value;
+      const cards = document.querySelectorAll('.transcription-card');
+
+      cards.forEach(card => {
+        if (filterValue === 'All Transcriptions') {
+          card.style.display = 'block';
+        } else if (filterValue === 'Recent') {
+          const date = new Date(card.dataset.date);
+          const thirtyDaysAgo = new Date();
+          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+          card.style.display = date >= thirtyDaysAgo ? 'block' : 'none';
+        } else if (filterValue === 'By Doctor') {
+          // For demo, show all - could be enhanced with sorting
+          card.style.display = 'block';
+        } else if (filterValue === 'By Date') {
+          // For demo, show all - could be enhanced with sorting
+          card.style.display = 'block';
+        }
+      });
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      const modal = document.getElementById('transcriptionModal');
+      if (event.target == modal) {
+        modal.style.display = 'none';
+        currentTranscriptionData = null;
+      }
+    }
+  </script>
 </body>
 </html>
 

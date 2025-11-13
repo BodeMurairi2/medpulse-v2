@@ -493,6 +493,112 @@ body {
   background-color: #f57c00;
 }
 
+/* Modal Styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 5% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 800px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+}
+
+/* Lab Results Table */
+.lab-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+.lab-table th,
+.lab-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.lab-table th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+  color: #333;
+}
+
+.lab-table tr:hover {
+  background-color: #f5f5f5;
+}
+
+/* View Lab Button */
+.view-lab-btn {
+  margin-left: 1rem;
+  padding: 0.75rem 2rem;
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.view-lab-btn:hover {
+  background-color: #1976D2;
+}
+
+/* Search Button */
+.search-btn {
+  padding: 0.75rem 1.5rem;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-right: 1rem;
+}
+
+.search-btn:hover {
+  background-color: #45a049;
+}
+
+/* Transcription Content */
+.transcription-content {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 5px;
+  margin-top: 0.5rem;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .nav-container {
@@ -525,6 +631,17 @@ body {
   .cancel-btn,
   .reschedule-btn {
     flex: 1;
+  }
+
+  .modal-content {
+    width: 95%;
+    margin: 10% auto;
+  }
+
+  .lab-table th,
+  .lab-table td {
+    padding: 0.5rem;
+    font-size: 0.9rem;
   }
 }
 
