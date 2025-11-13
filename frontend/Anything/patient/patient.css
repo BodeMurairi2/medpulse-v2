@@ -531,6 +531,117 @@ body {
   text-decoration: none;
 }
 
+/* Lab Results styles */
+.lab-results-section {
+  margin-top: 30px;
+}
+
+.search-section {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.search-section input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.search-section button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.search-section button:hover {
+  background-color: #0056b3;
+}
+
+.lab-results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.lab-result-item {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.result-header h3 {
+  margin: 0;
+  color: #333;
+}
+
+.result-date {
+  color: #666;
+  font-size: 14px;
+}
+
+.result-details p {
+  margin: 5px 0;
+  color: #555;
+}
+
+.status-normal {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.status-abnormal {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.result-actions {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+}
+
+.view-btn, .download-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.view-btn {
+  background-color: #007bff;
+  color: white;
+}
+
+.view-btn:hover {
+  background-color: #0056b3;
+}
+
+.download-btn {
+  background-color: #28a745;
+  color: white;
+}
+
+.download-btn:hover {
+  background-color: #1e7e34;
+}
+
 /* Lab Results Table */
 .lab-table {
   width: 100%;
