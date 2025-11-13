@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>View Full Reports - MedPulse</title>
+  <link rel="stylesheet" href="patient.css" />
+  <style>
+    /* General Modal Styling */
+    .modal {
+      display: none; 
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.5);
+    }
+
+    .modal-content {
+      background-color: #fff;
+      margin: 5% auto;
+      padding: 2rem;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 600px;
+      position: relative;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .modal form label {
+      font-weight: bold;
+      display: block;
+      margin-top: 1rem;
+    }
+
+    .modal form input,
+    .modal form textarea,
+    .modal form a {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.25rem;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    /* Buttons inside modal */
+    .view-btn,
+    .download-btn {
+      display: block;
+      margin-top: 0.5rem;
+      padding: 0.5rem 1.5rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .view-btn { background-color: #4CAF50; color: white; }
+    .view-btn:hover { background-color: #45a049; }
+
+    .download-btn { background-color: #2196F3; color: white; }
+    .download-btn:hover { background-color: #1976D2; }
+  </style>
+</head>
+<body>
+  <h1>Reports Demo</h1>
+
+  <!-- Demo buttons to trigger modals -->
+  <button class="view-consultation-btn">View Consultation</button>
+  <button class="view-lab-btn">View Lab Result</button>
+  <button class="view-prescription-btn">View Prescription</button>
+
+  <!-- Medical Consultation Modal -->
+  <div id="consultation-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <h2>Medical Consultation Details</h2>
+      <form>
+        <label>Diagnosis:</label>
+        <input type="text" id="diagnosis" readonly value="Routine Checkup - All Clear" />
+
+        <label>Treatment:</label>
+        <input type="text" id="treatment" readonly value="No treatment required" />
+
+        <label>Notes:</label>
+        <textarea id="notes" rows="4" readonly>Patient in good health.</textarea>
+
+        <label>Follow-up Date:</label>
+        <input type="date" id="follow_up_date" readonly value="2024-02-01" />
+
+        <label>Created By:</label>
+        <input type="text" id="created_by" readonly value="Dr. Sarah Johnson" />
+
+        <label>Consultation Date:</label>
+        <input type="date" id="consultation_date" readonly value="2024-01-15" />
+      </form>
+    </div>
+  </div>
+
+  <!-- Lab Test Result Modal -->
+  <div id="lab-result-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <h2>Lab Test Result Details</h2>
+      <form>
+        <label>Test Name:</label>
+        <input type="text" id="test_name" readonly value="Complete Blood Count (CBC)" />
+
+        <label>Result Value:</label>
+        <input type="text" id="result_value" readonly value="All blood components normal" />
+
+        <label>Result Date:</label>
+        <input type="date" id="result_date" readonly value="2024-02-20" />
+
+        <label>Doctor Name:</label>
+        <input type="text" id="doctor_name" readonly value="Dr. Sarah Johnson" />
+
+        <label>Notes:</label>
+        <textarea id="notes_lab" rows="4" readonly>No abnormalities detected.</textarea>
+
+        <label>Attached Files:</label>
+        <a id="attached_files" href="#" target="_blank">View File</a>
+      </form>
+    </div>
+  </div>
+
+  <!-- Prescription Modal -->
+  <div id="prescription-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <h2>Prescription Details</h2>
+      <form>
+        <label>Medicine Name:</label>
+        <input type="text" id="medicine_name" readonly value="Amoxicillin" />
+
+        <label>Dosage:</label>
+        <input type="text" id="dosage" readonly value="500mg" />
+
+        <label>Frequency:</label>
+        <input type="text" id="frequency" readonly value="3 times a day" />
+
+        <label>Duration:</label>
+        <input type="text" id="duration" readonly value="7 days" />
+
+        <label>Prescription Date:</label>
+        <input type="date" id="prescription_date" readonly value="2024-01-15" />
+
+        <label>Notes:</label>
+        <textarea id="notes_prescription" rows="4" readonly>Take after meals</textarea>
+
+        <label>Prescription Details:</label>
+        <textarea id="prescription_details" rows="4" readonly>General consultation prescription.</textarea>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Get modals
+    const consultationModal = document.getElementById('consultation-modal');
+    const labModal = document.getElementById('lab-result-modal');
+    const prescriptionModal = document.getElementById('prescription-modal');
+
+    // Open modals
+    document.querySelector('.view-consultation-btn').addEventListener('click', () => {
+      consultationModal.style.display = 'block';
+    });
+
+    document.querySelector('.view-lab-btn').addEventListener('click', () => {
+      labModal.style.display = 'block';
+    });
+
+    document.querySelector('.view-prescription-btn').addEventListener('click', () => {
+      prescriptionModal.style.display = 'block';
+    });
+
+    // Close modals
+    document.querySelectorAll('.close-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        consultationModal.style.display = 'none';
+        labModal.style.display = 'none';
+        prescriptionModal.style.display = 'none';
+      });
+    });
+
+    // Close modal when clicking outside
+    window.addEventListener('click', e => {
+      if (e.target === consultationModal) consultationModal.style.display = 'none';
+      if (e.target === labModal) labModal.style.display = 'none';
+      if (e.target === prescriptionModal) prescriptionModal.style.display = 'none';
+    });
+  </script>
+</body>
+</html>

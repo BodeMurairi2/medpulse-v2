@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Medical Consultations - MedPulse</title>
+  <link rel="stylesheet" href="patient.css" />
+  <style>
+
+
+    /*Styling */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.5);
+    }
+
+    .modal-content {
+      background-color: #fff;
+      margin: 5% auto;
+      padding: 2rem;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 600px;
+      position: relative;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .modal form label {
+      font-weight: bold;
+      display: block;
+      margin-top: 1rem;
+    }
+
+    .modal form input,
+    .modal form textarea {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.25rem;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <h1 class="nav-brand">MedPulse</h1>
+      <div class="nav-links">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="consultations.html" class="active">Medical Consultations</a>
+        <a href="prescriptions.html">Prescriptions</a>
+        <a href="lab-results.html">Lab Results</a>
+        <a href="appointments.html">Appointments</a>
+        <a href="qr-code.html">My QR Code</a>
+        <a href="../index.html">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <h2>My Medical Consultations</h2>
+    
+    <div class="consultations-section">
+      <div class="filter-bar">
+        <input type="text" placeholder="Search consultations..." class="search-input" />
+        <select class="filter-select">
+          <option>All Consultations</option>
+          <option>Recent</option>
+          <option>By Doctor</option>
+          <option>By Date</option>
+        </select>
+      </div>
+
+      <div class="consultations-list">
+        <div class="consultations-card">
+          <div class="consultations-header">
+            <h3>General Checkup</h3>
+            <span class="consultations-date">2024-01-15</span>
+          </div>
+          <div class="consultations-details">
+            <p><strong>Doctor:</strong> Dr. Sarah Johnson</p>
+            <p><strong>Department:</strong> General Medicine</p>
+            <p><strong>Diagnosis:</strong> Routine checkup - All clear</p>
+            <button class="view-btn">View Full Report</button>
+            <button class="download-btn">Download PDF</button>
+          </div>
+        </div>
+
+        <div class="consultations-card">
+          <div class="consultations-header">
+            <h3>Blood Test Results</h3>
+            <span class="consultations-date">2024-01-10</span>
+          </div>
+          <div class="consultations-details">
+            <p><strong>Doctor:</strong> Dr. Michael Brown</p>
+            <p><strong>Department:</strong> Laboratory</p>
+            <p><strong>Diagnosis:</strong> Blood work completed - Normal ranges</p>
+            <button class="view-btn">View Full Report</button>
+            <button class="download-btn">Download PDF</button>
+          </div>
+        </div>
+
+        <div class="consultations-card">
+          <div class="consultations-header">
+            <h3>X-Ray Examination</h3>
+            <span class="consultations-date">2024-01-05</span>
+          </div>
+          <div class="consultations-details">
+            <p><strong>Doctor:</strong> Dr. Emily Davis</p>
+            <p><strong>Department:</strong> Radiology</p>
+            <p><strong>Diagnosis:</strong> Chest X-ray - No abnormalities detected</p>
+            <button class="view-btn">View Full Report</button>
+            <button class="download-btn">Download PDF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Consultation form -->
+  <div id="consultation-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <h2>Consultation Details</h2>
+      <form>
+        <label>Record ID:</label>
+        <input type="text" id="record_id" readonly />
+        
+        <label>Patient ID:</label>
+        <input type="text" id="patient_id" readonly />
+
+        <label>Doctor ID:</label>
+        <input type="text" id="doctor_id" readonly />
+
+        <label>Diagnosis:</label>
+        <input type="text" id="diagnosis" readonly />
+
+        <label>Treatment:</label>
+        <input type="text" id="treatment" readonly />
+
+        <label>Notes:</label>
+        <textarea id="notes" rows="4" readonly></textarea>
+
+        <label>Follow-up Date:</label>
+        <input type="date" id="follow_up_date" readonly />
+
+        <label>Consultation Date:</label>
+        <input type="date" id="consultation_date" readonly />
+      </form>
+    </div>
+  </div>
+
+  <script>
+    
+    const consultationModal = document.getElementById('consultation-modal');
+
+    document.querySelectorAll('.view-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        consultationModal.style.display = 'block';
+      });
+    });
+
+    document.querySelectorAll('.close-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        consultationModal.style.display = 'none';
+      });
+    });
+
+    window.addEventListener('click', e => {
+      if (e.target === consultationModal) consultationModal.style.display = 'none';
+    });
+  </script>
+
+</body>
+</html>
