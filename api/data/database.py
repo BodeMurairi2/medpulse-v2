@@ -3,10 +3,13 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 import os
 from dotenv import load_dotenv
+#from decouple import config
 
 load_dotenv()
-
+#DATABASE_URL = config('DATABASE_URL')
 DATABASE_URL = os.getenv("DATABASE_URL")
+print("DATABASE_URL:", DATABASE_URL)
+
 if DATABASE_URL is None:
     raise ValueError("Database not Found.Check the .env file")
 engine = create_engine(DATABASE_URL, echo=True)

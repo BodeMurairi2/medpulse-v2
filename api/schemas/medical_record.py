@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from typing import Optional
+from typing import List, Optional
 from datetime import date, datetime
 from pydantic import BaseModel, Field
 
@@ -52,3 +52,17 @@ class LabTestFileInfo(BaseModel):
     lab_test_id: int
     file_url: str
     created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class PatientRecordsOut(BaseModel):
+    id: int
+    full_name: str
+    date_of_birth: Optional[date] = None
+    gender: Optional[str] = None
+    contact: Optional[str] = None
+    email: Optional[str] = None
+    medical_records: List[MedicalRecord] = []
+    prescriptions: List[PrescriptionInfo] = []
+    lab_tests: List[LabTestInfo] = []
+
+    class Config:
+        orm_mode = True

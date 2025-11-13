@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 from fastapi import Header, HTTPException, status
 from services.jwt import decode_access_token
 
