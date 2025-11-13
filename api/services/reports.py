@@ -42,7 +42,8 @@ def generate_patient_report(request: PatientReportRequest, db: Session) -> Patie
 
         patient_summaries.append(PatientSummary(
             patient_id=patient.id,
-            full_name=patient.full_name,
+            first_name=patient.first_name,
+            second_name=patient.second_name,
             age=age,
             gender=patient.gender,
             contact=patient.contact,
@@ -149,7 +150,7 @@ def generate_appointment_report(request: AppointmentReportRequest, db: Session) 
     appointment_summaries = []
     for appointment in appointments:
         # Get related data
-        patient = db.query(Patient).filter(Patient.id == appointment.patient_id).first()
+        patient = db.query(Patient).filter(Patient.patient_id == appointment.patient_id).first()
         doctor = db.query(Staff).filter(Staff.id == appointment.doctor_id).first()
         department = db.query(Department).filter(Department.id == appointment.department_id).first()
 

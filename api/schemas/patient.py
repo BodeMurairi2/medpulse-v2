@@ -2,19 +2,18 @@ from pydantic import BaseModel, EmailStr
 
 class PatientCreate(BaseModel):
     first_name : str
-    last_name : str
+    second_name : str
     email : EmailStr
-    phone : str
-    dob : str
+    phone_number : str
+    date_of_birth : str
     password : str
-
 
 class PatientOut(BaseModel):
     patient_id: int
     first_name: str
-    last_name: str
+    second_name: str
     email: EmailStr
-    phone: str
+    phone_number: str
 
     class Config:
         orm_mode = True

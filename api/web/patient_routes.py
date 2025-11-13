@@ -9,33 +9,7 @@ from services.token_blacklist import is_token_blacklisted, add_to_blacklist
 from auth.dependencies import get_current_hospital
 from datetime import datetime
 
-router = APIRouter()
-
-@router.post("/create", response_model=PatientOut)
-def create_patient(
-    patient : PatientCreate,
-    hospital_id : int = Depends(get_current_hospital),
-    db : Session = Depends(get_db)
-):
-    if patient.email:
-        existing = db.query(Patient).filter(Patient.email == patient.email).first()
-        if existing:
-            raise HTTPException(status_code=404, detail="Patient with this email already exists")
-    hashed = hash_password(patient.password)
-    new_patient = Patient(
-    first_name=patient.first_name,
-    last_name=patient.last_name,
-    email=patient.email,
-    phone=patient.phone,
-    dob=patient.dob,
-    password_hash=hashed,
-    created_at=datetime.utcnow()
-)
-    db.add(new_patient)
-    db.commit()
-    db.refresh(new_patient)
-    return new_patient
-
+router = APIRouter(prefix="/patients_portal_auth", tags=["Patients Authentication"])
 
 @router.post("/login")
 def patient_login(data : PatientLogin, db : Session = Depends(get_db)):

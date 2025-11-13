@@ -9,9 +9,9 @@ from services.jwt import create_access_token
 from services.token_blacklist import add_to_blacklist
 from datetime import datetime
 
-router = APIRouter(tags=["Hospital"])
+hospital_router = APIRouter(prefix="/hospital_auth", tags=["Hospital Authentication"])
 
-@router.post("/signup")
+@hospital_router.post("/signup")
 def signup_hospital(hospital: HospitalCreate, db: Session = Depends(get_db)):
     existing_hospital = db.query(Hospital).filter(Hospital.hospital_email == hospital.hospital_email).first()
 
@@ -40,7 +40,7 @@ def signup_hospital(hospital: HospitalCreate, db: Session = Depends(get_db)):
     "hospital_id": new_hospital.hospital_id
     }
 
-@router.post("/login")
+@hospital_router.post("/login")
 def login_hospital(login_data: HospitalLogin, db: Session = Depends(get_db)):
     hospital = db.query(Hospital).filter(Hospital.hospital_email == login_data.hospital_email).first()
 
@@ -54,7 +54,7 @@ def login_hospital(login_data: HospitalLogin, db: Session = Depends(get_db)):
         "token_type": "bearer",
         "hospital_id": hospital.hospital_id
     }
-@router.post("/logout")
+@hospital_router.post("/logout")
 def logout(authorization : str = Header(...)):
     if not authorization.startswith("Bearer "):
         raise HTTPException(status_code=400, detail="Invalid authorization header")

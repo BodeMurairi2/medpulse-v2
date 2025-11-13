@@ -6,7 +6,7 @@ from schemas.hospital import DoctorCreate
 from services.harsh import hash_password
 from auth.dependencies import get_current_hospital
 
-router = APIRouter(prefix="/doctor", tags=["Doctor"])
+router = APIRouter(prefix="/doctor_create", tags=["Doctor Create"])
 
 @router.post("/create")
 def add_doctor(

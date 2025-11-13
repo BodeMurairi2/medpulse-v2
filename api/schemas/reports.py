@@ -16,7 +16,8 @@ class PatientReportRequest(BaseModel):
 
 class PatientSummary(BaseModel):
     patient_id: int
-    full_name: str
+    first_name: str
+    second_name: str
     age: int
     gender: str
     contact: str
