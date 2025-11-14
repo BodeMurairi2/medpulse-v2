@@ -57,64 +57,97 @@
       document.getElementById('search-patients').addEventListener('input', filterPatients);
     });
 
-    function loadPatients() {
-      const doctorId = localStorage.getItem('doctorId');
-      const doctors = JSON.parse(localStorage.getItem('doctors') || '[]');
-      const doctor = doctors.find(d => d.id === doctorId);
-      
-      if (!doctor || !doctor.departmentId) {
-        document.getElementById('patients-list').innerHTML = '<tr><td colspan="6">No department assigned.</td></tr>';
+    async function loadPatients() {
+      const token = localStorage.getItem("doctor_token");
+
+      if (!token) {
+        document.getElementById('patients-list').innerHTML =
+          '<tr><td colspan="6">Not authenticated.</td></tr>';
         return;
       }
 
-      const patients = JSON.parse(localStorage.getItem('patients') || '[]');
-      // In a real app, patients would be filtered by department
-      // For now, show all patients
-      displayPatients(patients);
+      try {
+        const response = await fetch("http://localhost:8080/doctor_portal/patients", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        });
+
+        if (!response.ok) {
+          document.getElementById('patients-list').innerHTML =
+            `<tr><td colspan="6">Failed to load patients. (${response.status})</td></tr>`;
+          return;
+        }
+
+        const patients = await response.json();
+
+        // Save to localStorage for search
+        localStorage.setItem("patients", JSON.stringify(patients));
+
+        displayPatients(patients);
+
+      } catch (error) {
+        console.error("Error loading patients:", error);
+        document.getElementById('patients-list').innerHTML =
+          '<tr><td colspan="6">Server connection error.</td></tr>';
+      }
     }
 
     function displayPatients(patients) {
       const tbody = document.getElementById('patients-list');
-      if (patients.length === 0) {
+
+      if (!patients || patients.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No patients found.</td></tr>';
         return;
       }
 
-      tbody.innerHTML = patients.map(patient => {
-        return `
-          <tr>
-            <td>${patient.id || 'N/A'}</td>
-            <td>${patient.name || patient.patientName || 'N/A'}</td>
-            <td>${patient.email || patient.patientEmail || 'N/A'}</td>
-            <td>${patient.dateOfBirth || patient.dob || 'N/A'}</td>
-            <td>${patient.gender || 'N/A'}</td>
-            <td>
-              <a href="patient-search.html?patientId=${patient.id}" class="btn-edit">View Records</a>
-            </td>
-          </tr>
-        `;
-      }).join('');
+      tbody.innerHTML = patients.map(patient => `
+        <tr>
+          <td>${patient.patient_id || patient.id || "N/A"}</td>
+          <td>${patient.first_name && patient.second_name ? patient.first_name + " " + patient.second_name : patient.name || "N/A"}</td>
+          <td>${patient.email || "N/A"}</td>
+          <td>${patient.dob || patient.date_of_birth || "N/A"}</td>
+          <td>${patient.gender || "N/A"}</td>
+          <td>
+            <a href="patient-search.html?patientId=${patient.patient_id || patient.id}" class="btn-edit">View Records</a>
+          </td>
+        </tr>
+      `).join('');
     }
 
     function filterPatients() {
       const searchTerm = document.getElementById('search-patients').value.toLowerCase();
       const patients = JSON.parse(localStorage.getItem('patients') || '[]');
+
       const filtered = patients.filter(patient => {
-        const name = (patient.name || patient.patientName || '').toLowerCase();
-        const id = (patient.id || '').toLowerCase();
-        return name.includes(searchTerm) || id.includes(searchTerm);
+        const fullName = `${patient.first_name || ""} ${patient.second_name || ""}`.toLowerCase();
+        const id = String(patient.patient_id || patient.id || "").toLowerCase();
+        return fullName.includes(searchTerm) || id.includes(searchTerm);
       });
+
       displayPatients(filtered);
     }
 
-    function logout() {
-      if (confirm('Are you sure you want to logout?')) {
-        localStorage.removeItem('doctorLoggedIn');
-        localStorage.removeItem('doctorId');
-        window.location.href = '../index.html';
-      }
+    async function logout() {
+      const token = localStorage.getItem("doctor_token");
+
+      if (!confirm("Are you sure you want to logout?")) return;
+
+      try {
+        await fetch("http://localhost:8080/doctor_portal/logout", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+      } catch {}
+
+      localStorage.clear();
+      window.location.href = "../index.html";
     }
   </script>
+
 </body>
 </html>
-

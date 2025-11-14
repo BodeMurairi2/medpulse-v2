@@ -18,7 +18,10 @@
         <a href="all-doctors.html">All Doctors</a>
         <a href="appointments.html">Appointments</a>
         <a href="medical-records.html">Medical Records</a>
-        <a href="notifications.html">Notifications <span id="notification-badge" class="notification-badge" style="display: none;">0</span></a>
+        <a href="notifications.html">
+          Notifications 
+          <span id="notification-badge" class="notification-badge" style="display: none;">0</span>
+        </a>
         <a href="change-password.html">Change Password</a>
         <a href="#" onclick="logout()">Logout</a>
       </div>
@@ -76,20 +79,20 @@
       </div>
     </div>
   </div>
+
   <script>
-    // Load doctor information from localStorage
+    // Load doctor information from localStorage on page load
     window.addEventListener('DOMContentLoaded', () => {
       const doctorId = localStorage.getItem('doctorId') || 'D-12345';
       document.getElementById('doctorId').textContent = doctorId;
       
-      // Load doctor data
+      // Load doctor data if stored locally
       const doctors = JSON.parse(localStorage.getItem('doctors')) || [];
       const doctor = doctors.find(d => d.id === doctorId);
       
       if (doctor) {
         document.getElementById('doctorName').textContent = doctor.name || doctor.doctorName || 'Dr. Name';
         
-        // Get department name
         const departments = JSON.parse(localStorage.getItem('departments')) || [];
         const dept = departments.find(d => d.id === doctor.departmentId);
         document.getElementById('hospitalName').textContent = dept ? dept.name : 'Department';
@@ -98,14 +101,15 @@
         document.getElementById('hospitalName').textContent = 'Hospital Name';
       }
 
-      // Load notification count
       updateNotificationBadge();
     });
 
+    // Notification badge update
     function updateNotificationBadge() {
       const notifications = JSON.parse(localStorage.getItem('doctorNotifications') || '[]');
       const unreadCount = notifications.filter(n => !n.read).length;
       const badge = document.getElementById('notification-badge');
+
       if (unreadCount > 0) {
         badge.textContent = unreadCount;
         badge.style.display = 'inline-block';
@@ -114,14 +118,40 @@
       }
     }
 
-    function logout() {
-      if (confirm('Are you sure you want to logout?')) {
-        localStorage.removeItem('doctorLoggedIn');
-        localStorage.removeItem('doctorId');
-        window.location.href = '../index.html';
+    // LOGOUT FUNCTION WITH POST REQUEST
+    async function logout() {
+      if (!confirm('Are you sure you want to logout?')) return;
+
+      const token = localStorage.getItem('doctor_token');
+
+      try {
+        const response = await fetch("http://localhost:8080/doctor_portal/logout", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        });
+
+        if (!response.ok) {
+          alert("Logout failed. Server error.");
+          return;
+        }
+
+        // Clear session storage
+        localStorage.removeItem("doctor_token");
+        localStorage.removeItem("doctorId");
+        localStorage.removeItem("doctorLoggedIn");
+
+        // Redirect home
+        window.location.href = "../index.html";
+
+      } catch (error) {
+        console.error("Logout error:", error);
+        alert("Could not contact server.");
       }
     }
   </script>
+
 </body>
 </html>
-
