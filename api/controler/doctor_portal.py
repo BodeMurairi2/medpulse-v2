@@ -75,6 +75,13 @@ def get_patients(doctor_id: int = Depends(get_current_doctor)):
 def get_patient(patient_name: str, _: int = Depends(get_current_doctor)):
     return record.search_patient(patient_name=patient_name)
 
+@doctor_portal_router.get("/patients/{patient_id}/records")
+def get_records(
+    patient_id: int,
+    doctor_id: int = Depends(get_current_doctor)
+):
+    return record.get_patient_medical_history(patient_id=patient_id, doctor_id=doctor_id)
+
 # ----------------------- CREATE -----------------------
 @doctor_portal_router.post("/patients/new_consultation/{patient_id}")
 def create_new_consultation(

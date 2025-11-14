@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from datetime import date
 from fastapi import File, HTTPException, status, UploadFile
+from pytest import Session
 from data.hospital_model import Patient, Doctor, MedicalRecord, Prescription, LabTestResult, Hospital, LabTestFile
 from data.database import SessionLocal
 from services.search_patient import search_user
@@ -23,8 +24,13 @@ class Record:
             patients = db.query(Patient).filter(Patient.patient_id.in_(patient_ids)).all()
         return patients or []
 
-    def search_patient(self, patient_name: str) -> list:
-        """Search for patients by name"""
+    def search_patient(self, patient_name) -> list:
+        """Search for patients by name or id"""
+        if isinstance(patient_name, int):
+            with SessionLocal() as session:
+                patient = session.query(Patient).filter(Patient.patient_id == patient_name).first()
+                return [patient] if patient else []
+        
         with SessionLocal() as session:
             patients = search_user(
                 user_name=patient_name,
@@ -32,6 +38,51 @@ class Record:
                 session=session
             )
         return patients or []
+
+    def get_patient_medical_history(patient_id: int, db: Session):
+        """Fetch all medical records (consultations, prescriptions, lab tests) for a patient."""
+        
+        # Fetch consultations
+        consultations = db.query(MedicalRecord).filter(MedicalRecord.patient_id == patient_id).all()
+        consultation_records = [
+            {
+                "date": c.record_date or date.today(),
+                "type": "Consultation",
+                "description": f"Diagnosis: {c.diagnosis}, Treatment: {c.treatment}, Notes: {c.notes or '-'}",
+                "doctor": c.created_by
+            }
+            for c in consultations
+        ]
+
+        # Fetch prescriptions
+        prescriptions = db.query(Prescription).filter(Prescription.patient_id == patient_id).all()
+        prescription_records = [
+            {
+                "date": p.prescription_date or date.today(),
+                "type": "Prescription",
+                "description": f"Medicine: {p.medicine_name}, Dosage: {p.dosage}, Frequency: {p.frequency}, Duration: {p.duration}, Notes: {p.notes or '-'}",
+                "doctor": p.prescribed_by
+            }
+            for p in prescriptions
+        ]
+
+        # Fetch lab tests
+        lab_tests = db.query(LabTestResult).filter(LabTestResult.patient_id == patient_id).all()
+        lab_test_records = [
+            {
+                "date": l.result_date or date.today(),
+                "type": "Lab Test",
+                "description": f"Test: {l.test_name}, Result: {l.result_value}, Notes: {l.notes or '-'}",
+                "doctor": l.doctor_name
+            }
+            for l in lab_tests
+        ]
+
+        # Combine all records and sort by date descending
+        all_records = consultation_records + prescription_records + lab_test_records
+        all_records.sort(key=lambda x: x["date"], reverse=True)
+
+        return all_records
 
     # ----------------------- SAVE -----------------------
     def save_consultation(self, record: medical_record_schema, patient_id: int, doctor_id: int) -> str:
@@ -44,6 +95,9 @@ class Record:
             doctor = session.get(Doctor, doctor_id)
             hospital = session.get(Hospital, doctor.hospital_id)
 
+            # get doctor name from the doctor table
+            doctor_name = session.get(Doctor, doctor_id).first_name + " " + session.get(Doctor, doctor_id).last_name
+
             new_record = MedicalRecord(
                 patient_id=patient_id,
                 doctor_id=doctor_id,
@@ -52,7 +106,7 @@ class Record:
                 notes=record.notes,
                 hospital_id=doctor.hospital_id,
                 hospital_name=hospital.hospital_name,
-                created_by=record.created_by,
+                created_by=doctor_name,
                 follow_up_date=getattr(record, "follow_up_date", None),
                 record_date=getattr(record, "record_date", None)
             )
@@ -76,6 +130,9 @@ class Record:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Medical record not found for the patient.")
 
             hospital = session.get(Hospital, record.hospital_id)
+            # get doctor name from the doctor table
+            doctor_name = session.get(Doctor, doctor_id).first_name + " " + session.get(Doctor, doctor_id).last_name
+
             new_prescription = Prescription(
                 patient_id=patient_id,
                 doctor_id=doctor_id,
@@ -87,7 +144,7 @@ class Record:
                 duration=prescription_data.duration,
                 dosage=prescription_data.dosage,
                 notes=prescription_data.notes,
-                prescribed_by=prescription_data.prescribed_by,
+                prescribed_by=doctor_name,
                 prescription_date=prescription_data.prescription_date or date.today(),
                 prescription_details=prescription_data.prescription_details or None
             )
@@ -95,7 +152,7 @@ class Record:
             session.commit()
             session.refresh(new_prescription)
         return "Prescription saved successfully."
-
+    
     def save_lab_test(self, lab_test_data: lab_test_schema, patient_id: int, doctor_id: int) -> LabTestResult:
         """Save a new lab test result for a patient"""
         with SessionLocal() as session:
@@ -111,6 +168,8 @@ class Record:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Medical record not found for the patient.")
 
             hospital = session.get(Hospital, record.hospital_id)
+            # get doctor name from the doctor table
+            doctor_name = session.get(Doctor, doctor_id).first_name + " " + session.get(Doctor, doctor_id).last_name
             new_lab_test = LabTestResult(
                 patient_id=patient_id,
                 doctor_id=doctor_id,
@@ -121,7 +180,7 @@ class Record:
                 result_value=lab_test_data.result_value,
                 result_date=lab_test_data.result_date or date.today(),
                 notes=lab_test_data.notes,
-                doctor_name=lab_test_data.doctor_name
+                doctor_name=doctor_name
             )
             session.add(new_lab_test)
             session.commit()
