@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hospital Login - MedPulse</title>
+  <link rel="stylesheet" href="../login&signup.css" />
+</head>
+<body>
+  <div class="overlay-bg"></div>  
+  <div class="auth-container">
+    <h1>Hospital Portal Login</h1>
+    <form id="loginForm">
+      <label for="email">Email Address</label>
+      <input type="email" id="email" name="email" required />
+
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required />
+
+      <div class="remember-me">
+        <input type="checkbox" id="rememberMe" name="rememberMe" />
+        <label for="rememberMe">Remember Me</label>
+      </div>
+
+      <button type="submit">Log In</button>
+      <p class="switch">New hospital? <a href="signup.html">Create an account</a></p>
+      <p class="switch"><a href="../index.html">Back to Home</a></p>
+    </form>
+  </div>
+
+  <script>
+    // Pre-fill remembered email
+    window.addEventListener('DOMContentLoaded', () => {
+      const rememberedEmail = localStorage.getItem('rememberedHospitalEmail');
+      if (rememberedEmail) {
+        document.getElementById('email').value = rememberedEmail;
+        document.getElementById('rememberMe').checked = true;
+      }
+    });
+
+    // Login form
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const rememberMe = document.getElementById('rememberMe').checked;
+
+      try {
+        const res = await fetch('http://localhost:8080/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ hospital_email: email, password })
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          alert(errorData.detail || 'Login failed');
+          return;
+        }
+
+        const data = await res.json();
+        localStorage.setItem('hospitalToken', data.access_token);
+        localStorage.setItem('hospitalId', data.hospital_id);
+        localStorage.setItem('hospitalLoggedIn', 'true');
+        localStorage.setItem('hospitalName', email);
+
+        if (rememberMe) {
+          localStorage.setItem('rememberedHospitalEmail', email);
+        } else {
+          localStorage.removeItem('rememberedHospitalEmail');
+        }
+
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        console.error(err);
+        alert('Server error. Try again later.');
+      }
+    });
+  </script>
+</body>
+</html>

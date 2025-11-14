@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Audit Logs - MedPulse</title>
+  <link rel="stylesheet" href="hospital.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <h1 class="nav-brand">MedPulse</h1>
+      <div class="nav-links">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="change-password.html">Change Password</a>
+        <a href="#" onclick="logout()">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <div class="page-header">
+      <h2>Audit Logs</h2>
+      <div class="filter-actions">
+        <input type="text" id="search-logs" placeholder="Search logs..." class="search-input" />
+        <select id="filter-user" class="filter-select">
+          <option value="">All Users</option>
+        </select>
+        <button class="btn-primary" onclick="exportLogs()">Export Logs</button>
+      </div>
+    </div>
+
+    <div class="table-section">
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>User</th>
+              <th>Action</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody id="logs-list">
+            <!-- Logs will be loaded here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let logs = JSON.parse(localStorage.getItem('auditLogs')) || [];
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadLogs();
+      loadUsers();
+      
+      document.getElementById('search-logs').addEventListener('input', filterLogs);
+      document.getElementById('filter-user').addEventListener('change', filterLogs);
+    });
+
+    function loadLogs() {
+      const tbody = document.getElementById('logs-list');
+      if (logs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No audit logs found.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = logs.map(log => {
+        const date = new Date(log.timestamp);
+        return `
+          <tr>
+            <td>${date.toLocaleString()}</td>
+            <td>${log.user}</td>
+            <td>${log.action}</td>
+            <td>${log.details}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function loadUsers() {
+      const select = document.getElementById('filter-user');
+      const users = [...new Set(logs.map(log => log.user))];
+      users.forEach(user => {
+        const option = document.createElement('option');
+        option.value = user;
+        option.textContent = user;
+        select.appendChild(option);
+      });
+    }
+
+    function filterLogs() {
+      const searchTerm = document.getElementById('search-logs').value.toLowerCase();
+      const userFilter = document.getElementById('filter-user').value;
+
+      const filtered = logs.filter(log => {
+        const matchesSearch = log.action.toLowerCase().includes(searchTerm) ||
+                             log.details.toLowerCase().includes(searchTerm);
+        const matchesUser = !userFilter || log.user === userFilter;
+        return matchesSearch && matchesUser;
+      });
+
+      const tbody = document.getElementById('logs-list');
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No logs match your criteria.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(log => {
+        const date = new Date(log.timestamp);
+        return `
+          <tr>
+            <td>${date.toLocaleString()}</td>
+            <td>${log.user}</td>
+            <td>${log.action}</td>
+            <td>${log.details}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function exportLogs() {
+      const csv = [
+        ['Timestamp', 'User', 'Action', 'Details'],
+        ...logs.map(log => [
+          new Date(log.timestamp).toLocaleString(),
+          log.user,
+          log.action,
+          log.details
+        ])
+      ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `audit-logs-${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+    }
+
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('hospitalLoggedIn');
+        localStorage.removeItem('hospitalName');
+        window.location.href = '../index.html';
+      }
+    }
+  </script>
+</body>
+</html>
+

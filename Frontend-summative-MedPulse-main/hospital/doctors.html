@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage Doctors - MedPulse</title>
+  <link rel="stylesheet" href="hospital.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <h1 class="nav-brand">MedPulse</h1>
+      <div class="nav-links">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="change-password.html">Change Password</a>
+        <a href="#" onclick="logout()">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <div class="page-header">
+      <h2>Manage Doctors</h2>
+      <div class="header-actions">
+        <input type="text" id="search-doctors" placeholder="Search doctors..." class="search-input" />
+        <a href="register-doctor.html" class="btn-primary">+ Add New Doctor</a>
+      </div>
+    </div>
+
+    <div class="table-section">
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Doctor ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Specialization</th>
+              <th>Department</th>
+              <th>Phone</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="doctors-list">
+            <!-- Doctors will be loaded here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      loadDoctors();
+      document.getElementById('search-doctors').addEventListener('input', filterDoctors);
+    });
+
+    function loadDoctors() {
+      const doctors = JSON.parse(localStorage.getItem('doctors')) || [];
+      const departments = JSON.parse(localStorage.getItem('departments')) || [];
+      const tbody = document.getElementById('doctors-list');
+
+      if (doctors.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No doctors registered. Register your first doctor.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = doctors.map(doctor => {
+        const dept = departments.find(d => d.id === doctor.departmentId);
+        return `
+          <tr>
+            <td>${doctor.id || 'N/A'}</td>
+            <td>${doctor.name || doctor.doctorName || 'N/A'}</td>
+            <td>${doctor.email || doctor.doctorEmail || 'N/A'}</td>
+            <td>${doctor.specialization || 'N/A'}</td>
+            <td>${dept ? dept.name : 'N/A'}</td>
+            <td>${doctor.phone || 'N/A'}</td>
+            <td>
+              <button class="btn-edit" onclick="viewDoctor('${doctor.id}')">View</button>
+              <button class="btn-delete" onclick="deleteDoctor('${doctor.id}')">Delete</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filterDoctors() {
+      const searchTerm = document.getElementById('search-doctors').value.toLowerCase();
+      const doctors = JSON.parse(localStorage.getItem('doctors')) || [];
+      const departments = JSON.parse(localStorage.getItem('departments')) || [];
+      const tbody = document.getElementById('doctors-list');
+
+      const filtered = doctors.filter(doctor => {
+        const name = (doctor.name || doctor.doctorName || '').toLowerCase();
+        const email = (doctor.email || doctor.doctorEmail || '').toLowerCase();
+        const specialization = (doctor.specialization || '').toLowerCase();
+        return name.includes(searchTerm) || email.includes(searchTerm) || specialization.includes(searchTerm);
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No doctors found matching your search.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(doctor => {
+        const dept = departments.find(d => d.id === doctor.departmentId);
+        return `
+          <tr>
+            <td>${doctor.id || 'N/A'}</td>
+            <td>${doctor.name || doctor.doctorName || 'N/A'}</td>
+            <td>${doctor.email || doctor.doctorEmail || 'N/A'}</td>
+            <td>${doctor.specialization || 'N/A'}</td>
+            <td>${dept ? dept.name : 'N/A'}</td>
+            <td>${doctor.phone || 'N/A'}</td>
+            <td>
+              <button class="btn-edit" onclick="viewDoctor('${doctor.id}')">View</button>
+              <button class="btn-delete" onclick="deleteDoctor('${doctor.id}')">Delete</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function viewDoctor(id) {
+      // In real app, navigate to doctor details page
+      alert('Doctor details view - To be implemented');
+    }
+
+    function deleteDoctor(id) {
+      if (!confirm('Are you sure you want to delete this doctor?')) return;
+      
+      const doctors = JSON.parse(localStorage.getItem('doctors')) || [];
+      const filtered = doctors.filter(d => d.id !== id);
+      localStorage.setItem('doctors', JSON.stringify(filtered));
+      addAuditLog('Doctor deleted', `Doctor ID: ${id}`);
+      loadDoctors();
+    }
+
+    function addAuditLog(action, details) {
+      const logs = JSON.parse(localStorage.getItem('auditLogs')) || [];
+      logs.unshift({
+        id: 'LOG-' + Date.now(),
+        action,
+        details,
+        user: localStorage.getItem('hospitalName') || 'Hospital Admin',
+        timestamp: new Date().toISOString()
+      });
+      localStorage.setItem('auditLogs', JSON.stringify(logs));
+    }
+
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('hospitalLoggedIn');
+        localStorage.removeItem('hospitalName');
+        window.location.href = '../index.html';
+      }
+    }
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My QR Code - MedPulse</title>
+  <link rel="stylesheet" href="patient.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <h1 class="nav-brand">MedPulse</h1>
+      <div class="nav-links">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="qr-code.html" class="active">My QR Code</a>
+        <a href="../index.html">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <div class="qr-section">
+      <h2>My QR Code</h2>
+      <p class="qr-description">Share this QR code with authorized doctors for quick access to your medical information.</p>
+      
+      <div class="qr-container">
+        <div id="qrcode"></div>
+        <p class="qr-info">Patient ID: <span id="displayPatientId">P-12345</span></p>
+        <button class="download-btn" onclick="downloadQR()">Download QR Code</button>
+      </div>
+
+      <div class="qr-instructions">
+        <h3>How to Use:</h3>
+        <ol>
+          <li>Show this QR code to your doctor</li>
+          <li>Doctor will scan the code using their device</li>
+          <li>Doctor will be prompted to enter their ID for verification</li>
+          <li>Once verified, doctor can access your medical consultations</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Generate QR code on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      const patientId = localStorage.getItem('patientId') || 'P-12345';
+      document.getElementById('displayPatientId').textContent = patientId;
+      
+      // Store patient ID in localStorage if not already set
+      if (!localStorage.getItem('patientId')) {
+        localStorage.setItem('patientId', patientId);
+      }
+      
+      // Generate QR code with patient ID
+      const qrData = JSON.stringify({
+        type: 'patient',
+        patientId: patientId,
+        timestamp: new Date().toISOString()
+      });
+      
+      // Clear any existing QR code
+      document.getElementById("qrcode").innerHTML = '';
+      
+      // Generate new QR code
+      new QRCode(document.getElementById("qrcode"), {
+        text: qrData,
+        width: 256,
+        height: 256,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    });
+
+    function downloadQR() {
+      const qrContainer = document.getElementById('qrcode');
+      const canvas = qrContainer.querySelector('canvas');
+      if (canvas) {
+        const url = canvas.toDataURL();
+        const link = document.createElement('a');
+        link.download = 'medpulse-qr-code.png';
+        link.href = url;
+        link.click();
+      } else {
+        // Fallback: try to get img if library uses img instead
+        const img = qrContainer.querySelector('img');
+        if (img) {
+          const link = document.createElement('a');
+          link.download = 'medpulse-qr-code.png';
+          link.href = img.src;
+          link.click();
+        }
+      }
+    }
+  </script>
+</body>
+</html>
+

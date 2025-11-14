@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Record - MedPulse</title>
+  <style>
+    :root {
+      --green: #056608;
+      --frost: #f3f5f7;
+    }
+
+    body {
+      font-family: "Poppins", sans-serif;
+      background: var(--frost);
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+
+    .record-container {
+      max-width: 800px;
+      background: #fff;
+      margin: 2rem auto;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 2rem;
+    }
+
+    /* MedPulse header */
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .header h1 {
+      color: var(--green);
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin: 0;
+    }
+
+    h2 {
+      text-align: center;
+      color: var(--green);
+      margin-bottom: 1rem;
+    }
+
+    .info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      margin-bottom: 2rem;
+    }
+
+    .info div {
+      background: var(--frost);
+      padding: 0.8rem;
+      border-radius: 8px;
+    }
+
+    .section {
+      margin-bottom: 1.5rem;
+    }
+
+    .section h3 {
+      color: var(--green);
+      border-bottom: 2px solid var(--green);
+      padding-bottom: 0.3rem;
+    }
+
+    @media (max-width: 600px) {
+      .info {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="record-container" id="record-content">
+    <div class="header">
+      <h1>MedPulse</h1>
+    </div>
+
+    <h2 id="record-title">Medical Consultation Record</h2>
+
+    <div class="info">
+      <div><strong>Hospital:</strong> MedPulse General Hospital</div>
+      <div><strong>Doctor:</strong> <span id="doctor-name">Dr. Alice Niyonsaba</span></div>
+      <div><strong>Patient:</strong> <span id="patient-name">John Doe</span></div>
+      <div><strong>Patient ID:</strong> <span id="patient-id">P12345</span></div>
+      <div><strong>Date:</strong> <span id="record-date">2025-11-13</span></div>
+    </div>
+
+    <!-- Consultation Section -->
+    <div class="section" id="consultation-section">
+      <h3>Consultation Details</h3>
+      <p><strong>Record ID:</strong> <span id="record-id">101</span></p>
+      <p><strong>Diagnosis:</strong> <span id="diagnosis">Malaria</span></p>
+      <p><strong>Treatment:</strong> <span id="treatment">Artemether-Lumefantrine</span></p>
+      <p><strong>Notes:</strong> <span id="notes">Patient advised to rest and stay hydrated.</span></p>
+      <p><strong>Follow-up Date:</strong> <span id="follow-up">2025-11-20</span></p>
+      <p><strong>Created By:</strong> <span id="created-by">Dr. Alice</span></p>
+    </div>
+
+    <!-- Prescription Section -->
+    <div class="section" id="prescription-section" style="display:none;">
+      <h3>Prescription Details</h3>
+      <p><strong>Prescription ID:</strong> <span id="prescription-id">205</span></p>
+      <p><strong>Medicine Name:</strong> <span id="medicine-name">Paracetamol</span></p>
+      <p><strong>Frequency:</strong> <span id="frequency">3 times a day</span></p>
+      <p><strong>Duration:</strong> <span id="duration">5 days</span></p>
+      <p><strong>Dosage:</strong> <span id="dosage">500mg</span></p>
+      <p><strong>Notes:</strong> <span id="prescription-notes">Take after meals.</span></p>
+      <p><strong>Prescription Date:</strong> <span id="prescription-date">2025-11-13</span></p>
+    </div>
+
+    <!-- Lab Results Section -->
+    <div class="section" id="lab-section" style="display:none;">
+      <h3>Laboratory Results</h3>
+      <p><strong>Test ID:</strong> <span id="test-id">301</span></p>
+      <p><strong>Test Name:</strong> <span id="test-name">Blood Test</span></p>
+      <p><strong>Result Value:</strong> <span id="result-value">Normal</span></p>
+      <p><strong>Result Date:</strong> <span id="result-date">2025-11-13</span></p>
+      <p><strong>Notes:</strong> <span id="lab-notes">No abnormalities detected.</span></p>
+      <p><strong>Doctor:</strong> <span id="lab-doctor">Dr. Alice</span></p>
+      <p><strong>Attached Files:</strong> <span id="attached-files">blood_test.pdf</span></p>
+    </div>
+
+  </div>
+
+  <script>
+    const recordType = "consultation"; 
+
+    function displayRecordType() {
+      const title = document.getElementById("record-title");
+      const consultation = document.getElementById("consultation-section");
+      const prescription = document.getElementById("prescription-section");
+      const lab = document.getElementById("lab-section");
+
+      consultation.style.display = "none";
+      prescription.style.display = "none";
+      lab.style.display = "none";
+
+      if (recordType === "consultation") {
+        title.innerText = "Medical Consultation Record";
+        consultation.style.display = "block";
+      } else if (recordType === "prescription") {
+        title.innerText = "Prescription Record";
+        prescription.style.display = "block";
+      } else if (recordType === "lab") {
+        title.innerText = "Lab Results Record";
+        lab.style.display = "block";
+      }
+    }
+
+    displayRecordType();
+  </script>
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reports - MedPulse</title>
+  <link rel="stylesheet" href="hospital.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <h1 class="nav-brand">MedPulse</h1>
+      <div class="nav-links">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="change-password.html">Change Password</a>
+        <a href="#" onclick="logout()">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <h2>Generate Reports</h2>
+
+    <div class="reports-section">
+      <div class="report-cards">
+        <div class="report-card" onclick="generateReport('patients')">
+          <div class="report-icon">👥</div>
+          <h3>Patient Report</h3>
+          <p>Generate report on all patients</p>
+        </div>
+
+        <div class="report-card" onclick="generateReport('doctors')">
+          <div class="report-icon">👨‍⚕️</div>
+          <h3>Doctor Report</h3>
+          <p>Generate report on all doctors</p>
+        </div>
+
+        <div class="report-card" onclick="generateReport('departments')">
+          <div class="report-icon">🏢</div>
+          <h3>Department Report</h3>
+          <p>Generate report on departments</p>
+        </div>
+
+        <div class="report-card" onclick="generateReport('appointments')">
+          <div class="report-icon">📅</div>
+          <h3>Appointments Report</h3>
+          <p>Generate report on appointments</p>
+        </div>
+
+        <div class="report-card" onclick="generateReport('operations')">
+          <div class="report-icon">📊</div>
+          <h3>Operations Report</h3>
+          <p>Generate hospital operations report</p>
+        </div>
+      </div>
+
+      <div id="report-results" class="report-results" style="display: none;">
+        <h3>Report Results</h3>
+        <div id="report-content"></div>
+        <button class="btn-primary" onclick="exportReport()">Export Report</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentReport = null;
+    let currentReportType = null;
+
+    function generateReport(type) {
+      currentReportType = type;
+      const resultsDiv = document.getElementById('report-results');
+      const contentDiv = document.getElementById('report-content');
+
+      let reportData = {};
+
+      switch(type) {
+        case 'patients':
+          const patients = JSON.parse(localStorage.getItem('patients')) || [];
+          reportData = {
+            title: 'Patient Report',
+            total: patients.length,
+            data: patients,
+            columns: ['Patient ID', 'Name', 'Email', 'Date of Birth', 'Gender']
+          };
+          break;
+
+        case 'doctors':
+          const doctors = JSON.parse(localStorage.getItem('doctors')) || [];
+          reportData = {
+            title: 'Doctor Report',
+            total: doctors.length,
+            data: doctors,
+            columns: ['Doctor ID', 'Name', 'Email', 'Specialization', 'Department']
+          };
+          break;
+
+        case 'departments':
+          const departments = JSON.parse(localStorage.getItem('departments')) || [];
+          reportData = {
+            title: 'Department Report',
+            total: departments.length,
+            data: departments,
+            columns: ['Department Name', 'Description', 'Department Head', 'Number of Doctors']
+          };
+          break;
+
+        case 'appointments':
+          const appointments = JSON.parse(localStorage.getItem('appointments')) || [];
+          reportData = {
+            title: 'Appointments Report',
+            total: appointments.length,
+            data: appointments,
+            columns: ['Patient', 'Doctor', 'Date', 'Time', 'Status']
+          };
+          break;
+
+        case 'operations':
+          const patientsCount = (JSON.parse(localStorage.getItem('patients')) || []).length;
+          const doctorsCount = (JSON.parse(localStorage.getItem('doctors')) || []).length;
+          const deptsCount = (JSON.parse(localStorage.getItem('departments')) || []).length;
+          const appointmentsCount = (JSON.parse(localStorage.getItem('appointments')) || []).length;
+          reportData = {
+            title: 'Hospital Operations Report',
+            summary: {
+              'Total Patients': patientsCount,
+              'Total Doctors': doctorsCount,
+              'Total Departments': deptsCount,
+              'Total Appointments': appointmentsCount
+            }
+          };
+          break;
+      }
+
+      currentReport = reportData;
+      displayReport(reportData);
+      resultsDiv.style.display = 'block';
+      resultsDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function displayReport(reportData) {
+      const contentDiv = document.getElementById('report-content');
+      let html = `<h4>${reportData.title}</h4>`;
+
+      if (reportData.summary) {
+        html += '<div class="report-summary">';
+        for (const [key, value] of Object.entries(reportData.summary)) {
+          html += `<div class="summary-item"><strong>${key}:</strong> ${value}</div>`;
+        }
+        html += '</div>';
+      } else {
+        html += `<p><strong>Total:</strong> ${reportData.total}</p>`;
+        html += '<table class="data-table"><thead><tr>';
+        reportData.columns.forEach(col => {
+          html += `<th>${col}</th>`;
+        });
+        html += '</tr></thead><tbody>';
+
+        reportData.data.slice(0, 50).forEach(item => {
+          html += '<tr>';
+          reportData.columns.forEach(col => {
+            const key = col.toLowerCase().replace(/\s+/g, '');
+            html += `<td>${item[key] || item[col] || 'N/A'}</td>`;
+          });
+          html += '</tr>';
+        });
+        html += '</tbody></table>';
+        if (reportData.data.length > 50) {
+          html += `<p>Showing first 50 of ${reportData.data.length} records</p>`;
+        }
+      }
+
+      contentDiv.innerHTML = html;
+    }
+
+    function exportReport() {
+      if (!currentReport) return;
+
+      let csv = '';
+      if (currentReport.summary) {
+        csv = 'Metric,Value\n';
+        for (const [key, value] of Object.entries(currentReport.summary)) {
+          csv += `"${key}","${value}"\n`;
+        }
+      } else {
+        csv = currentReport.columns.map(col => `"${col}"`).join(',') + '\n';
+        currentReport.data.forEach(item => {
+          const row = currentReport.columns.map(col => {
+            const key = col.toLowerCase().replace(/\s+/g, '');
+            return `"${item[key] || item[col] || ''}"`;
+          }).join(',');
+          csv += row + '\n';
+        });
+      }
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${currentReportType}-report-${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+    }
+
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('hospitalLoggedIn');
+        localStorage.removeItem('hospitalName');
+        window.location.href = '../index.html';
+      }
+    }
+  </script>
+</body>
+</html>
+

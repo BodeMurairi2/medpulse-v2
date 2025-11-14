@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notifications - MedPulse</title>
+  <link rel="stylesheet" href="doctor.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <h1 class="nav-brand">MedPulse</h1>
+      <div class="nav-links">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="notifications.html" class="active">Notifications</a>
+        <a href="change-password.html">Change Password</a>
+        <a href="#" onclick="logout()">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <h2>Notifications</h2>
+    <button class="btn-primary" onclick="markAllAsRead()">Mark All as Read</button>
+    
+    <div id="notifications-list" class="notifications-list">
+      <!-- Notifications will be loaded here -->
+    </div>
+  </div>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      loadNotifications();
+    });
+
+    function loadNotifications() {
+      const doctorId = localStorage.getItem('doctorId');
+      const notifications = JSON.parse(localStorage.getItem('doctorNotifications') || '[]');
+      const doctorNotifications = notifications.filter(n => n.doctorId === doctorId);
+      const list = document.getElementById('notifications-list');
+
+      if (doctorNotifications.length === 0) {
+        list.innerHTML = '<p>No notifications.</p>';
+        return;
+      }
+
+      list.innerHTML = doctorNotifications.map(notif => {
+        const date = new Date(notif.timestamp);
+        return `
+          <div class="notification-item ${notif.read ? 'read' : 'unread'}" onclick="markAsRead('${notif.id}')">
+            <div class="notification-icon">${notif.type === 'appointment' ? '📅' : '🔔'}</div>
+            <div class="notification-content">
+              <h4>${notif.title}</h4>
+              <p>${notif.message}</p>
+              <span class="notification-date">${date.toLocaleString()}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function markAsRead(notificationId) {
+      const notifications = JSON.parse(localStorage.getItem('doctorNotifications') || '[]');
+      const notif = notifications.find(n => n.id === notificationId);
+      if (notif) {
+        notif.read = true;
+        localStorage.setItem('doctorNotifications', JSON.stringify(notifications));
+        loadNotifications();
+      }
+    }
+
+    function markAllAsRead() {
+      const doctorId = localStorage.getItem('doctorId');
+      const notifications = JSON.parse(localStorage.getItem('doctorNotifications') || '[]');
+      notifications.forEach(notif => {
+        if (notif.doctorId === doctorId) {
+          notif.read = true;
+        }
+      });
+      localStorage.setItem('doctorNotifications', JSON.stringify(notifications));
+      loadNotifications();
+    }
+
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('doctorLoggedIn');
+        localStorage.removeItem('doctorId');
+        window.location.href = '../index.html';
+      }
+    }
+  </script>
+</body>
+</html>
+

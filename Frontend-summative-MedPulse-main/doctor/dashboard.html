@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Doctor Dashboard - MedPulse</title>
+  <link rel="stylesheet" href="doctor.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <h1 class="nav-brand">MedPulse</h1>
+      <div class="nav-links">
+        <a href="dashboard.html" class="active">Dashboard</a>
+        <a href="notifications.html">Notifications <span id="notification-badge" class="notification-badge" style="display: none;">0</span></a>
+        <a href="change-password.html">Change Password</a>
+        <a href="#" onclick="logout()">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <div class="welcome-section">
+      <h2>Welcome, <span id="doctorName">Dr. Name</span></h2>
+      <p class="doctor-id">Doctor ID: <span id="doctorId">D-12345</span></p>
+      <p class="hospital-name">Hospital: <span id="hospitalName">Hospital Name</span></p>
+    </div>
+
+    <div class="dashboard-grid">
+      <div class="dashboard-card">
+        <div class="card-icon">📱</div>
+        <h3>Scan QR Code</h3>
+        <p>Scan patient QR code for quick access</p>
+        <a href="qr-scanner.html" class="card-link">Scan Now →</a>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="card-icon">🔍</div>
+        <h3>Search Patient</h3>
+        <p>Search patients by name or ID</p>
+        <a href="patient-search.html" class="card-link">Search Now →</a>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="card-icon">📋</div>
+        <h3>My Patients</h3>
+        <p>View patients in your department</p>
+        <a href="patients.html" class="card-link">View Patients →</a>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="card-icon">👨‍⚕️</div>
+        <h3>All Doctors</h3>
+        <p>View all active doctors and departments</p>
+        <a href="all-doctors.html" class="card-link">View Doctors →</a>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="card-icon">📅</div>
+        <h3>Appointments & Shifts</h3>
+        <p>View your scheduled appointments and shifts</p>
+        <a href="appointments.html" class="card-link">View Schedule →</a>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="card-icon">📝</div>
+        <h3>Medical Records</h3>
+        <p>Create and update patient medical records</p>
+        <a href="medical-records.html" class="card-link">Manage Records →</a>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Load doctor information from localStorage
+    window.addEventListener('DOMContentLoaded', () => {
+      const doctorId = localStorage.getItem('doctorId') || 'D-12345';
+      document.getElementById('doctorId').textContent = doctorId;
+      
+      // Load doctor data
+      const doctors = JSON.parse(localStorage.getItem('doctors')) || [];
+      const doctor = doctors.find(d => d.id === doctorId);
+      
+      if (doctor) {
+        document.getElementById('doctorName').textContent = doctor.name || doctor.doctorName || 'Dr. Name';
+        
+        // Get department name
+        const departments = JSON.parse(localStorage.getItem('departments')) || [];
+        const dept = departments.find(d => d.id === doctor.departmentId);
+        document.getElementById('hospitalName').textContent = dept ? dept.name : 'Department';
+      } else {
+        document.getElementById('doctorName').textContent = 'Dr. Name';
+        document.getElementById('hospitalName').textContent = 'Hospital Name';
+      }
+
+      // Load notification count
+      updateNotificationBadge();
+    });
+
+    function updateNotificationBadge() {
+      const notifications = JSON.parse(localStorage.getItem('doctorNotifications') || '[]');
+      const unreadCount = notifications.filter(n => !n.read).length;
+      const badge = document.getElementById('notification-badge');
+      if (unreadCount > 0) {
+        badge.textContent = unreadCount;
+        badge.style.display = 'inline-block';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('doctorLoggedIn');
+        localStorage.removeItem('doctorId');
+        window.location.href = '../index.html';
+      }
+    }
+  </script>
+</body>
+</html>
+

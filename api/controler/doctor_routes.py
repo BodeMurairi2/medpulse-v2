@@ -9,7 +9,7 @@ from auth.dependencies import get_current_hospital
 
 router = APIRouter(prefix="/doctor", tags=["Doctor"])
 
-@router.post("/add")
+@router.post("/create")
 def add_doctor(
     doctor_data: DoctorCreate,
     hospital_id: int = Depends(get_current_hospital),
