@@ -39,6 +39,30 @@ class Record:
             )
         return patients or []
 
+
+    def get_doctors(self):
+        """View all doctors per department"""
+        with SessionLocal() as db:
+            load_doctors = db.query(Doctor).all()
+
+        if not load_doctors:
+            raise HTTPException(status_code=400, detail="No doctors in the platform")
+
+        doctors_list = {}
+        for doc in load_doctors:
+            dept_key = doc.department
+            if dept_key not in doctors_list:
+                doctors_list[dept_key] = []
+
+            doctors_list[dept_key].append({
+                "first_name": doc.first_name,
+                "last_name": doc.last_name,
+                "gender": doc.gender,
+                "phone_number": doc.phone_number,
+                "email": doc.email
+            })
+        return doctors_list
+
     def get_patient_medical_history(patient_id: int, db: Session):
         """Fetch all medical records (consultations, prescriptions, lab tests) for a patient."""
         

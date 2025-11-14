@@ -5,6 +5,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>All Doctors - MedPulse</title>
   <link rel="stylesheet" href="doctor.css" />
+  <style>
+    .doctor-card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 0.5rem;
+      width: 280px; /* increased width */
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+    .doctor-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    .doctor-avatar {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .doctors-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .doctor-section-title {
+      width: 100%;
+      margin-top: 1.5rem;
+      font-size: 1.3rem;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 0.3rem;
+    }
+    .filter-section {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .filter-select, .search-input {
+      padding: 0.3rem 0.5rem;
+      font-size: 1rem;
+    }
+  </style>
 </head>
 <body>
   <nav class="navbar">
@@ -12,7 +53,7 @@
       <h1 class="nav-brand">MedPulse</h1>
       <div class="nav-links">
         <a href="dashboard.html">Dashboard</a>
-        <a href="notifications.html">Notifications <span id="notification-badge" class="notification-badge" style="display: none;">0</span></a>
+        <a href="medical-records.html">Medical Records <span id="notification-badge" class="notification-badge" style="display: none;">0</span></a>
         <a href="change-password.html">Change Password</a>
         <a href="#" onclick="logout()">Logout</a>
       </div>
@@ -29,75 +70,99 @@
       </select>
     </div>
 
-    <div class="doctors-grid" id="doctors-grid">
-      <!-- Doctors will be loaded here -->
+    <div id="doctors-container">
+      <!-- Doctors per department will be loaded here -->
     </div>
   </div>
 
   <script>
     window.addEventListener('DOMContentLoaded', () => {
       loadDoctors();
-      loadDepartments();
       document.getElementById('search-doctors').addEventListener('input', filterDoctors);
       document.getElementById('filter-department').addEventListener('change', filterDoctors);
       updateNotificationBadge();
     });
 
-    function loadDepartments() {
-      const departments = JSON.parse(localStorage.getItem('departments')) || [];
+    let allDoctors = {};
+    let departments = [];
+
+    async function loadDoctors() {
+      const token = localStorage.getItem('doctor_token');
+      try {
+        const res = await fetch('http://localhost:8080/doctor_portal/doctors/all', {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if(!res.ok) throw new Error('Failed to fetch doctors');
+
+        allDoctors = await res.json();
+        departments = Object.keys(allDoctors);
+        populateDepartmentFilter();
+        displayDoctors(allDoctors);
+      } catch(err) {
+        console.error(err);
+        document.getElementById('doctors-container').innerHTML = '<p>Failed to load doctors.</p>';
+      }
+    }
+
+    function populateDepartmentFilter() {
       const select = document.getElementById('filter-department');
       departments.forEach(dept => {
         const option = document.createElement('option');
-        option.value = dept.id;
-        option.textContent = dept.name;
+        option.value = dept;
+        option.textContent = dept;
         select.appendChild(option);
       });
     }
 
-    function loadDoctors() {
-      const doctors = JSON.parse(localStorage.getItem('doctors')) || [];
-      const departments = JSON.parse(localStorage.getItem('departments')) || [];
-      const grid = document.getElementById('doctors-grid');
+    function displayDoctors(doctorsData) {
+      const container = document.getElementById('doctors-container');
+      container.innerHTML = '';
 
-      if (doctors.length === 0) {
-        grid.innerHTML = '<p>No doctors found.</p>';
-        return;
-      }
+      departments.forEach(dept => {
+        if(!doctorsData[dept] || doctorsData[dept].length === 0) return;
 
-      displayDoctors(doctors, departments);
-    }
+        const sectionTitle = document.createElement('div');
+        sectionTitle.className = 'doctor-section-title';
+        sectionTitle.textContent = dept;
+        container.appendChild(sectionTitle);
 
-    function displayDoctors(doctors, departments) {
-      const grid = document.getElementById('doctors-grid');
-      grid.innerHTML = doctors.map(doctor => {
-        const dept = departments.find(d => d.id === doctor.departmentId);
-        return `
-          <div class="doctor-card">
-            <div class="doctor-avatar">👨‍⚕️</div>
-            <h3>${doctor.name || doctor.doctorName || 'Unknown'}</h3>
-            <p class="doctor-specialization">${doctor.specialization || 'N/A'}</p>
-            <p class="doctor-department">${dept ? dept.name : 'No Department'}</p>
-            <p class="doctor-email">${doctor.email || doctor.doctorEmail || 'N/A'}</p>
-            <p class="doctor-id">ID: ${doctor.id || 'N/A'}</p>
-          </div>
-        `;
-      }).join('');
+        const grid = document.createElement('div');
+        grid.className = 'doctors-grid';
+
+        doctorsData[dept].forEach(doc => {
+          const avatar = doc.gender && doc.gender.toLowerCase() === 'female' ? '👩‍⚕️' : '👨‍⚕️';
+          const card = document.createElement('div');
+          card.className = 'doctor-card';
+          card.innerHTML = `
+            <div class="doctor-avatar">${avatar}</div>
+            <h3>${doc.first_name} ${doc.last_name}</h3>
+            <p class="doctor-specialization">${doc.gender}</p>
+            <p class="doctor-email">${doc.email}</p>
+            <p class="doctor-phone">${doc.phone_number}</p>
+          `;
+          grid.appendChild(card);
+        });
+
+        container.appendChild(grid);
+      });
     }
 
     function filterDoctors() {
       const searchTerm = document.getElementById('search-doctors').value.toLowerCase();
       const deptFilter = document.getElementById('filter-department').value;
-      const doctors = JSON.parse(localStorage.getItem('doctors')) || [];
-      const departments = JSON.parse(localStorage.getItem('departments')) || [];
 
-      const filtered = doctors.filter(doctor => {
-        const matchesSearch = (doctor.name || doctor.doctorName || '').toLowerCase().includes(searchTerm) ||
-                             (doctor.specialization || '').toLowerCase().includes(searchTerm);
-        const matchesDept = !deptFilter || doctor.departmentId === deptFilter;
-        return matchesSearch && matchesDept;
+      let filtered = {};
+      departments.forEach(dept => {
+        if(deptFilter && dept !== deptFilter) return;
+        const docs = allDoctors[dept].filter(doc => {
+          return `${doc.first_name} ${doc.last_name}`.toLowerCase().includes(searchTerm) ||
+                 doc.email.toLowerCase().includes(searchTerm) ||
+                 doc.phone_number.includes(searchTerm);
+        });
+        if(docs.length) filtered[dept] = docs;
       });
 
-      displayDoctors(filtered, departments);
+      displayDoctors(filtered);
     }
 
     function updateNotificationBadge() {
@@ -116,10 +181,10 @@
       if (confirm('Are you sure you want to logout?')) {
         localStorage.removeItem('doctorLoggedIn');
         localStorage.removeItem('doctorId');
+        localStorage.removeItem('doctor_token');
         window.location.href = '../index.html';
       }
     }
   </script>
 </body>
 </html>
-
