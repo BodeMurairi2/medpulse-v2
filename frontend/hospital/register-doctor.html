@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register Doctor - MedPulse</title>
+  <link rel="stylesheet" href="hospital.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <h1 class="nav-brand">MedPulse</h1>
+      <div class="nav-links">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="doctors.html">Manage Doctors</a>
+        <a href="../index.html">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <h2>Register New Doctor</h2>
+
+    <div class="form-section">
+      <form class="registration-form" id="doctorForm">
+        <div class="form-group">
+          <label for="doctorName">Doctor Full Name</label>
+          <input type="text" id="doctorName" name="doctorName" required />
+        </div>
+
+        <div class="form-group">
+          <label for="gender">Gender</label>
+          <select id="gender" name="gender" required>
+           <option value="" disabled selected>Select your gender</option>
+           <option value="female">Female</option>
+           <option value="male">Male</option>
+           <option value="prefer-not-to-say">Prefer not to say</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+         <label for="license">Doctor's License</label>
+         <input type="text" id="license" name="license" required />
+        </div>
+
+        <div class="form-group">
+          <label for="doctorEmail">Email Address</label>
+          <input type="email" id="doctorEmail" name="doctorEmail" required />
+        </div>
+
+        <div class="form-group">
+         <label for="dob">Date of Birth</label>
+         <input type="date" id="dob" name="dob" required />
+        </div>
+
+        <div class="form-group">
+         <label for="nationalId">National ID</label>
+         <input type="text" id="nationalId" name="nationalId" required />
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input type="tel" id="phone" name="phone" required />
+        </div>
+
+        <div class="form-group">
+          <label for="department">Department</label>
+          <select id="department" name="department" required>
+            <option value="">Select department...</option>
+            <option value="general">General Medicine</option>
+            <option value="cardiology">Cardiology</option>
+            <option value="pediatrics">Pediatrics</option>
+            <option value="radiology">Radiology</option>
+            <option value="surgery">Surgery</option>
+            <option value="orthopedics">Orthopedics</option>
+            <option value="neurology">Neurology</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+         <label for="status">Status</label>
+         <select id="status" name="status" required>
+           <option value="">Select Status</option>
+           <option value="Active">Active</option>
+           <option value="On Leave">Inactive</option>
+         </select>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Create Password</label>
+          <input type="password" id="password" name="password" required />
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <input type="password" id="confirmPassword" name="confirmPassword" required />
+        </div>
+
+        <button type="submit" class="submit-btn">Register Doctor</button>
+      </form>
+
+      <div id="success-message" class="success-message" style="display: none;">
+        <h3>Doctor Registered Successfully!</h3>
+        <p><strong>Doctor ID:</strong> <span id="generatedDoctorId"></span></p>
+        <p>Please share this ID with the doctor for login.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="../JSs/register-doctor.js"></script>
+</body>
+</html>
+
+

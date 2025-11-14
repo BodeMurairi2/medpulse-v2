@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage Departments - MedPulse</title>
+  <link rel="stylesheet" href="departments.css" />
+</head>
+<body>
+  <header>
+    <img src="logo.png" alt="MedPulse Logo" class="logo" />
+    <h1>Manage Departments</h1>
+  </header>
+
+  <section class="form-section">
+    <h2>Add / Edit Department</h2>
+    <form id="departmentForm">
+      <input type="hidden" id="department_id" />
+      <input type="text" id="department_name" placeholder="Department Name" required />
+      <input type="text" id="department_description" placeholder="Description" required />
+      <input type="email" id="department_email" placeholder="Email" required />
+      <input type="text" id="phone" placeholder="Phone" required />
+      <input type="text" id="location" placeholder="Location" required />
+      <input type="number" id="number_of_staff" placeholder="Number of Staff" required />
+      <select id="status">
+        <option value="true">Active</option>
+        <option value="false">Inactive</option>
+      </select>
+      <button type="submit">Save Department</button>
+    </form>
+  </section>
+
+  <section class="table-section">
+    <h2>Departments List</h2>
+    <input type="text" id="searchInput" placeholder="Search department by name..." />
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Location</th>
+          <th>Staff</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="departmentsTableBody"></tbody>
+    </table>
+  </section>
+
+  <script src="departments.js"></script>
+</body>
+</html>

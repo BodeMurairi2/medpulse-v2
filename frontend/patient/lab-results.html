@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab Results - MedPulse</title>
+  <link rel="stylesheet" href="patient.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <h1 class="nav-brand">MedPulse</h1>
+      <div class="nav-links">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="qr-code.html">My QR Code</a>
+        <a href="../index.html">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <h2>My Lab Results</h2>
+    
+    <div class="lab-results-section">
+      <div class="filter-bar">
+        <input type="text" placeholder="Search lab results..." class="search-input" />
+        <select class="filter-select">
+          <option>All Results</option>
+          <option>Recent</option>
+          <option>By Test Type</option>
+          <option>By Date</option>
+        </select>
+      </div>
+
+      <div class="lab-results-list">
+        <div class="lab-results-card">
+          <div class="lab-results-header">
+            <h3>Complete Blood Count (CBC)</h3>
+            <span class="lab-results-date">2024-02-20</span>
+          </div>
+          <div class="lab-results-details">
+            <p><strong>Lab Technician:</strong> Alice Niyonsenga</p>
+            <p><strong>Department:</strong> Hematology</p>
+            <p><strong>Results:</strong> All blood components within normal range.</p>
+            <button class="view-btn">View Full Report</button>
+            <button class="download-btn">Download PDF</button>
+          </div>
+        </div>
+
+        <div class="lab-results-card">
+          <div class="lab-results-header">
+            <h3>Urinalysis Test</h3>
+            <span class="lab-results-date">2024-02-10</span>
+          </div>
+          <div class="lab-results-details">
+            <p><strong>Lab Technician:</strong> Dr. Brian Mugisha</p>
+            <p><strong>Department:</strong> Clinical Chemistry</p>
+            <p><strong>Results:</strong> No signs of infection or abnormalities detected.</p>
+            <button class="view-btn">View Full Report</button>
+            <button class="download-btn">Download PDF</button>
+          </div>
+        </div>
+
+        <div class="lab-results-card">
+          <div class="lab-results-header">
+            <h3>COVID-19 PCR Test</h3>
+            <span class="lab-results-date">2024-01-29</span>
+          </div>
+          <div class="lab-results-details">
+            <p><strong>Lab Technician:</strong> Dr. Louise Uwera</p>
+            <p><strong>Department:</strong> Virology</p>
+            <p><strong>Results:</strong> Negative for SARS-CoV-2 infection.</p>
+            <button class="view-btn">View Full Report</button>
+            <button class="download-btn">Download PDF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.download-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        alert('Download PDF functionality not implemented yet.');
+      });
+    });
+
+    
+    document.querySelectorAll('.view-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        console.log('View Full Report clicked.');
+      });
+    });
+  </script>
+</body>
+</html>

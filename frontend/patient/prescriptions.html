@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Medical Prescriptions - MedPulse</title>
+  <link rel="stylesheet" href="patient.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <h1 class="nav-brand">MedPulse</h1>
+      <div class="nav-links">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="qr-code.html">My QR Code</a>
+        <a href="../index.html">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <h2>My Prescriptions</h2>
+
+    <div class="prescriptions-section">
+      <div class="filter-bar">
+        <input type="text" placeholder="Search prescriptions..." class="search-input" />
+        <select class="filter-select">
+          <option>All Prescriptions</option>
+          <option>Recent</option>
+          <option>By Doctor</option>
+          <option>By Date</option>
+        </select>
+      </div>
+
+      <div class="prescriptions-list">
+        <div class="prescriptions-card">
+          <div class="prescriptions-header">
+            <h3>Visit Prescription</h3>
+            <span class="prescriptions-date">2024-01-15</span>
+          </div>
+          <div class="prescriptions-details">
+            <p><strong>Doctor:</strong> Dr. Sarah Johnson</p>
+            <p><strong>Type:</strong> General Consultation</p>
+            <button class="view-btn">View Full Report</button>
+            <button class="download-btn">Download PDF</button>
+          </div>
+        </div>
+
+        <div class="prescriptions-card">
+          <div class="prescriptions-header">
+            <h3>Lab Report Prescription</h3>
+            <span class="prescriptions-date">2024-01-10</span>
+          </div>
+          <div class="prescriptions-details">
+            <p><strong>Doctor:</strong> Dr. Michael Brown</p>
+            <p><strong>Type:</strong> Laboratory Report</p>
+            <button class="view-btn">View Full Report</button>
+            <button class="download-btn">Download PDF</button>
+          </div>
+        </div>
+
+        <div class="prescriptions-card">
+          <div class="prescriptions-header">
+            <h3>Radiology Report</h3>
+            <span class="prescriptions-date">2024-01-05</span>
+          </div>
+          <div class="prescriptions-details">
+            <p><strong>Doctor:</strong> Dr. Emily Davis</p>
+            <p><strong>Type:</strong> Radiology Report</p>
+            <button class="view-btn">View Full Report</button>
+            <button class="download-btn">Download PDF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.view-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        console.log('View Full Report clicked.');
+      });
+    });
+
+    
+    document.querySelectorAll('.download-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        alert('Download PDF functionality not implemented yet.');
+      });
+    });
+  </script>
+</body>
+</html>

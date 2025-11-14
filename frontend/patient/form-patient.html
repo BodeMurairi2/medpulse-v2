@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MedPulse — Patient Registration</title>
+  <meta name="description" content="Responsive patient registration form for MedPulse" />
+  <style>
+    :root{
+      --maroon:#7d1022; /* main brand color */
+      --frost:#e9f6f6;  /* soft background */
+      --muted:#6b6b6b;
+      --card:#ffffff;
+      --radius:12px;
+      --max-width:900px;
+      --gap:14px;
+      font-family: Inter, system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:linear-gradient(180deg,var(--frost),#ffffff 60%);
+      color:#222;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:32px 18px;
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+      min-height:100vh;
+    }
+
+    .container{
+      width:100%;
+      max-width:var(--max-width);
+      background:var(--card);
+      border-radius:var(--radius);
+      box-shadow:0 10px 30px rgba(16,24,40,0.08);
+      padding:26px;
+      border:1px solid rgba(125,16,34,0.06);
+    }
+
+    .brand-bubble{
+      width:56px;height:56px;border-radius:10px;background:var(--maroon);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:20px;
+      box-shadow:0 6px 18px rgba(125,16,34,0.12);
+    }
+
+    .nav-brand{
+        color:#fff
+    }
+
+    h1{margin:0;font-size:20px;color:var(--maroon)}
+    p.lead{margin:2px 0 14px;color:var(--muted);font-size:13px}
+
+    form{display:grid;gap:18px}
+    .section{padding:14px;border-radius:10px;background:linear-gradient(180deg,rgba(125,16,34,0.02),transparent);border:1px solid rgba(125,16,34,0.03)}
+    .section h2{margin:0 0 8px;font-size:15px;color:var(--maroon)}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--gap)}
+    label{display:block;font-size:13px;margin-bottom:6px;color:#111;font-weight:600}
+    input[type=text],input[type=email],input[type=date],input[type=tel],select,textarea{width:100%;padding:10px 12px;border-radius:8px;border:1px solid #dcdcdc;font-size:14px}
+    textarea{min-height:80px;resize:vertical}
+    .full{grid-column:1/-1}
+    .two-cols{display:flex;gap:10px}
+    .small{width:140px}
+    .inline-options{display:flex;gap:14px;align-items:center}
+    .muted{font-size:13px;color:var(--muted)}
+
+    .actions{display:flex;gap:12px;justify-content:flex-end}
+    button.primary{background:var(--maroon);color:#fff;padding:10px 16px;border-radius:10px;border:0;font-weight:700;cursor:pointer}
+    button.ghost{background:transparent;border:1px solid rgba(0,0,0,0.06);padding:10px 14px;border-radius:10px}
+
+    /* responsive */
+    @media (max-width:780px){
+      .grid{grid-template-columns:1fr}
+      .small{width:100%}
+      header{gap:12px}
+    }
+
+    /* subtle required marker */
+    .required::after{content:" *";color:#c0392b}
+
+    /* success toast */
+    .toast{position:fixed;right:18px;bottom:18px;background:#0f5132;color:#d1e7dd;padding:12px 16px;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,0.12);display:none}
+  </style>
+  <link rel="stylesheet" href="patient.css" />
+</head>
+<body>
+    <nav>
+        <nav class="navbar">
+            <div class="nav-container">
+                    <h1 class="nav-brand">MedPulse</h1>
+                <div class="nav-links">
+                <a href="dashboard.html" class="active">Dashboard</a>
+                <a href="records.html">Medical Records</a>
+                <a href="transcriptions.html">Transcriptions</a>
+                <a href="appointments.html">Appointments</a>
+                <a href="qr-code.html">My QR Code</a>
+                <a href="form-patient.html">My Form</a>
+                <a href="../index.html">Logout</a>
+            </div>
+            </div>
+        </nav>
+
+        <div class="container" role="main">
+            <div>
+                <h1>Patient Registration</h1>
+                <p class="lead">Fill in the patient's details. Fields marked with <span class="muted required"></span> are required.</p>
+            </div>
+
+            <form id="registrationForm" action="#" method="post" novalidate>
+
+            <section class="section" aria-labelledby="personal">
+                <h2 id="personal">1. Personal Information</h2>
+                <div class="grid">
+                    <div>
+                        <label for="fullName" class="required">Full Name</label>
+                        <input id="fullName" name="fullName" type="text" placeholder="e.g. Jane Doe" required>
+                    </div>
+                    <div>
+                        <label for="dob" class="required">Date of Birth</label>
+                        <input id="dob" name="dob" type="date" required>
+                    </div>
+
+                    <div>
+                        <label class="required">Gender / Sex</label>
+                        <div class="inline-options" role="radiogroup" aria-label="Gender">
+                            <label><input type="radio" name="gender" value="Male" required> Male</label>
+                            <label><input type="radio" name="gender" value="Female"> Female</label>
+                            <label><input type="radio" name="gender" value="Other"> Other</label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="nationalId">National ID / Passport No.</label>
+                        <input id="nationalId" name="nationalId" type="text" placeholder="ID or passport number">
+                    </div>
+
+                    <div>
+                        <label for="marital">Marital Status</label>
+                        <select id="marital" name="marital">
+                        <option value="">-- Select --</option>
+                        <option>Single</option>
+                        <option>Married</option>
+                        <option>Divorced</option>
+                        <option>Widowed</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="nationality">Nationality</label>
+                        <input id="nationality" name="nationality" type="text">
+                    </div>
+
+                    <div class="full">
+                        <label for="address">Home Address</label>
+                        <input id="address" name="address" type="text" placeholder="Street, City, District">
+                    </div>
+
+                    <div>
+                        <label for="phone" class="required">Phone Number</label>
+                        <input id="phone" name="phone" type="tel" placeholder="+250 78 123 4567" required>
+                    </div>
+
+                    <div>
+                        <label for="email">Email Address</label>
+                        <input id="email" name="email" type="email" placeholder="name@example.com">
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" aria-labelledby="emergency">
+                <h2 id="emergency">2. Next of Kin / Emergency Contact</h2>
+                <div class="grid">
+                    <div>
+                        <label for="nokName" class="required">Name</label>
+                        <input id="nokName" name="nokName" type="text" required>
+                    </div>
+
+                    <div>
+                        <label for="nokRelation" class="required">Relationship</label>
+                        <input id="nokRelation" name="nokRelation" type="text" required>
+                    </div>
+
+                    <div class="full">
+                        <label for="nokPhone" class="required">Phone Number</label>
+                        <input id="nokPhone" name="nokPhone" type="tel" required>
+                    </div>
+
+                    <div class="full">
+                        <label for="nokAddress">Address (if different)</label>
+                        <input id="nokAddress" name="nokAddress" type="text">
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" aria-labelledby="socio">
+                <h2 id="socio">3. Demographic &amp; Social Information</h2>
+                <div class="grid">
+                    <div>
+                        <label for="occupation">Occupation / Job Title</label>
+                        <input id="occupation" name="occupation" type="text">
+                    </div>
+
+                    <div>
+                        <label for="employer">Employer / Organization</label>
+                        <input id="employer" name="employer" type="text">
+                    </div>
+
+                    <div>
+                        <label for="education">Education Level</label>
+                        <input id="education" name="education" type="text">
+                    </div>
+
+                    <div>
+                        <label for="religion">Religion (optional)</label>
+                        <input id="religion" name="religion" type="text">
+                    </div>
+
+                    <div class="full">
+                        <label for="languages">Languages Spoken</label>
+                        <input id="languages" name="languages" type="text" placeholder="e.g. Kinyarwanda, English, French">
+                    </div>
+                    </div>
+            </section>
+
+            <section class="section" aria-labelledby="medical">
+                <h2 id="medical">4. Medical Information</h2>
+                <div class="grid">
+                    <div class="full">
+                        <label for="complaint" class="required">Reason for Visit / Presenting Complaint</label>
+                        <textarea id="complaint" name="complaint" required placeholder="Describe symptoms or reason for visit"></textarea>
+                    </div>
+
+                    <div>
+                        <label>Do you have any chronic illnesses?</label>
+                        <div class="inline-options">
+                        <label><input type="radio" name="chronic" value="No" checked> No</label>
+                        <label><input type="radio" name="chronic" value="Yes"> Yes</label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="chronicDetails">If yes, please specify</label>
+                        <input id="chronicDetails" name="chronicDetails" type="text">
+                    </div>
+
+                    <div class="full">
+                        <label for="history">Past Medical History (illnesses, surgeries, hospitalizations)</label>
+                        <textarea id="history" name="history" placeholder="Add relevant dates and procedures"></textarea>
+                    </div>
+
+                    <div>
+                        <label for="allergies">Allergies (medicine, food, etc.)</label>
+                        <input id="allergies" name="allergies" type="text">
+                    </div>
+
+                    <div>
+                        <label for="meds">Current Medications</label>
+                        <input id="meds" name="meds" type="text">
+                    </div>
+
+                    <div>
+                        <label for="familyHistory">Family Medical History</label>
+                        <input id="familyHistory" name="familyHistory" type="text">
+                    </div>
+
+                    <div class="two-cols full">
+                        <div style="flex:1">
+                            <label for="blood">Blood Group</label>
+                            <input id="blood" name="blood" type="text" placeholder="e.g. O+">
+                        </div>
+                        <div style="flex:1">
+                            <label for="height">Height (cm)</label>
+                            <input id="height" name="height" type="text">
+                        </div>
+                        <div style="flex:1">
+                            <label for="weight">Weight (kg)</label>
+                            <input id="weight" name="weight" type="text">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" aria-labelledby="insurance">
+                <h2 id="insurance">5. Insurance and Billing Information</h2>
+                <div class="grid">
+                    <div>
+                        <label for="insuranceProvider">Insurance Provider</label>
+                        <select id="insuranceProvider" name="insuranceProvider">
+                        <option value="">-- Select --</option>
+                        <option>RSSB</option>
+                        <option>MMI</option>
+                        <option>Private</option>
+                        <option>None</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="insuranceId">Insurance / Membership ID</label>
+                        <input id="insuranceId" name="insuranceId" type="text">
+                    </div>
+
+                    <div>
+                        <label for="payer">Employer / Payer (if applicable)</label>
+                        <input id="payer" name="payer" type="text">
+                    </div>
+
+                    <div>
+                        <label>Preferred Payment Method</label>
+                        <div class="inline-options">
+                        <label><input type="radio" name="paymentMethod" value="Cash" checked> Cash</label>
+                        <label><input type="radio" name="paymentMethod" value="Insurance"> Insurance</label>
+                        <label><input type="radio" name="paymentMethod" value="Company"> Company</label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" aria-labelledby="referral">
+                <h2 id="referral">6. Referral &amp; Admission Details (if applicable)</h2>
+                <div class="grid">
+                    <div>
+                        <label for="referredBy">Referred by (Doctor / Facility)</label>
+                        <input id="referredBy" name="referredBy" type="text">
+                    </div>
+
+                    <div>
+                        <label>Type of Visit</label>
+                        <select name="visitType">
+                        <option>Outpatient</option>
+                        <option>Inpatient</option>
+                        <option>Emergency</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="arrival">Date &amp; Time of Arrival</label>
+                        <input id="arrival" name="arrival" type="datetime-local">
+                    </div>
+
+                    <div>
+                        <label for="dept">Department / Doctor Assigned</label>
+                        <input id="dept" name="dept" type="text">
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" aria-labelledby="consent">
+                <h2 id="consent">7. Consent &amp; Declaration</h2>
+                <div>
+                    <p class="muted">I hereby declare that the information provided above is true and accurate to the best of my knowledge. I consent to receive medical care and authorize the hospital to use my data in accordance with its privacy policy.</p>
+                    <div class="grid" style="align-items:end;margin-top:10px">
+                        <div>
+                            <label for="signature" class="required">Name (Signature)</label>
+                            <input id="signature" name="signature" type="text" required>
+                        </div>
+                        <div>
+                            <label for="signedDate" class="required">Date</label>
+                            <input id="signedDate" name="signedDate" type="date" required>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:8px;font-size:13px;color:var(--muted)">For minors: provide parent/guardian details below.</div>
+
+                        <div class="grid" style="margin-top:6px">
+                            <div>
+                                <label for="pgName">Parent/Guardian Name</label>
+                                <input id="pgName" name="pgName" type="text">
+                            </div>
+                            <div>
+                                <label for="pgRelation">Relationship</label>
+                                <input id="pgRelation" name="pgRelation" type="text">
+                            </div>
+                            <div class="full">
+                                <label for="pgSignature">Parent/Guardian Signature</label>
+                                <input id="pgSignature" name="pgSignature" type="text">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        <div class="actions">
+            <button type="button" class="ghost" onclick="window.print()">Print</button>
+            <button type="submit" class="primary">Submit Registration</button>
+        </div>
+
+        </form>
+    </div>
+
+        <div class="toast" id="toast">Registration saved (demo)</div>
+    </nav>
+
+
+  <script>
+    // basic client-side demo handling
+    const form = document.getElementById('registrationForm');
+    const toast = document.getElementById('toast');
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+
+      // native validity check
+      if(!form.checkValidity()){
+        form.reportValidity();
+        return;
+      }
+
+      // demo: show toast and clear some fields
+      toast.style.display = 'block';
+      setTimeout(()=>toast.style.display='none',3500);
+
+      // in real use: perform fetch to backend API endpoint here
+      // e.g. fetch('/api/register',{method:'POST',body:new FormData(form)})
+
+      // keep form data for now — you can clear if you want
+      // form.reset();
+    });
+  </script>
+</body>
+</html>

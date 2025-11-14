@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Medical Records - MedPulse</title>
+  <link rel="stylesheet" href="doctor.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <h1 class="nav-brand">MedPulse</h1>
+      <div class="nav-links">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="notifications.html">Notifications</a>
+        <a href="change-password.html">Change Password</a>
+        <a href="#" onclick="logout()">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <h2>Create/Update Medical Record</h2>
+    <p>Search for a patient first to create or update their medical record.</p>
+    
+    <div class="search-section">
+      <input type="text" id="patient-search" placeholder="Enter Patient ID or Name..." class="search-input" />
+      <button class="btn-primary" onclick="searchPatient()">Search</button>
+    </div>
+
+    <div id="record-form-section" style="display: none;">
+      <h3>Patient: <span id="patient-name-display"></span></h3>
+      <div class="form-section">
+        <label for="record-type">Select Record Type:</label>
+        <select id="record-type" onchange="showRecordForm()" required>
+          <option value="">Select type...</option>
+          <option value="consultation">Consultation</option>
+          <option value="prescription">Prescription</option>
+          <option value="lab-results">Lab Results</option>
+        </select>
+
+        <!-- Consultation Form -->
+        <form id="consultation-form" class="record-form" style="display:none;">
+          <label>Record ID:</label>
+          <input type="text" id="consult_record_id" />
+
+          <label>Patient ID:</label>
+          <input type="text" id="consult_patient_id" />
+
+          <label>Doctor ID:</label>
+          <input type="text" id="consult_doctor_id" />
+
+          <label>Doctor Name:</label>
+          <input type="text" id="consult_doctor_name" />
+
+          <label>Diagnosis:</label>
+          <input type="text" id="diagnosis" />
+
+          <label>Treatment:</label>
+          <input type="text" id="treatment" />
+
+          <label>Notes:</label>
+          <textarea id="consult_notes" rows="4"></textarea>
+
+          <label>Follow-up Date:</label>
+          <input type="date" id="follow_up_date" />
+
+          <label>Consultation Date:</label>
+          <input type="date" id="consultation_date" />
+        </form>
+
+        <!-- Prescription Form -->
+        <form id="prescription-form" class="record-form" style="display:none;">
+          <label>Prescription ID:</label>
+          <input type="text" id="prescription_id" />
+
+          <label>Patient ID:</label>
+          <input type="text" id="presc_patient_id" />
+
+          <label>Doctor ID:</label>
+          <input type="text" id="presc_doctor_id" />
+
+          <label>Doctor Name:</label>
+          <input type="text" id="presc_doctor_name" />
+
+          <label>Record ID:</label>
+          <input type="text" id="presc_record_id" />
+
+          <label>Medicine Name:</label>
+          <input type="text" id="medicine_name" />
+
+          <label>Dosage:</label>
+          <input type="text" id="dosage" />
+
+          <label>Frequency:</label>
+          <input type="text" id="frequency" />
+
+          <label>Duration:</label>
+          <input type="text" id="duration" />
+
+          <label>Prescription Date:</label>
+          <input type="date" id="prescription_date" />
+
+          <label>Notes:</label>
+          <textarea id="notes_prescription" rows="4"></textarea>
+
+          <label>Prescription Details:</label>
+          <textarea id="prescription_details" rows="4"></textarea>
+
+          <label>Created at:</label>
+          <input type="text" id="presc_created_at" />
+        </form>
+
+        <!-- Lab Results Form -->
+        <form id="lab-form" class="record-form" style="display:none;">
+          <label>Record ID:</label>
+          <input type="text" id="lab_record_id" />
+
+          <label>Patient ID:</label>
+          <input type="text" id="lab_patient_id" />
+
+          <label>Doctor ID:</label>
+          <input type="text" id="lab_doctor_id" />
+
+          <label>Doctor Name:</label>
+          <input type="text" id="lab_doctor_name" />
+
+          <label>Test Name:</label>
+          <input type="text" id="test_name" />
+
+          <label>Result Value:</label>
+          <input type="text" id="result_value" />
+
+          <label>Result Date:</label>
+          <input type="date" id="result_date" />
+
+          <label>Notes:</label>
+          <textarea id="notes_lab" rows="4"></textarea>
+
+          <label>Created at:</label>
+          <input type="datetime" id="created_at" />
+
+          <label>Attached Files:</label>
+          <input type="file" id="attached_files" />
+        </form>
+
+        <button id="save-record-btn" class="submit-btn" onclick="saveRecord()">Save Record</button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* record type dropdown */
+    #record-type {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-top: 10px;
+      margin-bottom: 20px;
+      box-sizing: border-box;
+    }
+
+    .record-form {
+      background-color: #f9f9f9;
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      margin-bottom: 20px;
+    }
+
+    .record-form label {
+      display: block;
+      font-weight: 500;
+      margin-top: 15px;
+    }
+
+    .record-form input[type="text"],
+    .record-form input[type="date"],
+    .record-form input[type="datetime-local"],
+    .record-form textarea,
+    .record-form select,
+    .record-form input[type="file"] {
+      width: 100%;
+      padding: 8px 10px;
+      margin-top: 5px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+
+    .record-form textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    #save-record-btn {
+      margin-top: 20px;
+      padding: 12px 25px;
+      background-color: #0cad51;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    #save-record-btn:hover {
+      background-color: #1d663f;
+    }
+  </style>
+
+  <script>
+    let currentPatientId = null;
+
+    function searchPatient() {
+      const searchTerm = document.getElementById('patient-search').value;
+      const patients = JSON.parse(localStorage.getItem('patients') || '[]');
+      const patient = patients.find(p => p.id === searchTerm || (p.name || p.patientName).toLowerCase().includes(searchTerm.toLowerCase()));
+
+      if (!patient) {
+        alert('Patient not found');
+        return;
+      }
+
+      currentPatientId = patient.id;
+      document.getElementById('patient-name-display').textContent = patient.name || patient.patientName;
+      document.getElementById('consult_patient_id').value = currentPatientId;
+      document.getElementById('presc_patient_id').value = currentPatientId;
+      document.getElementById('lab_patient_id').value = currentPatientId;
+
+      
+      const doctorId = localStorage.getItem('doctorId');
+      document.getElementById('consult_doctor_id').value = doctorId;
+      document.getElementById('presc_doctor_id').value = doctorId;
+      document.getElementById('lab_doctor_id').value = doctorId;
+
+    
+      const doctorName = localStorage.getItem('doctorName') || '';
+      document.getElementById('consult_doctor_name').value = doctorName;
+      document.getElementById('presc_doctor_name').value = doctorName;
+      document.getElementById('lab_doctor_name').value = doctorName;
+
+      document.getElementById('record-form-section').style.display = 'block';
+    }
+
+    function showRecordForm() {
+      const type = document.getElementById('record-type').value;
+      const forms = document.querySelectorAll('.record-form');
+      forms.forEach(f => f.style.display = 'none');
+
+      if(type === 'consultation') document.getElementById('consultation-form').style.display = 'block';
+      if(type === 'prescription') document.getElementById('prescription-form').style.display = 'block';
+      if(type === 'lab-results') document.getElementById('lab-form').style.display = 'block';
+    }
+
+    function saveRecord() {
+      const type = document.getElementById('record-type').value;
+      if(!type) return alert('Please select a record type');
+
+      let record = { patientId: currentPatientId, doctorId: localStorage.getItem('doctorId'), createdAt: new Date().toISOString() };
+
+      if(type === 'consultation') {
+        record.id = document.getElementById('consult_record_id').value || 'REC-' + Date.now();
+        record.diagnosis = document.getElementById('diagnosis').value;
+        record.treatment = document.getElementById('treatment').value;
+        record.notes = document.getElementById('consult_notes').value;
+        record.followUp = document.getElementById('follow_up_date').value;
+        record.date = document.getElementById('consultation_date').value;
+        record.doctorName = document.getElementById('consult_doctor_name').value;
+      } else if(type === 'prescription') {
+        record.id = document.getElementById('prescription_id').value || 'REC-' + Date.now();
+        record.medicineName = document.getElementById('medicine_name').value;
+        record.dosage = document.getElementById('dosage').value;
+        record.frequency = document.getElementById('frequency').value;
+        record.duration = document.getElementById('duration').value;
+        record.date = document.getElementById('prescription_date').value;
+        record.notes = document.getElementById('notes_prescription').value;
+        record.details = document.getElementById('prescription_details').value;
+        record.doctorName = document.getElementById('presc_doctor_name').value;
+      } else if(type === 'lab-results') {
+        record.id = document.getElementById('lab_record_id').value || 'REC-' + Date.now();
+        record.testName = document.getElementById('test_name').value;
+        record.resultValue = document.getElementById('result_value').value;
+        record.date = document.getElementById('result_date').value;
+        record.notes = document.getElementById('notes_lab').value;
+        record.doctorName = document.getElementById('lab_doctor_name').value;
+      }
+
+      let records = JSON.parse(localStorage.getItem('medicalRecords') || '[]');
+      records.push(record);
+      localStorage.setItem('medicalRecords', JSON.stringify(records));
+
+      alert(type.charAt(0).toUpperCase() + type.slice(1) + ' record saved successfully!');
+      document.getElementById('record-type').value = '';
+      showRecordForm();
+    }
+
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('doctorLoggedIn');
+        localStorage.removeItem('doctorId');
+        window.location.href = '../index.html';
+      }
+    }
+  </script>
+</body>
+</html>
