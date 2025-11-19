@@ -5,6 +5,63 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Appointments & Shifts - MedPulse</title>
   <link rel="stylesheet" href="doctor.css" />
+  <style>
+    .tab-btn {
+      padding: 0.5rem 1rem;
+      margin-right: 0.3rem;
+      cursor: pointer;
+      border: none;
+      background-color: #eee;
+      border-radius: 5px 5px 0 0;
+    }
+    .tab-btn.active {
+      background-color: #fff;
+      border-bottom: 2px solid #007BFF;
+      font-weight: bold;
+    }
+    .tab-content {
+      display: none;
+      background-color: #fff;
+      padding: 1rem;
+      border: 1px solid #ddd;
+      border-top: none;
+      border-radius: 0 0 5px 5px;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .status-badge {
+      padding: 0.2rem 0.5rem;
+      border-radius: 5px;
+      color: white;
+      font-weight: bold;
+      text-transform: capitalize;
+    }
+    .status-badge.scheduled { background-color: #007BFF; }
+    .status-badge.completed { background-color: #28a745; }
+    .status-badge.cancelled { background-color: #dc3545; }
+    .btn-edit {
+      padding: 0.3rem 0.6rem;
+      background-color: #007BFF;
+      color: white;
+      border-radius: 5px;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .btn-edit:hover { background-color: #0056b3; }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .data-table th, .data-table td {
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+    .data-table th {
+      background-color: #f2f2f2;
+    }
+  </style>
 </head>
 <body>
   <nav class="navbar">
@@ -80,57 +137,45 @@
     }
 
     function loadAppointments() {
-      const doctorId = localStorage.getItem('doctorId');
-      const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
-      const doctorAppointments = appointments.filter(apt => apt.doctorId === doctorId);
-      const patients = JSON.parse(localStorage.getItem('patients') || '[]');
+      const appointments = [
+        {date:'2025-11-15', time:'09:00', patient:'John Doe', reason:'Routine Checkup', status:'scheduled', patientId:1},
+        {date:'2025-11-15', time:'10:30', patient:'Mary Smith', reason:'Flu Symptoms', status:'completed', patientId:2},
+        {date:'2025-11-16', time:'14:00', patient:'Ahmed Ali', reason:'Blood Test', status:'scheduled', patientId:3},
+        {date:'2025-11-17', time:'11:00', patient:'Jane Brown', reason:'Follow-up', status:'cancelled', patientId:4},
+        {date:'2025-11-18', time:'15:30', patient:'David Wilson', reason:'Consultation', status:'scheduled', patientId:5}
+      ];
+
       const tbody = document.getElementById('appointments-list');
-
-      if (doctorAppointments.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No appointments scheduled.</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = doctorAppointments.map(apt => {
-        const patient = patients.find(p => p.id === apt.patientId);
-        return `
-          <tr>
-            <td>${apt.date || 'N/A'}</td>
-            <td>${apt.time || 'N/A'}</td>
-            <td>${patient ? (patient.name || patient.patientName) : 'Unknown'}</td>
-            <td>${apt.reason || 'N/A'}</td>
-            <td><span class="status-badge ${apt.status || 'scheduled'}">${apt.status || 'Scheduled'}</span></td>
-            <td>
-              <a href="patient-search.html?patientId=${apt.patientId}" class="btn-edit">View Patient</a>
-            </td>
-          </tr>
-        `;
-      }).join('');
+      tbody.innerHTML = appointments.map(apt => `
+        <tr>
+          <td>${apt.date}</td>
+          <td>${apt.time}</td>
+          <td>${apt.patient}</td>
+          <td>${apt.reason}</td>
+          <td><span class="status-badge ${apt.status}">${apt.status}</span></td>
+          <td><a href="medical-records.html?patientId=${apt.patientId}" class="btn-edit">View Patient</a></td>
+        </tr>
+      `).join('');
     }
 
     function loadShifts() {
-      const doctorId = localStorage.getItem('doctorId');
-      const shifts = JSON.parse(localStorage.getItem('shifts') || '[]');
-      const doctorShifts = shifts.filter(shift => shift.doctorIds && shift.doctorIds.includes(doctorId));
-      const departments = JSON.parse(localStorage.getItem('departments') || '[]');
+      const shifts = [
+        {day:'Monday', startTime:'08:00', endTime:'16:00', department:'Cardiology'},
+        {day:'Tuesday', startTime:'10:00', endTime:'18:00', department:'Neurology'},
+        {day:'Wednesday', startTime:'08:00', endTime:'14:00', department:'Pediatrics'},
+        {day:'Thursday', startTime:'12:00', endTime:'20:00', department:'Orthopedics'},
+        {day:'Friday', startTime:'09:00', endTime:'17:00', department:'Radiology'}
+      ];
+
       const tbody = document.getElementById('shifts-list');
-
-      if (doctorShifts.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No shifts assigned.</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = doctorShifts.map(shift => {
-        const dept = departments.find(d => d.id === shift.departmentId);
-        return `
-          <tr>
-            <td>${shift.day || 'N/A'}</td>
-            <td>${shift.startTime || 'N/A'}</td>
-            <td>${shift.endTime || 'N/A'}</td>
-            <td>${dept ? dept.name : 'Unknown'}</td>
-          </tr>
-        `;
-      }).join('');
+      tbody.innerHTML = shifts.map(shift => `
+        <tr>
+          <td>${shift.day}</td>
+          <td>${shift.startTime}</td>
+          <td>${shift.endTime}</td>
+          <td>${shift.department}</td>
+        </tr>
+      `).join('');
     }
 
     function logout() {
@@ -143,4 +188,3 @@
   </script>
 </body>
 </html>
-
