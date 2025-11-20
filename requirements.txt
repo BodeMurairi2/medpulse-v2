@@ -21,4 +21,4 @@ redis
 botocore
 boto3
 celery
-decouple
+

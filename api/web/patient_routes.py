@@ -1,13 +1,21 @@
+#!/usr/bin/env python3
+
 from fastapi import APIRouter, HTTPException, Depends, Header, status
 from sqlalchemy.orm import Session
+from datetime import datetime
+
 from data.database import get_db
 from data.hospital_model import Patient
 from schemas.patient import PatientCreate, PatientLogin, PatientOut, ChangePasswordSchema
+from schemas.medical_record import PatientRecordsOut
+
 from services.harsh import hash_password, verify_password
 from services.jwt import create_access_token, decode_access_token
 from services.token_blacklist import is_token_blacklisted, add_to_blacklist
+
 from auth.dependencies import get_current_hospital
-from datetime import datetime
+from services.patient_service import get_patient_records_by_id
+
 
 router = APIRouter(prefix="/patients_portal_auth", tags=["Patients Authentication"])
 
@@ -58,3 +66,17 @@ def patient_logout(authorization : str = Header(...)):
         raise HTTPException(status_code=401, detail="Authorization must start with Bearer")
     add_to_blacklist(token)
     return {"message": "Logged out successfully"}
+
+@router.get("/patients/{patient_id}/records", response_model=PatientRecordsOut)
+def get_patient_records(patient_id: int, db: Session = Depends(get_db)):
+    """
+    Fetch patient records by patient_id
+    """
+    try:
+        patient = get_patient_records_by_id(db, patient_id)
+        if not patient:
+            raise HTTPException(status_code=404, detail="Patient not found")
+        return patient
+    except Exception as e:
+        print("ERROR:", e)
+        raise HTTPException(status_code=500, detail=str(e))
