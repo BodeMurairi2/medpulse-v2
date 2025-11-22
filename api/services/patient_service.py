@@ -10,6 +10,7 @@ def get_patient_records_by_id(db: Session, patient_id: int):
     """
     Fetches all patient records including medical records, prescriptions, and lab tests,
     formatted to match the PatientRecordsOut Pydantic model.
+    Each lab test includes its associated files.
     """
     patient = (
         db.query(Patient)
@@ -20,7 +21,7 @@ def get_patient_records_by_id(db: Session, patient_id: int):
             joinedload(Patient.prescriptions)
                 .joinedload(Prescription.doctor),
             joinedload(Patient.lab_tests)
-                .joinedload(LabTestResult.files)
+                .joinedload(LabTestResult.files)  # Load associated lab test files
         )
         .filter(Patient.patient_id == patient_id)
         .first()
@@ -87,7 +88,14 @@ def get_patient_records_by_id(db: Session, patient_id: int):
                 "notes": l.notes,
                 "created_at": l.created_at,
                 "updated_at": l.updated_at,
-                "files": [f.file_url for f in l.files]  # Lab test files URLs
+                "files": [
+                    {
+                        "id": f.file_id,
+                        "file_url": f.file_url,
+                        "uploaded_at": f.created_at
+                    }
+                    for f in l.files
+                ]
             }
             for l in patient.lab_tests
         ]

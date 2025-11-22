@@ -5,92 +5,386 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lab Results - MedPulse</title>
   <link rel="stylesheet" href="patient.css" />
+  <style>
+    /* Navbar Styles */
+    .navbar {
+      background-color: #fff;
+      border-bottom: 1px solid #ddd;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #007bff;
+    }
+    .nav-brand img {
+      height: 40px;
+      margin-right: 10px;
+    }
+    .nav-links a {
+      margin-left: 20px;
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+    }
+    .nav-links a:hover { color: #007bff; }
+
+    /* Card Styles */
+    .lab-results-card {
+      background-color: #f8f9fa;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .lab-results-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .lab-results-header h3 {
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+      color: #333;
+    }
+    .lab-results-header .lab-results-date {
+      font-size: 0.9rem;
+      color: #555;
+    }
+    .lab-results-details p {
+      margin: 6px 0;
+      line-height: 1.4;
+      font-size: 0.95rem;
+    }
+    .lab-results-details p strong { color: #222; }
+    .lab-results-details button {
+      margin-top: 10px;
+      margin-right: 8px;
+      padding: 6px 12px;
+      font-size: 0.9rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    .lab-results-details button.view-btn {
+      background-color: #007bff;
+      color: #fff;
+    }
+    .lab-results-details button.view-btn:hover { background-color: #0056b3; }
+    .lab-results-details button.download-btn {
+      background-color: #28a745;
+      color: #fff;
+    }
+    .lab-results-details button.download-btn:hover { background-color: #1e7e34; }
+    .lab-results-details button.file-btn {
+      background-color: #6c757d;
+      color: #fff;
+    }
+    .lab-results-details button.file-btn:hover { background-color: #495057; }
+
+    /* Filter Styles */
+    .filter-bar {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+    .filter-bar input, .filter-bar select {
+      padding: 6px 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 0.95rem;
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none; 
+      position: fixed; 
+      z-index: 1000; 
+      left: 0;
+      top: 0;
+      width: 100%; 
+      height: 100%; 
+      overflow: auto; 
+      background-color: rgba(0,0,0,0.5); 
+    }
+    .modal-content {
+      background-color: #fff;
+      margin: 5% auto; 
+      padding: 20px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+      cursor: pointer;
+    }
+    .modal-content p { margin: 8px 0; }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
   <nav class="navbar">
-    <div class="nav-container">
-      <h1 class="nav-brand">MedPulse</h1>
-      <div class="nav-links">
-        <a href="dashboard.html">Dashboard</a>
-        <a href="qr-code.html">My QR Code</a>
-        <a href="../index.html">Logout</a>
-      </div>
+    <div class="nav-brand">
+      <img src="logo.jpeg" alt="MedPulse Logo" />
+      MedPulse
+    </div>
+    <div class="nav-links">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="qr-code.html">My QR Code</a>
+      <a href="../index.html">Logout</a>
     </div>
   </nav>
 
   <div class="dashboard-container">
     <h2>My Lab Results</h2>
-    
     <div class="lab-results-section">
       <div class="filter-bar">
-        <input type="text" placeholder="Search lab results..." class="search-input" />
-        <select class="filter-select">
-          <option>All Results</option>
-          <option>Recent</option>
-          <option>By Test Type</option>
-          <option>By Date</option>
+        <input type="text" placeholder="Search lab results..." id="searchInput" />
+        <select id="filterSelect">
+          <option value="all">All Results</option>
+          <option value="recent">Recent</option>
+          <option value="type">By Test Type</option>
+          <option value="date">By Date</option>
         </select>
       </div>
+      <div class="lab-results-list" id="lab-results-list"></div>
+    </div>
+  </div>
 
-      <div class="lab-results-list">
-        <div class="lab-results-card">
-          <div class="lab-results-header">
-            <h3>Complete Blood Count (CBC)</h3>
-            <span class="lab-results-date">2024-02-20</span>
-          </div>
-          <div class="lab-results-details">
-            <p><strong>Lab Technician:</strong> Alice Niyonsenga</p>
-            <p><strong>Department:</strong> Hematology</p>
-            <p><strong>Results:</strong> All blood components within normal range.</p>
-            <button class="view-btn">View Full Report</button>
-            <button class="download-btn">Download PDF</button>
-          </div>
-        </div>
-
-        <div class="lab-results-card">
-          <div class="lab-results-header">
-            <h3>Urinalysis Test</h3>
-            <span class="lab-results-date">2024-02-10</span>
-          </div>
-          <div class="lab-results-details">
-            <p><strong>Lab Technician:</strong> Dr. Brian Mugisha</p>
-            <p><strong>Department:</strong> Clinical Chemistry</p>
-            <p><strong>Results:</strong> No signs of infection or abnormalities detected.</p>
-            <button class="view-btn">View Full Report</button>
-            <button class="download-btn">Download PDF</button>
-          </div>
-        </div>
-
-        <div class="lab-results-card">
-          <div class="lab-results-header">
-            <h3>COVID-19 PCR Test</h3>
-            <span class="lab-results-date">2024-01-29</span>
-          </div>
-          <div class="lab-results-details">
-            <p><strong>Lab Technician:</strong> Dr. Louise Uwera</p>
-            <p><strong>Department:</strong> Virology</p>
-            <p><strong>Results:</strong> Negative for SARS-CoV-2 infection.</p>
-            <button class="view-btn">View Full Report</button>
-            <button class="download-btn">Download PDF</button>
-          </div>
-        </div>
-      </div>
+  <!-- Modal -->
+  <div id="labModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <h3>Lab Test Detail</h3>
+      <div id="modalBody"></div>
     </div>
   </div>
 
   <script>
-    document.querySelectorAll('.download-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        alert('Download PDF functionality not implemented yet.');
+    const patientId = localStorage.getItem('patientId');
+    const token = localStorage.getItem('authToken');
+    const labList = document.getElementById('lab-results-list');
+    const modal = document.getElementById('labModal');
+    const modalBody = document.getElementById('modalBody');
+    const closeBtn = modal.querySelector('.close-btn');
+    const filterSelect = document.getElementById('filterSelect');
+
+    if (!token || !patientId) {
+      alert("You are not logged in. Please login first.");
+      window.location.href = "../index.html";
+    }
+
+    let allLabTests = [];
+
+    async function fetchLabTests() {
+      try {
+        const response = await fetch(`http://localhost:8080/patients_portal_auth/patients/${patientId}/records`, {
+          method: 'GET',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            alert("Session expired. Please login again.");
+            localStorage.clear();
+            window.location.href = "../index.html";
+          } else { throw new Error(`Error: ${response.status} ${response.statusText}`); }
+        }
+
+        const data = await response.json();
+        allLabTests = (data.lab_tests || []);
+        displayLabTests(allLabTests);
+
+      } catch (error) {
+        labList.innerHTML = `<p class="error">${error.message}</p>`;
+        console.error('Failed to fetch lab tests:', error);
+      }
+    }
+
+    function displayLabTests(tests) {
+      labList.innerHTML = '';
+      if (!tests.length) { labList.innerHTML = '<p>No lab results found.</p>'; return; }
+
+      tests.forEach(test => {
+        const card = document.createElement('div');
+        card.className = 'lab-results-card';
+        const dateText = test.result_date ? new Date(test.result_date).toLocaleDateString() : 'N/A';
+
+        let filesHtml = '';
+        if (test.files && test.files.length > 0) {
+          filesHtml = `<p><strong>Files:</strong></p><div>`;
+          test.files.forEach(file => {
+            filesHtml += `<button class="file-btn" onclick="window.open('${file.file_url}', '_blank')">View File</button>`;
+          });
+          filesHtml += `</div>`;
+        }
+
+        card.innerHTML = `
+          <div class="lab-results-header">
+            <h3>${test.test_name || 'Lab Test'}</h3>
+            <span class="lab-results-date">${dateText}</span>
+          </div>
+          <div class="lab-results-details">
+            <p><strong>Lab Technician:</strong> ${test.doctor_name || 'N/A'}</p>
+            <p><strong>Department/Hospital:</strong> ${test.hospital_name || 'N/A'}</p>
+            <p><strong>Results:</strong> ${test.result_value || 'N/A'}</p>
+            ${filesHtml}
+            <button class="view-btn">View Full Report</button>
+            <button class="download-btn">Download PDF</button>
+          </div>
+        `;
+
+        card.querySelector('.view-btn').addEventListener('click', () => {
+          let filesModalHtml = '';
+          if (test.files && test.files.length > 0) {
+            filesModalHtml = `<p><strong>Files:</strong></p>`;
+            test.files.forEach(f => {
+              filesModalHtml += `<button class="file-btn" onclick="window.open('${f.file_url}', '_blank')">View File</button> `;
+            });
+          }
+
+          modalBody.innerHTML = `
+            <p><strong>Date:</strong> ${dateText}</p>
+            <p><strong>Lab Technician:</strong> ${test.doctor_name || 'N/A'}</p>
+            <p><strong>Department/Hospital:</strong> ${test.hospital_name || 'N/A'}</p>
+            <p><strong>Test Name:</strong> ${test.test_name || 'N/A'}</p>
+            <p><strong>Results:</strong> ${test.result_value || 'N/A'}</p>
+            <p><strong>Notes:</strong> ${test.notes || 'N/A'}</p>
+            ${filesModalHtml}
+          `;
+          modal.style.display = 'block';
+        });
+
+        card.querySelector('.download-btn').addEventListener('click', () => {
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF();
+          const pageHeight = doc.internal.pageSize.height;
+          let y = 50, pageNum = 1;
+
+          const addHeader = () => {
+            const img = new Image();
+            img.src = 'logo.jpeg';
+            img.onload = () => doc.addImage(img, 'JPEG', 20, 10, 20, 20);
+            doc.setFontSize(16);
+            doc.setFont(undefined,'bold');
+            doc.text("MedPulse", 105, 20, {align:'center'});
+            doc.setFontSize(14);
+            doc.setFont(undefined,'normal');
+            doc.text("Lab Test Report", 105, 28, {align:'center'});
+            doc.setLineWidth(0.5);
+            doc.line(20, 35, 190, 35);
+          };
+
+          const addFooter = (pageNum) => {
+            doc.setFontSize(10);
+            doc.setFont(undefined,'normal');
+            doc.text(`Page ${pageNum}`, 105, pageHeight - 10, {align:'center'});
+          };
+
+          const recordLines = [
+            {label:"Date", value:dateText},
+            {label:"Lab Technician", value:test.doctor_name||"N/A"},
+            {label:"Department/Hospital", value:test.hospital_name||"N/A"},
+            {label:"Test Name", value:test.test_name||"N/A"},
+            {label:"Results", value:test.result_value||"N/A"},
+            {label:"Notes", value:test.notes||"N/A"}
+          ];
+
+          addHeader();
+          recordLines.forEach(line => {
+            const splitText = doc.splitTextToSize(line.value, 110);
+            splitText.forEach(textLine => {
+              if(y + 10 > pageHeight - 20){
+                addFooter(pageNum);
+                doc.addPage();
+                pageNum++;
+                y = 50;
+                addHeader();
+              }
+              doc.setFont(undefined,'bold');
+              doc.text(`${line.label}:`, 20, y);
+              doc.setFont(undefined,'normal');
+              doc.text(textLine, 70, y);
+              y+=10;
+            });
+            y+=2;
+          });
+
+          if (test.files && test.files.length > 0) {
+            y += 5;
+            doc.setFont(undefined,'bold');
+            doc.text("Files:", 20, y);
+            y += 10;
+            test.files.forEach(f => {
+              const splitText = doc.splitTextToSize(f.file_url, 150);
+              splitText.forEach(textLine => {
+                if(y + 10 > pageHeight - 20){
+                  addFooter(pageNum);
+                  doc.addPage();
+                  pageNum++;
+                  y = 50;
+                  addHeader();
+                }
+                doc.setFont(undefined,'normal');
+                doc.text(textLine, 25, y);
+                y+=10;
+              });
+            });
+          }
+
+          addFooter(pageNum);
+          const filename = `LabTest_${new Date(test.result_date).toISOString().split('T')[0]}.pdf`;
+          doc.save(filename);
+        });
+
+        labList.appendChild(card);
+      });
+    }
+
+    closeBtn.addEventListener('click',()=>modal.style.display='none');
+    window.addEventListener('click', e => { if(e.target==modal) modal.style.display='none'; });
+
+    document.getElementById('searchInput').addEventListener('input', function(){
+      const query = this.value.toLowerCase();
+      document.querySelectorAll('.lab-results-card').forEach(card=>{
+        const text = card.innerText.toLowerCase();
+        card.style.display = text.includes(query) ? 'block' : 'none';
       });
     });
 
-    
-    document.querySelectorAll('.view-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        console.log('View Full Report clicked.');
-      });
+    filterSelect.addEventListener('change', () => {
+      let filtered = [...allLabTests];
+      const val = filterSelect.value;
+
+      if(val === 'recent'){
+        filtered.sort((a,b)=>new Date(b.result_date) - new Date(a.result_date));
+      } else if(val === 'type'){
+        filtered.sort((a,b)=> (a.test_name||'').localeCompare(b.test_name||''));
+      } else if(val === 'date'){
+        filtered.sort((a,b)=>new Date(a.result_date) - new Date(b.result_date));
+      }
+
+      displayLabTests(filtered);
     });
+
+    fetchLabTests();
   </script>
 </body>
 </html>
