@@ -14,6 +14,7 @@ from controler.hospital_routes import router as hospital_router
 from controler.doctor_portal import doctor_portal_router as doctor_portal_router
 from controler.doctor_routes import router as doctor_router
 from controler.patient_controller import router as patient_router
+from controler.department import department_router as deperment_router
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -53,6 +54,7 @@ app.include_router(doctor_router)
 app.include_router(patient_router)
 app.include_router(patient_router_auth)
 app.include_router(patient_router_create)
+app.include_router(department_router)
 
 @app.get("/")
 async def root():
