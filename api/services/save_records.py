@@ -29,6 +29,7 @@ class Record:
         if isinstance(patient_name, int):
             with SessionLocal() as session:
                 patient = session.query(Patient).filter(Patient.patient_id == patient_name).first()
+                #patient = session.query(patient).all()
                 return [patient] if patient else []
         
         with SessionLocal() as session:

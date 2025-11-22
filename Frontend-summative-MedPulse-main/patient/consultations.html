@@ -23,75 +23,113 @@
     
     <div class="consultations-section">
       <div class="filter-bar">
-        <input type="text" placeholder="Search consultations..." class="search-input" />
-        <select class="filter-select">
-          <option>All Consultations</option>
-          <option>Recent</option>
-          <option>By Doctor</option>
-          <option>By Date</option>
-        </select>
+        <input type="text" placeholder="Search consultations..." class="search-input" id="searchInput" />
       </div>
 
-      <div class="consultations-list">
-        <div class="consultations-card">
-          <div class="consultations-header">
-            <h3>General Checkup</h3>
-            <span class="consultations-date">2024-01-15</span>
-          </div>
-          <div class="consultations-details">
-            <p><strong>Doctor:</strong> Dr. Sarah Johnson</p>
-            <p><strong>Department:</strong> General Medicine</p>
-            <p><strong>Diagnosis:</strong> Routine checkup - All clear</p>
-            <button class="view-btn">View Full Report</button>
-            <button class="download-btn">Download PDF</button>
-          </div>
-        </div>
-
-        <div class="consultations-card">
-          <div class="consultations-header">
-            <h3>Blood Test Results</h3>
-            <span class="consultations-date">2024-01-10</span>
-          </div>
-          <div class="consultations-details">
-            <p><strong>Doctor:</strong> Dr. Michael Brown</p>
-            <p><strong>Department:</strong> Laboratory</p>
-            <p><strong>Diagnosis:</strong> Blood work completed - Normal ranges</p>
-            <button class="view-btn">View Full Report</button>
-            <button class="download-btn">Download PDF</button>
-          </div>
-        </div>
-
-        <div class="consultations-card">
-          <div class="consultations-header">
-            <h3>X-Ray Examination</h3>
-            <span class="consultations-date">2024-01-05</span>
-          </div>
-          <div class="consultations-details">
-            <p><strong>Doctor:</strong> Dr. Emily Davis</p>
-            <p><strong>Department:</strong> Radiology</p>
-            <p><strong>Diagnosis:</strong> Chest X-ray - No abnormalities detected</p>
-            <button class="view-btn">View Full Report</button>
-            <button class="download-btn">Download PDF</button>
-          </div>
-        </div>
+      <div class="consultations-list" id="consultations-list">
+        <!-- Medical records will be dynamically loaded here -->
       </div>
     </div>
   </div>
 
-  
-  <script>    
-    document.querySelectorAll('.download-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        alert('Download PDF functionality not implemented yet.');
+  <script>
+    const patientId = localStorage.getItem('patientId');
+    const token = localStorage.getItem('authToken');
+    const consultationsList = document.getElementById('consultations-list');
+
+    // Redirect to login if token or patientId missing
+    if (!token || !patientId) {
+      alert("You are not logged in. Please login first.");
+      window.location.href = "../index.html";
+    }
+
+    async function fetchMedicalRecords() {
+      try {
+        const response = await fetch(`http://localhost:8080/patients_portal_auth/patients/${patientId}/records`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            alert("Session expired. Please login again.");
+            localStorage.clear();
+            window.location.href = "../index.html";
+          } else {
+            throw new Error(`Error: ${response.status} ${response.statusText}`);
+          }
+        }
+
+        let records = await response.json();
+
+        // Ensure records is always an array
+        if (!records) {
+          records = [];
+        } else if (!Array.isArray(records)) {
+          records = [records];
+        }
+
+        displayRecords(records);
+
+      } catch (error) {
+        consultationsList.innerHTML = `<p class="error">${error.message}</p>`;
+        console.error('Failed to fetch medical records:', error);
+      }
+    }
+
+    function displayRecords(records) {
+      consultationsList.innerHTML = '';
+
+      if (!records || records.length === 0) {
+        consultationsList.innerHTML = '<p>No consultation found.</p>';
+        return;
+      }
+
+      records.forEach(record => {
+        const card = document.createElement('div');
+        card.className = 'consultations-card';
+
+        card.innerHTML = `
+          <div class="consultations-header">
+            <h3>${record.title}</h3>
+            <span class="consultations-date">${record.date}</span>
+          </div>
+          <div class="consultations-details">
+            <p><strong>Doctor:</strong> ${record.doctor_name}</p>
+            <p><strong>Department:</strong> ${record.department}</p>
+            <p><strong>Diagnosis:</strong> ${record.diagnosis}</p>
+            <button class="view-btn">View Full Report</button>
+            <button class="download-btn">Download PDF</button>
+          </div>
+        `;
+
+        card.querySelector('.view-btn').addEventListener('click', () => {
+          console.log('View Full Report clicked for record ID:', record.id);
+        });
+
+        card.querySelector('.download-btn').addEventListener('click', () => {
+          console.log('Download PDF clicked for record ID:', record.id);
+          alert('Download PDF functionality not implemented yet.');
+        });
+
+        consultationsList.appendChild(card);
+      });
+    }
+
+    // Search filter
+    document.getElementById('searchInput').addEventListener('input', function() {
+      const query = this.value.toLowerCase();
+      document.querySelectorAll('.consultations-card').forEach(card => {
+        const text = card.innerText.toLowerCase();
+        card.style.display = text.includes(query) ? 'block' : 'none';
       });
     });
 
-    
-    document.querySelectorAll('.view-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        console.log('View Full Report clicked.');
-      });
-    });
+    // Fetch records on page load
+    fetchMedicalRecords();
   </script>
 </body>
 </html>

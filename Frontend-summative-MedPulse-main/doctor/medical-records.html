@@ -165,11 +165,11 @@
       const token = localStorage.getItem('doctor_token');
       const doctorId = localStorage.getItem('doctorId');
       const doctorName = localStorage.getItem('doctorName') || 'Unknown';
-
       if(!type || !token || !doctorId) return alert("Doctor info missing. Please login again.");
 
-      try{
+      try {
         let response, data;
+        const baseUrl = `http://localhost:8080/doctor_portal/patients`;
 
         if(type==='consultation'){
           data = {
@@ -181,7 +181,7 @@
             follow_up_date: document.getElementById('follow-up-date').value,
             created_by: doctorName
           };
-          response = await fetch(`http://localhost:8080/doctor_portal/patients/new_consultation/${currentPatientId}`, {
+          response = await fetch(`${baseUrl}/new_consultation/${currentPatientId}`, {
             method: "POST",
             headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
             body: JSON.stringify(data)
@@ -198,7 +198,7 @@
             notes: document.getElementById('prescription-notes').value,
             prescribed_by: doctorName
           };
-          response = await fetch(`http://localhost:8080/doctor_portal/patients/new_prescription/${currentPatientId}`, {
+          response = await fetch(`${baseUrl}/new_prescription/${currentPatientId}`, {
             method: "POST",
             headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
             body: JSON.stringify(data)
@@ -214,7 +214,7 @@
             notes: document.getElementById('lab-notes').value,
             doctor_name: doctorName
           };
-          response = await fetch(`http://localhost:8080/doctor_portal/patients/new_lab_test/${currentPatientId}`, {
+          response = await fetch(`${baseUrl}/new_lab_test/${currentPatientId}`, {
             method: "POST",
             headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
             body: JSON.stringify(data)
@@ -226,17 +226,15 @@
           if(!labTestId) throw new Error("Lab Test ID missing from server response.");
 
           const files = document.getElementById('lab-files').files;
-          if(files.length > 0){
-            for(let i=0;i<files.length;i++){
-              const formData = new FormData();
-              formData.append("file", files[i]);
-              const uploadResponse = await fetch(`http://localhost:8080/doctor_portal/patients/lab_test/${labTestId}/upload_file`, {
-                method: "POST",
-                headers: { "Authorization": `Bearer ${token}` },
-                body: formData
-              });
-              if(!uploadResponse.ok) throw new Error("Failed to upload lab test file.");
-            }
+          for(let i=0;i<files.length;i++){
+            const formData = new FormData();
+            formData.append("file", files[i]);
+            const uploadResponse = await fetch(`${baseUrl}/lab_test/${labTestId}/upload_file`, {
+              method: "POST",
+              headers: { "Authorization": `Bearer ${token}` },
+              body: formData
+            });
+            if(!uploadResponse.ok) throw new Error("Failed to upload lab test file.");
           }
         }
 
@@ -244,7 +242,8 @@
         alert("Record saved successfully!");
         document.getElementById('medical-record-form').reset();
         loadPatientRecords(currentPatientId);
-      }catch(err){
+
+      } catch(err){
         console.error(err);
         alert(err.message);
       }
@@ -258,73 +257,65 @@
         });
         if (!response.ok) throw new Error("Failed to fetch patient records.");
         const records = await response.json();
-
         const tbody = document.getElementById('records-list');
         tbody.innerHTML = '';
 
-        records.forEach(r => {
-          let date = '-';
-          let type = '';
-          let description = '';
-          let doctor = '-';
-
-          if (r.diagnosis) {  // Consultation
-            type = 'Consultation';
-            date = r.record_date || '-';
-            description = `Diagnosis: ${r.diagnosis}, Treatment: ${r.treatment || '-'}`;
-            doctor = r.created_by || '-';
-          } else if (r.medicine_name) {  // Prescription
-            type = 'Prescription';
-            date = r.prescription_date || '-';
-            description = `Medicine: ${r.medicine_name}, Dosage: ${r.dosage || '-'}, Frequency: ${r.frequency || '-'}, Duration: ${r.duration || '-'}`;
-            doctor = r.prescribed_by || '-';
-          } else if (r.test_name) {  // Lab Test
-            type = 'Lab Test';
-            date = r.result_date || '-';
-            description = `Test: ${r.test_name}, Result: ${r.result_value || '-'}`;
-            doctor = r.doctor_name || '-';
-          }
-
+        if(!records || records.length === 0){
           const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${date}</td>
-            <td>${type}</td>
-            <td>${description}</td>
-            <td>${doctor}</td>
-            <td>-</td>
-          `;
+          tr.innerHTML = `<td colspan="5" style="text-align:center;">No records found</td>`;
+          tbody.appendChild(tr);
+          return;
+        }
+
+        records.forEach(r => {
+          let date='-', type='', description='', doctor='-';
+          if(r.diagnosis){ type='Consultation'; date=r.record_date||'-'; description=`Diagnosis: ${r.diagnosis}, Treatment: ${r.treatment||'-'}`; doctor=r.created_by||'-'; }
+          else if(r.medicine_name){ type='Prescription'; date=r.prescription_date||'-'; description=`Medicine: ${r.medicine_name}, Dosage: ${r.dosage||'-'}, Frequency: ${r.frequency||'-'}, Duration: ${r.duration||'-'}`; doctor=r.prescribed_by||'-'; }
+          else if(r.test_name){ type='Lab Test'; date=r.result_date||'-'; description=`Test: ${r.test_name}, Result: ${r.result_value||'-'}`; doctor=r.doctor_name||'-'; }
+
+          const tr=document.createElement('tr');
+          tr.innerHTML=`<td>${date}</td><td>${type}</td><td>${description}</td><td>${doctor}</td><td>-</td>`;
           tbody.appendChild(tr);
         });
-      } catch (err) {
-        console.error(err);
-      }
+
+      } catch(err){ console.error(err); }
     }
 
     async function searchPatient() {
       const searchTerm = document.getElementById('patient-search').value.trim();
       const resultsList = document.getElementById('search-results');
-      resultsList.innerHTML=''; resultsList.style.display='none';
-      if(!searchTerm) return;
+      resultsList.innerHTML = '';
+      resultsList.style.display = 'none';
+      if (!searchTerm) return;
 
-      const patients = [
-        {id:1, first_name:'John', last_name:'Doe'},
-        {id:2, first_name:'Jane', last_name:'Smith'}
-      ].filter(p=>(p.first_name+' '+p.last_name).toLowerCase().includes(searchTerm.toLowerCase()));
+      const token = localStorage.getItem('doctor_token');
+      if (!token) return alert("Please login again.");
 
-      if(patients.length===0) return;
-      resultsList.style.display='block';
-      patients.forEach(p=>{
-        const li=document.createElement('li');
-        li.textContent=`${p.first_name} ${p.last_name} (ID: ${p.id})`;
-        li.onclick=()=>selectPatient(p);
-        resultsList.appendChild(li);
-      });
+      try {
+        const response = await fetch(`http://localhost:8080/doctor_portal/patients/search/${encodeURIComponent(searchTerm)}`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if(!response.ok) throw new Error("Failed to search patients.");
+        const patients = await response.json();
+        if(!patients || patients.length===0) return;
+
+        resultsList.style.display='block';
+        patients.forEach(p=>{
+          const li=document.createElement('li');
+          li.textContent=`${p.first_name} ${p.second_name} (ID: ${p.patient_id})`;
+          li.onclick=()=>selectPatient(p);
+          resultsList.appendChild(li);
+        });
+      } catch(err){
+        console.error(err);
+        alert(err.message);
+      }
     }
 
-    function selectPatient(patient) {
-      currentPatientId = patient.id;
-      document.getElementById('patient-id').value = patient.id;
-      document.getElementById('patient-name-display').textContent = patient.first_name + ' ' + patient.last_name;
+    function selectPatient(patient){
+      currentPatientId = patient.patient_id; // corrected: use patient_id
+      document.getElementById('patient-id').value = patient.patient_id;
+      document.getElementById('patient-name-display').textContent = `${patient.first_name} ${patient.second_name}`;
       document.getElementById('record-form-section').style.display='block';
       document.getElementById('patient-records-list').style.display='block';
       document.getElementById('search-results').innerHTML='';

@@ -39,25 +39,50 @@
     });
 
     // Handle form submission
-    document.getElementById('loginForm').addEventListener('submit', (e) => {
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       
-      const rememberMe = document.getElementById('rememberMe').checked;
       const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const rememberMe = document.getElementById('rememberMe').checked;
 
-      // Save email if remember me is checked
-      if (rememberMe) {
-        localStorage.setItem('rememberedPatientEmail', email);
-      } else {
-        localStorage.removeItem('rememberedPatientEmail');
+      try {
+        const response = await fetch('http://localhost:8080/patients_portal_auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          alert(data.detail || 'Login failed');
+          return;
+        }
+
+        // Correctly save token and patient_id
+        const token = data.access_token;
+        const patientId = data.patient_id;
+
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('patientId', patientId);
+
+        if (rememberMe) {
+          localStorage.setItem('rememberedPatientEmail', email);
+        } else {
+          localStorage.removeItem('rememberedPatientEmail');
+        }
+
+        localStorage.setItem('patientLoggedIn', 'true');
+        localStorage.setItem('patientEmail', email);
+
+        // Redirect to dashboard
+        window.location.href = 'dashboard.html';
+
+      } catch (error) {
+        console.error('Error during login:', error);
+        alert('An error occurred. Please try again.');
       }
-
-      // Store login session (simulating authentication)
-      localStorage.setItem('patientLoggedIn', 'true');
-      localStorage.setItem('patientEmail', email);
-      
-      // Redirect to dashboard
-      window.location.href = 'dashboard.html';
     });
   </script>
 </body>
