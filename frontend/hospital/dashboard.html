@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hospital Dashboard - MedPulse</title>
+  <link rel="stylesheet" href="hospital.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <h1 class="nav-brand">MedPulse</h1>
+      <div class="nav-links">
+        <a href="dashboard.html" class="active">Dashboard</a>
+        <a href="change-password.html">Change Password</a>
+        <a href="#" onclick="logout()">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <div class="welcome-section">
+      <h2>Welcome, <span id="hospitalName">Hospital Name</span></h2>
+      <p class="hospital-info">Manage your hospital operations, doctors, and patients</p>
+    </div>
+
+    <div class="dashboard-grid">
+      <div class="dashboard-card">
+        <div class="card-icon">👨‍⚕️</div>
+        <h3>Register Doctor</h3>
+        <p>Add new doctors to your hospital</p>
+        <a href="register-doctor.html" class="card-link">Register Now →</a>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="card-icon">👤</div>
+        <h3>Register Patient</h3>
+        <p>Register new patients and assign unique IDs</p>
+        <a href="register-patient.html" class="card-link">Register Now →</a>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="card-icon">📋</div>
+        <h3>Manage Doctors</h3>
+        <p>View and manage registered doctors</p>
+        <a href="doctors.html" class="card-link">View Doctors →</a>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="card-icon">📊</div>
+        <h3>Manage Patients</h3>
+        <p>View and manage registered patients</p>
+        <a href="patients.html" class="card-link">View Patients →</a>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="card-icon">🏢</div>
+        <h3>Departments</h3>
+        <p>Create, edit, or remove departments</p>
+        <a href="departments.html" class="card-link">Manage Departments →</a>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="card-icon">📋</div>
+        <h3>Audit Logs</h3>
+        <p>View logs of actions taken by staff</p>
+        <a href="audit-logs.html" class="card-link">View Logs →</a>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="card-icon">📈</div>
+        <h3>Reports</h3>
+        <p>Generate reports on hospital operations</p>
+        <a href="reports.html" class="card-link">Generate Reports →</a>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="card-icon">⏰</div>
+        <h3>Working Hours & Shifts</h3>
+        <p>Define working hours and shifts for departments</p>
+        <a href="shifts.html" class="card-link">Manage Shifts →</a>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Load hospital name from localStorage
+    window.addEventListener('DOMContentLoaded', () => {
+      const hospitalName = localStorage.getItem('hospitalName') || 'Hospital Name';
+      const hospitalData = localStorage.getItem('hospitalData');
+      
+      if (hospitalData) {
+        const data = JSON.parse(hospitalData);
+        document.getElementById('hospitalName').textContent = data.name || hospitalName;
+      } else {
+        document.getElementById('hospitalName').textContent = hospitalName;
+      }
+    });
+
+    // Logout function
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        // Clear all hospital-related data
+        localStorage.removeItem('hospitalLoggedIn');
+        localStorage.removeItem('hospitalName');
+        localStorage.removeItem('hospitalData');
+        // Redirect to home
+        window.location.href = '../index.html';
+      }
+    }
+  </script>
+</body>
+</html>
+

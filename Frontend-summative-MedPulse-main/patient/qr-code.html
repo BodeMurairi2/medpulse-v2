@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My QR Code - MedPulse</title>
+  <link rel="stylesheet" href="patient.css" />
+  <style>
+    /* Responsive QR code */
+    #qrcode-img {
+      width: 50%;        /* scales to 50% of container width */
+      max-width: 250px;  /* max width to maintain readability */
+      height: auto;      /* keeps aspect ratio */
+    }
+
+    .qr-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .download-btn {
+      padding: 8px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      border-radius: 6px;
+      background-color: #007bff;
+      color: white;
+    }
+
+    .download-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <h1 class="nav-brand">MedPulse</h1>
+      <div class="nav-links">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="qr-code.html" class="active">My QR Code</a>
+        <a href="../index.html">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <div class="qr-section">
+      <h2>My QR Code</h2>
+      <p class="qr-description">
+        Share this QR code with authorized doctors for quick access to your basic information.
+      </p>
+      
+      <div class="qr-container">
+        <img id="qrcode-img" alt="Patient QR Code" />
+        <p class="qr-info">Patient ID: <span id="displayPatientId">P-12345</span></p>
+        <button class="download-btn" onclick="downloadQR()">Download QR Code</button>
+      </div>
+
+      <div class="qr-instructions">
+        <h3>How to Use:</h3>
+        <ol>
+          <li>Show this QR code to your doctor</li>
+          <li>Doctor will scan the code using their device</li>
+          <li>Doctor will be prompted to enter their ID for verification</li>
+          <li>Once verified, doctor can access your medical consultations</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('authToken');
+    const patientId = localStorage.getItem('patientId');
+
+    if (!token || !patientId) {
+      alert("You are not logged in. Please login first.");
+      window.location.href = "../index.html";
+    }
+
+    async function fetchEncryptedQRCode() {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/patients_portal_auth/patients/${patientId}/qrcode`,
+          {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            alert("Session expired. Please login again.");
+            localStorage.clear();
+            window.location.href = "../index.html";
+          } else {
+            throw new Error(`Error fetching QR code: ${response.status} ${response.statusText}`);
+          }
+        }
+
+        const data = await response.json();
+        const qrBase64 = data.qr_code_base64;
+
+        document.getElementById('displayPatientId').textContent = patientId;
+        document.getElementById('qrcode-img').src = `data:image/png;base64,${qrBase64}`;
+
+      } catch (error) {
+        console.error(error);
+        alert("Failed to fetch QR code. Check console for details.");
+      }
+    }
+
+    function downloadQR() {
+      const img = document.getElementById('qrcode-img');
+      if (img && img.src) {
+        const link = document.createElement('a');
+        link.download = 'medpulse-qr-code.png';
+        link.href = img.src;
+        link.click();
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', fetchEncryptedQRCode);
+  </script>
+</body>
+</html>

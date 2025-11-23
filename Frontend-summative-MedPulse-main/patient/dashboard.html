@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patient Dashboard - MedPulse</title>
+  <link rel="stylesheet" href="patient.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <h1 class="nav-brand">MedPulse</h1>
+      <div class="nav-links">
+        <a href="dashboard.html" class="active">Dashboard</a>
+        <a href="form-patient.html">My Form</a>
+        <a href="../index.html" onclick="logout()">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <div class="welcome-section">
+      <h2>Welcome, <span id="patientName">Dear Patient</span></h2>
+      <p class="patient-id">Patient ID: <span id="patientId">P-12345</span></p>
+    </div>
+
+    <div class="dashboard-grid">
+      <div class="dashboard-card">
+        <div class="card-icon">📋</div>
+        <h3>Medical Consultations</h3>
+        <p>View your complete medical history</p>
+        <a href="consultations.html" class="card-link">View Consultations →</a>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="card-icon">📄</div>
+        <h3>Medical Prescriptions</h3>
+        <p>Access your medical reports and prescriptions</p>
+        <a href="prescriptions.html" class="card-link">View Prescriptions →</a>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="card-icon">📄</div>
+        <h3>Laboratory results</h3>
+        <p>Access your medical lab test results</p>
+        <a href="lab-results.html" class="card-link">View Prescriptions →</a>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="card-icon">📅</div>
+        <h3>Book Appointment</h3>
+        <p>Schedule an appointment with your doctor</p>
+        <a href="appointments.html" class="card-link">Book Now →</a>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="card-icon">📱</div>
+        <h3>My QR Code</h3>
+        <p>Share your QR code for quick access</p>
+        <a href="qr-code.html" class="card-link">View QR Code →</a>
+      </div>
+    </div>
+
+    <div class="recent-activity">
+      <h3>Recent Activity</h3>
+      <div class="activity-list">
+        <div class="activity-item">
+          <span class="activity-date">2024-01-15</span>
+          <span class="activity-text">Appointment scheduled with Dr. Smith</span>
+        </div>
+        <div class="activity-item">
+          <span class="activity-date">2024-01-10</span>
+          <span class="activity-text">New medical prescription received</span>
+        </div>
+        <div class="activity-item">
+          <span class="activity-date">2024-01-05</span>
+          <span class="activity-text">Medical consultations updated</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function fetchPatientInfo() {
+      const token = localStorage.getItem('patient_token'); // should be saved after login
+      if (!token) return;
+
+      try {
+        const response = await fetch('http://localhost:8080/patients_portal_auth/general_info', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch patient info');
+        }
+
+        const data = await response.json();
+        document.getElementById('patientName').textContent = data.patient_name || 'Patient Name';
+        document.getElementById('patientId').textContent = data.patient_id || 'P-12345';
+        localStorage.setItem('patientId', data.patient_id); // optional: save locally
+
+      } catch (error) {
+        console.error('Error fetching patient info:', error);
+      }
+    }
+
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('patient_token');
+        localStorage.removeItem('patientId');
+        window.location.href = '../index.html';
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      fetchPatientInfo();
+    });
+  </script>
+</body>
+</html>

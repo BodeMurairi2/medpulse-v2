@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patient Login - MedPulse</title>
+  <link rel="stylesheet" href="../login&signup.css" />
+</head>
+<body>
+  <div class="overlay-bg"></div>  
+  <div class="auth-container">
+    <h1>Patient Portal Login</h1>
+    <form id="loginForm">
+      <label for="email">Email Address</label>
+      <input type="email" id="email" name="email" required placeholder="Enter your registered email" />
+
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required placeholder="Enter your password" />
+
+      <div class="remember-me">
+        <input type="checkbox" id="rememberMe" name="rememberMe" />
+        <label for="rememberMe">Remember Me</label>
+      </div>
+
+      <button type="submit">Log In</button>
+      <p class="switch">Don't have an account? Contact your hospital to register.</p>
+      <p class="switch"><a href="../index.html">Back to Home</a></p>
+    </form>
+  </div>
+
+  <script>
+    // Load remembered email if it exists
+    window.addEventListener('DOMContentLoaded', () => {
+      const rememberedEmail = localStorage.getItem('rememberedPatientEmail');
+      if (rememberedEmail) {
+        document.getElementById('email').value = rememberedEmail;
+        document.getElementById('rememberMe').checked = true;
+      }
+    });
+
+    // Handle form submission
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const rememberMe = document.getElementById('rememberMe').checked;
+
+      try {
+        const response = await fetch('http://localhost:8080/patients_portal_auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          alert(data.detail || 'Login failed');
+          return;
+        }
+
+        // Correctly save token and patient_id
+        const token = data.access_token;
+        const patientId = data.patient_id;
+
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('patientId', patientId);
+
+        if (rememberMe) {
+          localStorage.setItem('rememberedPatientEmail', email);
+        } else {
+          localStorage.removeItem('rememberedPatientEmail');
+        }
+
+        localStorage.setItem('patientLoggedIn', 'true');
+        localStorage.setItem('patientEmail', email);
+
+        // Redirect to dashboard
+        window.location.href = 'dashboard.html';
+
+      } catch (error) {
+        console.error('Error during login:', error);
+        alert('An error occurred. Please try again.');
+      }
+    });
+  </script>
+</body>
+</html>

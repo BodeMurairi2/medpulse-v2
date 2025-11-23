@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Medical Records - MedPulse</title>
+  <link rel="stylesheet" href="doctor.css" />
+  <style>
+    #search-results li {
+      padding: 0.5rem 1rem;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    #search-results li:hover {
+      background-color: #f0f0f0;
+    }
+    .record-fields { display:none; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <h1 class="nav-brand">MedPulse</h1>
+      <div class="nav-links">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="notifications.html">Notifications</a>
+        <a href="change-password.html">Change Password</a>
+        <a href="#" onclick="logout()">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <h2>Create/Update Medical Record</h2>
+    <p>Search for a patient first to create or update their medical record.</p>
+
+    <div class="search-section">
+      <input type="text" id="patient-search" placeholder="Enter Patient Name..." class="search-input" />
+      <button class="btn-primary" onclick="searchPatient()">Search</button>
+      <ul id="search-results" style="list-style:none; padding-left:0; margin-top:10px; display:none;"></ul>
+    </div>
+
+    <div id="record-form-section" style="display: none;">
+      <div class="form-section">
+        <h3>Patient: <span id="patient-name-display"></span></h3>
+        <form id="medical-record-form">
+          <input type="hidden" id="patient-id" />
+          <div class="form-group">
+            <label for="record-type">Record Type</label>
+            <select id="record-type" required>
+              <option value="">Select type...</option>
+              <option value="consultation">Consultation</option>
+              <option value="prescription">Prescription</option>
+              <option value="lab-test">Lab Test</option>
+            </select>
+          </div>
+
+          <!-- Consultation Fields -->
+          <div id="consultation-fields" class="record-fields">
+            <div class="form-group">
+              <label for="diagnosis">Diagnosis</label>
+              <input type="text" id="diagnosis" placeholder="Diagnosis..." />
+            </div>
+            <div class="form-group">
+              <label for="treatment">Treatment</label>
+              <input type="text" id="treatment" placeholder="Treatment..." />
+            </div>
+            <div class="form-group">
+              <label for="follow-up-date">Follow-up Date</label>
+              <input type="date" id="follow-up-date" />
+            </div>
+            <div class="form-group">
+              <label for="notes">Notes</label>
+              <textarea id="notes" rows="3" placeholder="Doctor notes or additional info..."></textarea>
+            </div>
+          </div>
+
+          <!-- Prescription Fields -->
+          <div id="prescription-fields" class="record-fields">
+            <div class="form-group">
+              <label for="medicine-name">Medicine Name</label>
+              <input type="text" id="medicine-name" placeholder="Medicine name..." />
+            </div>
+            <div class="form-group">
+              <label for="dosage">Dosage</label>
+              <input type="text" id="dosage" placeholder="Dosage details..." />
+            </div>
+            <div class="form-group">
+              <label for="frequency">Frequency</label>
+              <input type="text" id="frequency" placeholder="Frequency..." />
+            </div>
+            <div class="form-group">
+              <label for="duration">Duration</label>
+              <input type="text" id="duration" placeholder="Duration..." />
+            </div>
+            <div class="form-group">
+              <label for="prescription-notes">Notes</label>
+              <textarea id="prescription-notes" rows="3" placeholder="Additional notes..."></textarea>
+            </div>
+          </div>
+
+          <!-- Lab Test Fields -->
+          <div id="lab-test-fields" class="record-fields">
+            <div class="form-group">
+              <label for="test-name">Test Name</label>
+              <input type="text" id="test-name" placeholder="Test name..." />
+            </div>
+            <div class="form-group">
+              <label for="result-value">Result</label>
+              <input type="text" id="result-value" placeholder="Result value..." />
+            </div>
+            <div class="form-group">
+              <label for="lab-notes">Notes</label>
+              <textarea id="lab-notes" rows="3" placeholder="Notes or observations..."></textarea>
+            </div>
+            <div class="form-group">
+              <label for="lab-file">Attach File</label>
+              <input type="file" id="lab-file" />
+              <button type="button" class="btn-primary" id="upload-file-btn">Upload</button>
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn">Save Record</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="patient-records-list" class="table-section" style="display: none;">
+      <h3>Patient Medical Records</h3>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Description</th>
+            <th>Doctor</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="records-list"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    let currentPatientId = null;
+    let lastLabTestId = null; // To store the most recently created lab test id
+
+    document.getElementById('record-type').addEventListener('change', async () => {
+      const type = document.getElementById('record-type').value;
+      document.querySelectorAll('.record-fields').forEach(f => f.style.display = 'none');
+      if(type==='consultation') document.getElementById('consultation-fields').style.display='block';
+      if(type==='prescription') document.getElementById('prescription-fields').style.display='block';
+      if(type==='lab-test') document.getElementById('lab-test-fields').style.display='block';
+
+      if(currentPatientId) await loadPatientRecords(currentPatientId, type);
+    });
+
+    async function submitRecord(e){
+      e.preventDefault();
+      if(!currentPatientId) return alert("Please select a patient before saving a record.");
+
+      const type = document.getElementById('record-type').value;
+      const token = localStorage.getItem('doctor_token');
+      const doctorId = localStorage.getItem('doctorId');
+      const doctorName = localStorage.getItem('doctorName') || 'Unknown';
+      if(!type || !token || !doctorId) return alert("Doctor info missing. Please login again.");
+
+      try {
+        let response, data;
+        const baseUrl = `http://localhost:8080/doctor_portal/patients`;
+
+        if(type==='consultation'){
+          data = {
+            patient_id: currentPatientId,
+            doctor_id: doctorId,
+            diagnosis: document.getElementById('diagnosis').value,
+            treatment: document.getElementById('treatment').value,
+            follow_up_date: document.getElementById('follow-up-date').value,
+            notes: document.getElementById('notes').value,
+            created_by: doctorName
+          };
+          response = await fetch(`${baseUrl}/new_consultation/${currentPatientId}`, {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+          });
+
+        } else if(type==='prescription'){
+          data = {
+            patient_id: currentPatientId,
+            doctor_id: doctorId,
+            medicine_name: document.getElementById('medicine-name').value,
+            dosage: document.getElementById('dosage').value,
+            frequency: document.getElementById('frequency').value,
+            duration: document.getElementById('duration').value,
+            notes: document.getElementById('prescription-notes').value,
+            prescribed_by: doctorName
+          };
+          response = await fetch(`${baseUrl}/new_prescription/${currentPatientId}`, {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+          });
+
+        } else if(type==='lab-test'){
+          data = {
+            patient_id: currentPatientId,
+            doctor_id: doctorId,
+            test_name: document.getElementById('test-name').value,
+            result_value: document.getElementById('result-value').value,
+            notes: document.getElementById('lab-notes').value,
+            doctor_name: doctorName
+          };
+          response = await fetch(`${baseUrl}/new_lab_test/${currentPatientId}`, {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+          });
+
+          const result = await response.json();
+          lastLabTestId = result.lab_test_id; // Capture the last lab test id for file upload
+        }
+
+        if(!response.ok) throw new Error("Failed to save record.");
+        alert("Record saved successfully!");
+        document.getElementById('medical-record-form').reset();
+        await loadPatientRecords(currentPatientId, type);
+
+      } catch(err){
+        console.error(err);
+        alert(err.message);
+      }
+    }
+
+    document.getElementById('upload-file-btn').addEventListener('click', async () => {
+      if(!lastLabTestId) return alert("No lab test record found to attach file.");
+      const fileInput = document.getElementById('lab-file');
+      if(!fileInput.files.length) return alert("Please select a file to upload.");
+
+      const token = localStorage.getItem('doctor_token');
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+
+      try {
+        const response = await fetch(`http://localhost:8080/doctor_portal/patients/lab_test/${lastLabTestId}/upload_file`, {
+          method: 'POST',
+          headers: { "Authorization": `Bearer ${token}` },
+          body: formData
+        });
+        if(!response.ok) throw new Error("Failed to upload file.");
+        alert("File uploaded successfully!");
+        fileInput.value = '';
+      } catch(err){
+        console.error(err);
+        alert(err.message);
+      }
+    });
+
+    async function loadPatientRecords(patientId, filterType) {
+      const token = localStorage.getItem('doctor_token');
+      try {
+        const response = await fetch(`http://localhost:8080/doctor_portal/patients/${patientId}/records`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error("Failed to fetch patient records.");
+        let records = await response.json();
+        const tbody = document.getElementById('records-list');
+        tbody.innerHTML = '';
+
+        if(!records || records.length === 0){
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td colspan="5" style="text-align:center;">No records found</td>`;
+          tbody.appendChild(tr);
+          return;
+        }
+
+        // Filter by selected type
+        records = records.filter(r => r.type.toLowerCase().replace(' ','-') === filterType);
+
+        // Sort descending by date (safely handling invalid/missing dates)
+        records.sort((a, b) => {
+          const dateA = a.date ? new Date(a.date) : new Date(0);
+          const dateB = b.date ? new Date(b.date) : new Date(0);
+          return dateB - dateA;
+        });
+
+        // Append to table
+        records.forEach(r => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${r.date || '-'}</td>
+                          <td>${r.type || '-'}</td>
+                          <td>${r.description || '-'}</td>
+                          <td>${r.doctor || '-'}</td>
+                          <td>${r.action || '-'}</td>`;
+          tbody.appendChild(tr);
+        });
+
+      } catch(err){ console.error(err); }
+    }
+
+    async function searchPatient() {
+      const searchTerm = document.getElementById('patient-search').value.trim();
+      const resultsList = document.getElementById('search-results');
+      resultsList.innerHTML = '';
+      resultsList.style.display = 'none';
+      if (!searchTerm) return;
+
+      const token = localStorage.getItem('doctor_token');
+      if (!token) return alert("Please login again.");
+
+      try {
+        const response = await fetch(`http://localhost:8080/doctor_portal/patients/search/${encodeURIComponent(searchTerm)}`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if(!response.ok) throw new Error("Failed to search patients.");
+        const patients = await response.json();
+        if(!patients || patients.length===0) return;
+
+        resultsList.style.display='block';
+        patients.forEach(p=>{
+          const li=document.createElement('li');
+          li.textContent=`${p.first_name} ${p.second_name} (ID: ${p.patient_id})`;
+          li.onclick=()=>selectPatient(p);
+          resultsList.appendChild(li);
+        });
+      } catch(err){
+        console.error(err);
+        alert(err.message);
+      }
+    }
+
+    function selectPatient(patient){
+      currentPatientId = patient.patient_id;
+      document.getElementById('patient-id').value = patient.patient_id;
+      document.getElementById('patient-name-display').textContent = `${patient.first_name} ${patient.second_name}`;
+      document.getElementById('record-form-section').style.display='block';
+      document.getElementById('patient-records-list').style.display='block';
+      document.getElementById('search-results').innerHTML='';
+      document.getElementById('search-results').style.display='none';
+      document.getElementById('patient-search').value='';
+      const type = document.getElementById('record-type').value;
+      if(type) loadPatientRecords(currentPatientId, type);
+    }
+
+    document.getElementById('medical-record-form').addEventListener('submit', submitRecord);
+
+    function logout(){
+      if(confirm('Are you sure you want to logout?')){
+        localStorage.clear();
+        window.location.href='../index.html';
+      }
+    }
+  </script>
+</body>
+</html>

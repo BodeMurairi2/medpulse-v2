@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notifications - MedPulse</title>
+  <link rel="stylesheet" href="doctor.css" />
+  <style>
+    /* Simple styling for testing */
+    .notification-item { border: 1px solid #ccc; padding: 10px; margin: 10px 0; cursor: pointer; border-radius: 5px; }
+    .notification-item.unread { background-color: #f5f5f5; }
+    .notification-icon { font-size: 20px; display: inline-block; width: 30px; }
+    .notification-content h4 { margin: 0 0 5px 0; }
+    .notification-date { font-size: 12px; color: #666; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <h1 class="nav-brand">MedPulse</h1>
+      <div class="nav-links">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="notifications.html" class="active">Notifications</a>
+        <a href="change-password.html">Change Password</a>
+        <a href="#" onclick="logout()">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <h2>Notifications</h2>
+    <button class="btn-primary" onclick="markAllAsRead()">Mark All as Read</button>
+    
+    <div id="notifications-list" class="notifications-list">
+      <!-- Notifications will be loaded here -->
+    </div>
+  </div>
+
+  <script>
+    // Static notifications for testing
+    const staticNotifications = [
+      {
+        id: "1",
+        doctorId: "D-12345",
+        type: "appointment",
+        title: "New Appointment Scheduled",
+        message: "Patient John Doe has scheduled an appointment for 24 Nov 2025 at 10:00 AM.",
+        timestamp: "2025-11-22T08:30:00",
+        read: false
+      },
+      {
+        id: "2",
+        doctorId: "D-12345",
+        type: "alert",
+        title: "Lab Results Ready",
+        message: "Lab results for Patient Jane Smith are ready for review.",
+        timestamp: "2025-11-21T14:00:00",
+        read: true
+      },
+      {
+        id: "3",
+        doctorId: "D-12345",
+        type: "appointment",
+        title: "Appointment Reminder",
+        message: "Reminder: Appointment with Patient Michael Brown tomorrow at 2:00 PM.",
+        timestamp: "2025-11-22T09:00:00",
+        read: false
+      }
+    ];
+
+    window.addEventListener('DOMContentLoaded', () => {
+      // Ensure a doctorId exists
+      if (!localStorage.getItem('doctorId')) {
+        localStorage.setItem('doctorId', 'D-12345');
+      }
+
+      // Save static notifications only if none exist
+      if (!localStorage.getItem('doctorNotifications')) {
+        localStorage.setItem('doctorNotifications', JSON.stringify(staticNotifications));
+      }
+
+      loadNotifications();
+    });
+
+    function loadNotifications() {
+      const doctorId = localStorage.getItem('doctorId');
+      const notifications = JSON.parse(localStorage.getItem('doctorNotifications') || '[]');
+      const doctorNotifications = notifications.filter(n => n.doctorId === doctorId);
+      const list = document.getElementById('notifications-list');
+
+      if (doctorNotifications.length === 0) {
+        list.innerHTML = '<p>No notifications.</p>';
+        return;
+      }
+
+      list.innerHTML = doctorNotifications.map(notif => {
+        const date = new Date(notif.timestamp);
+        return `
+          <div class="notification-item ${notif.read ? 'read' : 'unread'}" onclick="markAsRead('${notif.id}')">
+            <div class="notification-icon">${notif.type === 'appointment' ? '📅' : '🔔'}</div>
+            <div class="notification-content">
+              <h4>${notif.title}</h4>
+              <p>${notif.message}</p>
+              <span class="notification-date">${date.toLocaleString()}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function markAsRead(notificationId) {
+      const notifications = JSON.parse(localStorage.getItem('doctorNotifications') || '[]');
+      const notif = notifications.find(n => n.id === notificationId);
+      if (notif) {
+        notif.read = true;
+        localStorage.setItem('doctorNotifications', JSON.stringify(notifications));
+        loadNotifications();
+      }
+    }
+
+    function markAllAsRead() {
+      const doctorId = localStorage.getItem('doctorId');
+      const notifications = JSON.parse(localStorage.getItem('doctorNotifications') || '[]');
+      notifications.forEach(notif => {
+        if (notif.doctorId === doctorId) notif.read = true;
+      });
+      localStorage.setItem('doctorNotifications', JSON.stringify(notifications));
+      loadNotifications();
+    }
+
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('doctorLoggedIn');
+        localStorage.removeItem('doctorId');
+        window.location.href = '../index.html';
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hospital Sign Up - MedPulse</title>
+  <link rel="stylesheet" href="../login&signup.css" />
+</head>
+<body>
+  <div class="overlay-bg"></div> 
+  <div class="auth-container">
+    <h1>Hospital Sign Up</h1>
+    <form id="signupForm">
+      <label for="hospitalName">Hospital Name</label>
+      <input type="text" id="hospitalName" name="hospitalName" required />
+
+      <label for="email">Official Email Address</label>
+      <input type="email" id="email" name="email" required />
+
+      <label for="hospitalLicense">Hospital License</label>
+      <input type="text" id="license" name="license" required />
+
+      <label for="hospitalCountry">Hospital Country</label>
+      <input type="text" id="hospitalCountry" name="hospitalCountry" required />
+
+      <label for="hospitalCity">Hospital City</label>
+      <input type="text" id="city" name="city" required />
+
+      <label for="password">Create Password</label>
+      <input type="password" id="password" name="password" required />
+
+      <label for="confirmPassword">Confirm Password</label>
+      <input type="password" id="confirmPassword" name="confirmPassword" required />
+
+      <button type="submit">Sign Up</button>
+      <p class="switch">Already registered? <a href="login.html">Log in here</a></p>
+      <p class="switch"><a href="../index.html">Back to Home</a></p>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      if (password !== confirmPassword) {
+        alert('Passwords do not match!');
+        return;
+      }
+
+      const hospitalData = {
+        hospital_name: document.getElementById('hospitalName').value,
+        hospital_email: document.getElementById('email').value,
+        hospital_license: document.getElementById('license').value,
+        hospital_country: document.getElementById('hospitalCountry').value,
+        hospital_city: document.getElementById('city').value,
+        password
+      };
+
+      try {
+        const res = await fetch('http://localhost:8080/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(hospitalData)
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          alert(errorData.detail || 'Signup failed');
+          return;
+        }
+
+        const data = await res.json();
+        alert('Hospital registered successfully! Redirecting to login...');
+        window.location.href = 'login.html';
+      } catch (err) {
+        console.error(err);
+        alert('Server error. Try again later.');
+      }
+    });
+  </script>
+</body>
+</html>

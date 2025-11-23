@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patient Search - MedPulse</title>
+  <link rel="stylesheet" href="doctor.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <h1 class="nav-brand">MedPulse</h1>
+      <div class="nav-links">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="qr-scanner.html">QR Scanner</a>
+        <a href="patient-search.html" class="active">Patient Search</a>
+        <a href="../index.html">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <h2>Search Patient</h2>
+    
+    <div class="search-section">
+      <div class="search-tabs">
+        <button class="tab-btn active" onclick="showSearchTab('name')">Search by Name</button>
+        <button class="tab-btn" onclick="showSearchTab('id')">Search by ID</button>
+      </div>
+
+      <!-- Search by Name Tab -->
+      <div id="name-tab" class="tab-content active">
+        <form class="search-form" onsubmit="searchByName(event)">
+          <div class="form-group">
+            <label for="patientName">Patient Name</label>
+            <input type="text" id="patientName" placeholder="Enter patient's full name" required />
+          </div>
+          <button type="submit" class="search-btn">Search</button>
+        </form>
+      </div>
+
+      <!-- Search by ID Tab -->
+      <div id="id-tab" class="tab-content">
+        <form class="search-form" onsubmit="searchById(event)">
+          <div class="form-group">
+            <label for="patientId">Patient ID</label>
+            <input type="text" id="patientId" placeholder="Enter patient ID (e.g., P-12345)" required />
+          </div>
+          <button type="submit" class="search-btn">Search</button>
+        </form>
+      </div>
+
+      <!-- Search Results -->
+      <div id="search-results" class="search-results" style="display: none;">
+        <h3>Patient Information</h3>
+        <div class="patient-info-card">
+          <div class="info-row">
+            <strong>Patient ID:</strong>
+            <span id="result-patient-id">P-12345</span>
+          </div>
+          <div class="info-row">
+            <strong>Name:</strong>
+            <span id="result-patient-name">John Doe</span>
+          </div>
+          <div class="info-row">
+            <strong>Date of Birth:</strong>
+            <span id="result-dob">1990-01-01</span>
+          </div>
+          <div class="info-row">
+            <strong>Gender:</strong>
+            <span id="result-gender">Male</span>
+          </div>
+          <div class="info-row">
+            <strong>Hospital:</strong>
+            <span id="result-hospital">General Hospital</span>
+          </div>
+          <div class="patient-actions">
+            <a href="patient-records.html" class="action-btn">View Medical Records</a>
+            <a href="patient-transcriptions.html" class="action-btn">View Transcriptions</a>
+            <a href="add-record.html" class="action-btn secondary">Add New Record</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Check if redirected from QR scanner
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const patientId = urlParams.get('patientId');
+      const verified = urlParams.get('verified');
+      
+      if (patientId && verified === 'true') {
+        // Auto-search by ID
+        document.getElementById('patientId').value = patientId;
+        showSearchTab('id');
+        searchById(new Event('submit'), patientId);
+      }
+    });
+
+    function showSearchTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      
+      document.getElementById(tabName + '-tab').classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    function searchByName(e) {
+      e.preventDefault();
+      const name = document.getElementById('patientName').value;
+      // Simulate search - in real app, this would query the database
+      displayPatientResults({
+        id: 'P-12345',
+        name: name,
+        dob: '1990-01-01',
+        gender: 'Male',
+        hospital: 'General Hospital'
+      });
+    }
+
+    function searchById(e, patientId = null) {
+      if (e) e.preventDefault();
+      const id = patientId || document.getElementById('patientId').value;
+      // Simulate search - in real app, this would query the database
+      displayPatientResults({
+        id: id,
+        name: 'John Doe',
+        dob: '1990-01-01',
+        gender: 'Male',
+        hospital: 'General Hospital'
+      });
+    }
+
+    function displayPatientResults(patient) {
+      document.getElementById('result-patient-id').textContent = patient.id;
+      document.getElementById('result-patient-name').textContent = patient.name;
+      document.getElementById('result-dob').textContent = patient.dob;
+      document.getElementById('result-gender').textContent = patient.gender;
+      document.getElementById('result-hospital').textContent = patient.hospital;
+      
+      document.getElementById('search-results').style.display = 'block';
+      
+      // Update action links with patient ID
+      document.querySelectorAll('.action-btn').forEach(btn => {
+        const href = btn.getAttribute('href');
+        if (href.includes('patient-')) {
+          btn.href = href + '?patientId=' + patient.id;
+        }
+      });
+    }
+  </script>
+</body>
+</html>
+

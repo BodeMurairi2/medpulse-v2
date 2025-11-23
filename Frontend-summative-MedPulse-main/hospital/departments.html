@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Department Management - MedPulse</title>
+  <link rel="stylesheet" href="hospital.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <h1 class="nav-brand">MedPulse</h1>
+      <div class="nav-links">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="change-password.html">Change Password</a>
+        <a href="#" onclick="logout()">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <div class="page-header">
+      <h2>Department Management</h2>
+      <button class="btn-primary" onclick="showAddDepartmentForm()">+ Add New Department</button>
+    </div>
+
+    <!-- Add/Edit Department Form -->
+    <div id="department-form-section" class="form-section" style="display: none;">
+      <h3 id="form-title">Add New Department</h3>
+      <form id="department-form">
+        <input type="hidden" id="department-name-hidden" />
+        <div class="form-group">
+          <label for="department-name">Department Name</label>
+          <input type="text" id="department-name" required />
+        </div>
+        <div class="form-group">
+          <label for="department-description">Description</label>
+          <textarea id="department-description" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="department-email">Email</label>
+          <input type="email" id="department-email" readonly />
+        </div>
+        <div class="form-group">
+          <label for="department-phone">Phone</label>
+          <input type="text" id="department-phone" required />
+        </div>
+        <div class="form-group">
+          <label for="department-location">Location</label>
+          <input type="text" id="department-location" required />
+        </div>
+        <div class="form-group">
+          <label for="department-staff">Number of Staff</label>
+          <input type="number" id="department-staff" required min="1" />
+        </div>
+        <div class="form-group">
+          <label for="department-status">Status</label>
+          <select id="department-status" required>
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="submit-btn">Save Department</button>
+          <button type="button" class="btn-secondary" onclick="hideDepartmentForm()">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Departments List -->
+    <div class="table-section">
+      <h3>Departments List</h3>
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Department Name</th>
+              <th>Description</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Location</th>
+              <th>Staff</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="departments-list">
+            <!-- Departments loaded here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+<script>
+const apiBase = "http://localhost:8080/department";
+const token = localStorage.getItem('hospitalToken');
+const hospitalEmail = localStorage.getItem('hospitalName') || "";
+
+let editingName = null;
+
+// Load departments on page load
+window.addEventListener('DOMContentLoaded', loadDepartments);
+
+// Show Add Department Form
+function showAddDepartmentForm() {
+  editingName = null;
+  document.getElementById('form-title').textContent = 'Add New Department';
+  document.getElementById('department-form').reset();
+  document.getElementById('department-email').value = hospitalEmail;
+  document.getElementById('department-name-hidden').value = '';
+  document.getElementById('department-form-section').style.display = 'block';
+}
+
+// Hide form
+function hideDepartmentForm() {
+  document.getElementById('department-form-section').style.display = 'none';
+  editingName = null;
+}
+
+// Load all departments from backend
+async function loadDepartments() {
+  try {
+    const res = await fetch(`${apiBase}/all`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const departments = await res.json();
+    renderDepartments(departments);
+  } catch(err) {
+    console.error(err);
+    alert('Failed to load departments');
+  }
+}
+
+// Render table
+function renderDepartments(departments) {
+  const tbody = document.getElementById('departments-list');
+  if (!departments || departments.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center">No departments found</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = departments.map(dept => `
+    <tr>
+      <td>${dept.department_name}</td>
+      <td>${dept.department_description}</td>
+      <td>${dept.department_email}</td>
+      <td>${dept.phone}</td>
+      <td>${dept.location}</td>
+      <td>${dept.number_of_staff}</td>
+      <td>${dept.status ? 'Active' : 'Inactive'}</td>
+      <td>
+        <button class="btn-edit" onclick="editDepartment('${encodeURIComponent(dept.department_name)}')">Edit</button>
+        <button class="btn-delete" onclick="deleteDepartment('${encodeURIComponent(dept.department_name)}')">Delete</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// Edit department: fetch from backend and populate form
+async function editDepartment(name) {
+  try {
+    const res = await fetch(`${apiBase}/search/${name}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const dept = await res.json();
+    editingName = dept.department_name;
+
+    document.getElementById('form-title').textContent = 'Edit Department';
+    document.getElementById('department-name').value = dept.department_name;
+    document.getElementById('department-description').value = dept.department_description;
+    document.getElementById('department-email').value = dept.department_email;
+    document.getElementById('department-phone').value = dept.phone;
+    document.getElementById('department-location').value = dept.location;
+    document.getElementById('department-staff').value = dept.number_of_staff;
+    document.getElementById('department-status').value = dept.status;
+    document.getElementById('department-name-hidden').value = dept.department_name;
+    document.getElementById('department-form-section').style.display = 'block';
+  } catch(err) {
+    console.error(err);
+    alert('Failed to load department data');
+  }
+}
+
+// Delete department
+async function deleteDepartment(name) {
+  if (!confirm('Are you sure you want to delete this department?')) return;
+
+  try {
+    const res = await fetch(`${apiBase}/delete/${name}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      alert(err.detail || 'Failed to delete department');
+      return;
+    }
+
+    alert('Department deleted successfully!');
+    loadDepartments();
+  } catch(err) {
+    console.error(err);
+    alert('Server error. Could not delete department.');
+  }
+}
+
+// Handle add/edit form submission
+document.getElementById('department-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const payload = {
+    department_name: document.getElementById('department-name').value,
+    department_description: document.getElementById('department-description').value,
+    department_email: document.getElementById('department-email').value,
+    phone: document.getElementById('department-phone').value,
+    location: document.getElementById('department-location').value,
+    number_of_staff: parseInt(document.getElementById('department-staff').value),
+    status: document.getElementById('department-status').value === 'true',
+    hospital_id: parseInt(localStorage.getItem('hospitalId')) || 0
+  };
+
+  try {
+    const url = editingName ? `${apiBase}/update/${encodeURIComponent(editingName)}` : `${apiBase}/add`;
+    const method = editingName ? 'PUT' : 'POST';
+
+    const res = await fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      alert(err.detail || 'Failed to save department');
+      return;
+    }
+
+    alert(editingName ? 'Department updated!' : 'Department added!');
+    hideDepartmentForm();
+    loadDepartments();
+
+  } catch(err) {
+    console.error(err);
+    alert('Server error. Could not save department.');
+  }
+});
+
+// Logout
+function logout() {
+  if (confirm('Are you sure you want to logout?')) {
+    localStorage.removeItem('hospitalLoggedIn');
+    localStorage.removeItem('hospitalName');
+    localStorage.removeItem('hospitalToken');
+    localStorage.removeItem('hospitalId');
+    window.location.href = '../index.html';
+  }
+}
+</script>
+</body>
+</html>

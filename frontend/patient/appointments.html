@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book Appointment - MedPulse</title>
+  <link rel="stylesheet" href="patient.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <h1 class="nav-brand">MedPulse</h1>
+      <div class="nav-links">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="qr-code.html">My QR Code</a>
+        <a href="../index.html">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <h2>Book an Appointment</h2>
+    
+    <div class="appointments-section">
+      <div class="appointment-tabs">
+        <button class="tab-btn active" onclick="showTab('book')">Book New Appointment</button>
+        <button class="tab-btn" onclick="showTab('upcoming')">Upcoming Appointments</button>
+        <button class="tab-btn" onclick="showTab('history')">Appointment History</button>
+      </div>
+
+      <!-- Book Appointment Tab -->
+      <div id="book-tab" class="tab-content active">
+        <form class="appointment-form">
+        <div class="form-group">
+          <label for="doctor">Select Doctor</label>
+          <select id="doctor" required>
+            <option value="">Choose a doctor...</option>
+          </select>
+        </div>
+
+          <div class="form-group">
+            <label for="date">Select Date</label>
+            <input type="date" id="date" required />
+          </div>
+
+          <div class="form-group">
+            <label for="time">Select Time</label>
+            <select id="time" required>
+              <option value="">Choose a time...</option>
+              <option value="09:00">9:00 AM</option>
+              <option value="10:00">10:00 AM</option>
+              <option value="11:00">11:00 AM</option>
+              <option value="14:00">2:00 PM</option>
+              <option value="15:00">3:00 PM</option>
+              <option value="16:00">4:00 PM</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="reason">Reason for Visit</label>
+            <textarea id="reason" rows="4" placeholder="Briefly describe the reason for your appointment..."></textarea>
+          </div>
+
+          <button type="submit" class="submit-btn">Book Appointment</button>
+        </form>
+      </div>
+
+      <!-- Upcoming Appointments Tab -->
+      <div id="upcoming-tab" class="tab-content">
+        <div class="appointments-list">
+          <div class="appointment-item">
+            <div class="appointment-info">
+              <h3>Dr. Sarah Johnson</h3>
+              <p><strong>Date:</strong> January 20, 2024</p>
+              <p><strong>Time:</strong> 10:00 AM</p>
+              <p><strong>Department:</strong> General Medicine</p>
+            </div>
+            <div class="appointment-actions">
+              <button class="cancel-btn">Cancel</button>
+              <button class="reschedule-btn">Reschedule</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Appointment History Tab -->
+      <div id="history-tab" class="tab-content">
+        <div class="appointments-list">
+          <div class="appointment-item">
+            <div class="appointment-info">
+              <h3>Dr. Michael Brown</h3>
+              <p><strong>Date:</strong> January 15, 2024</p>
+              <p><strong>Time:</strong> 2:00 PM</p>
+              <p><strong>Status:</strong> Completed</p>
+            </div>
+          </div>
+          <div class="appointment-item">
+            <div class="appointment-info">
+              <h3>Dr. Emily Davis</h3>
+              <p><strong>Date:</strong> January 10, 2024</p>
+              <p><strong>Time:</strong> 11:00 AM</p>
+              <p><strong>Status:</strong> Completed</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      loadDoctors();
+      loadAppointments();
+    });
+
+    function loadDoctors() {
+      const doctors = JSON.parse(localStorage.getItem('doctors') || '[]');
+      const departments = JSON.parse(localStorage.getItem('departments') || '[]');
+      const select = document.getElementById('doctor');
+      
+      doctors.forEach(doctor => {
+        const dept = departments.find(d => d.id === doctor.departmentId);
+        const option = document.createElement('option');
+        option.value = doctor.id;
+        option.textContent = `${doctor.name || doctor.doctorName} - ${doctor.specialization || 'N/A'}${dept ? ' (' + dept.name + ')' : ''}`;
+        select.appendChild(option);
+      });
+    }
+
+    function loadAppointments() {
+      const patientId = localStorage.getItem('patientId');
+      const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+      const patientAppointments = appointments.filter(apt => apt.patientId === patientId);
+      const doctors = JSON.parse(localStorage.getItem('doctors') || '[]');
+      
+      // Load upcoming appointments
+      const upcomingList = document.querySelector('#upcoming-tab .appointments-list');
+      const upcoming = patientAppointments.filter(apt => apt.status !== 'completed' && apt.status !== 'cancelled');
+      
+      if (upcoming.length === 0) {
+        upcomingList.innerHTML = '<p>No upcoming appointments.</p>';
+      } else {
+        upcomingList.innerHTML = upcoming.map(apt => {
+          const doctor = doctors.find(d => d.id === apt.doctorId);
+          return `
+            <div class="appointment-item">
+              <div class="appointment-info">
+                <h3>${doctor ? (doctor.name || doctor.doctorName) : 'Unknown Doctor'}</h3>
+                <p><strong>Date:</strong> ${apt.date}</p>
+                <p><strong>Time:</strong> ${apt.time}</p>
+                <p><strong>Reason:</strong> ${apt.reason || 'N/A'}</p>
+              </div>
+              <div class="appointment-actions">
+                <button class="cancel-btn" onclick="cancelAppointment('${apt.id}')">Cancel</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Load history
+      const historyList = document.querySelector('#history-tab .appointments-list');
+      const history = patientAppointments.filter(apt => apt.status === 'completed' || apt.status === 'cancelled');
+      
+      if (history.length === 0) {
+        historyList.innerHTML = '<p>No appointment history.</p>';
+      } else {
+        historyList.innerHTML = history.map(apt => {
+          const doctor = doctors.find(d => d.id === apt.doctorId);
+          return `
+            <div class="appointment-item">
+              <div class="appointment-info">
+                <h3>${doctor ? (doctor.name || doctor.doctorName) : 'Unknown Doctor'}</h3>
+                <p><strong>Date:</strong> ${apt.date}</p>
+                <p><strong>Time:</strong> ${apt.time}</p>
+                <p><strong>Status:</strong> ${apt.status}</p>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function showTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(tabName + '-tab').classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    function cancelAppointment(appointmentId) {
+      if (!confirm('Are you sure you want to cancel this appointment?')) return;
+      
+      const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+      const index = appointments.findIndex(apt => apt.id === appointmentId);
+      if (index !== -1) {
+        appointments[index].status = 'cancelled';
+        localStorage.setItem('appointments', JSON.stringify(appointments));
+        loadAppointments();
+      }
+    }
+
+    document.querySelector('.appointment-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const patientId = localStorage.getItem('patientId');
+      const doctorId = document.getElementById('doctor').value;
+      const date = document.getElementById('date').value;
+      const time = document.getElementById('time').value;
+      const reason = document.getElementById('reason').value;
+
+      const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+      const newAppointment = {
+        id: 'APT-' + Date.now(),
+        patientId: patientId,
+        doctorId: doctorId,
+        date: date,
+        time: time,
+        reason: reason,
+        status: 'scheduled',
+        createdAt: new Date().toISOString()
+      };
+      
+      appointments.push(newAppointment);
+      localStorage.setItem('appointments', JSON.stringify(appointments));
+
+      // Create notification for doctor
+      createDoctorNotification(doctorId, 'New appointment scheduled', `Patient has booked an appointment for ${date} at ${time}.`);
+
+      alert('Appointment booked successfully!');
+      document.querySelector('.appointment-form').reset();
+      loadAppointments();
+      showTab('upcoming');
+    });
+
+    function createDoctorNotification(doctorId, title, message) {
+      const notifications = JSON.parse(localStorage.getItem('doctorNotifications') || '[]');
+      notifications.unshift({
+        id: 'NOTIF-' + Date.now(),
+        doctorId: doctorId,
+        type: 'appointment',
+        title: title,
+        message: message,
+        read: false,
+        timestamp: new Date().toISOString()
+      });
+      localStorage.setItem('doctorNotifications', JSON.stringify(notifications));
+    }
+  </script>
+</body>
+</html>
+

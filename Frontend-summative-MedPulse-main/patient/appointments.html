@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book Appointment - MedPulse</title>
+  <link rel="stylesheet" href="patient.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <h1 class="nav-brand">MedPulse</h1>
+      <div class="nav-links">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="qr-code.html">My QR Code</a>
+        <a href="../index.html">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <h2>Book an Appointment</h2>
+    
+    <div class="appointments-section">
+      <div class="appointment-tabs">
+        <button class="tab-btn active" onclick="showTab('book')">Book New Appointment</button>
+        <button class="tab-btn" onclick="showTab('upcoming')">Upcoming Appointments</button>
+        <button class="tab-btn" onclick="showTab('history')">Appointment History</button>
+      </div>
+
+      <!-- Book Appointment Tab -->
+      <div id="book-tab" class="tab-content active">
+        <form class="appointment-form">
+          <div class="form-group">
+            <label for="doctor">Select Doctor</label>
+            <select id="doctor" required>
+              <option value="">Choose a doctor...</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="date">Select Date</label>
+            <input type="date" id="date" required />
+          </div>
+
+          <div class="form-group">
+            <label for="time">Select Time</label>
+            <select id="time" required>
+              <option value="">Choose a time...</option>
+              <option value="09:00">9:00 AM</option>
+              <option value="10:00">10:00 AM</option>
+              <option value="11:00">11:00 AM</option>
+              <option value="14:00">2:00 PM</option>
+              <option value="15:00">3:00 PM</option>
+              <option value="16:00">4:00 PM</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="reason">Reason for Visit</label>
+            <textarea id="reason" rows="4" placeholder="Briefly describe the reason for your appointment..."></textarea>
+          </div>
+
+          <button type="submit" class="submit-btn">Book Appointment</button>
+        </form>
+      </div>
+
+      <!-- Upcoming Appointments Tab -->
+      <div id="upcoming-tab" class="tab-content">
+        <div class="appointments-list" id="upcoming-list">
+          <!-- Loaded dynamically -->
+        </div>
+      </div>
+
+      <!-- Appointment History Tab -->
+      <div id="history-tab" class="tab-content">
+        <div class="appointments-list" id="history-list">
+          <!-- Loaded dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      initializeStaticData();
+      loadDoctors();
+      loadAppointments();
+    });
+
+    function initializeStaticData() {
+      // Sample static doctors
+      if (!localStorage.getItem('doctors')) {
+        localStorage.setItem('doctors', JSON.stringify([
+          { id: 'D1', name: 'Dr. Sarah Johnson', specialization: 'General Medicine', departmentId: 'DEP1' },
+          { id: 'D2', name: 'Dr. Michael Brown', specialization: 'Cardiology', departmentId: 'DEP2' },
+          { id: 'D3', name: 'Dr. Emily Davis', specialization: 'Dermatology', departmentId: 'DEP3' },
+          { id: 'D4', name: 'Dr. John Lee', specialization: 'Neurology', departmentId: 'DEP4' },
+          { id: 'D5', name: 'Dr. Anna Smith', specialization: 'Pediatrics', departmentId: 'DEP5' }
+        ]));
+      }
+
+      // Sample static departments
+      if (!localStorage.getItem('departments')) {
+        localStorage.setItem('departments', JSON.stringify([
+          { id: 'DEP1', name: 'General Medicine' },
+          { id: 'DEP2', name: 'Cardiology' },
+          { id: 'DEP3', name: 'Dermatology' },
+          { id: 'DEP4', name: 'Neurology' },
+          { id: 'DEP5', name: 'Pediatrics' }
+        ]));
+      }
+
+      // Sample static appointments: 5 upcoming and 5 history
+      if (!localStorage.getItem('appointments')) {
+        const patientId = localStorage.getItem('patientId') || 'P-12345';
+        localStorage.setItem('appointments', JSON.stringify([
+          // Upcoming appointments
+          { id: 'APT1', patientId, doctorId: 'D1', date: '2025-11-25', time: '09:00 AM', reason: 'General checkup', status: 'scheduled' },
+          { id: 'APT2', patientId, doctorId: 'D2', date: '2025-11-26', time: '10:00 AM', reason: 'Heart review', status: 'scheduled' },
+          { id: 'APT3', patientId, doctorId: 'D3', date: '2025-11-27', time: '11:00 AM', reason: 'Skin allergy', status: 'scheduled' },
+          { id: 'APT4', patientId, doctorId: 'D4', date: '2025-11-28', time: '14:00 PM', reason: 'Headache', status: 'scheduled' },
+          { id: 'APT5', patientId, doctorId: 'D5', date: '2025-11-29', time: '15:00 PM', reason: 'Child consultation', status: 'scheduled' },
+
+          // Appointment history
+          { id: 'APT6', patientId, doctorId: 'D1', date: '2025-11-15', time: '09:00 AM', reason: 'Flu', status: 'completed' },
+          { id: 'APT7', patientId, doctorId: 'D2', date: '2025-11-14', time: '10:00 AM', reason: 'Chest pain', status: 'completed' },
+          { id: 'APT8', patientId, doctorId: 'D3', date: '2025-11-13', time: '11:00 AM', reason: 'Skin rash', status: 'completed' },
+          { id: 'APT9', patientId, doctorId: 'D4', date: '2025-11-12', time: '14:00 PM', reason: 'Migraine', status: 'completed' },
+          { id: 'APT10', patientId, doctorId: 'D5', date: '2025-11-11', time: '15:00 PM', reason: 'Routine check', status: 'completed' }
+        ]));
+      }
+    }
+
+    function loadDoctors() {
+      const doctors = JSON.parse(localStorage.getItem('doctors') || '[]');
+      const departments = JSON.parse(localStorage.getItem('departments') || '[]');
+      const select = document.getElementById('doctor');
+      
+      doctors.forEach(doctor => {
+        const dept = departments.find(d => d.id === doctor.departmentId);
+        const option = document.createElement('option');
+        option.value = doctor.id;
+        option.textContent = `${doctor.name} - ${doctor.specialization}${dept ? ' (' + dept.name + ')' : ''}`;
+        select.appendChild(option);
+      });
+    }
+
+    function loadAppointments() {
+      const patientId = localStorage.getItem('patientId') || 'P-12345';
+      const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+      const patientAppointments = appointments.filter(apt => apt.patientId === patientId);
+      const doctors = JSON.parse(localStorage.getItem('doctors') || '[]');
+
+      // Upcoming appointments
+      const upcomingList = document.getElementById('upcoming-list');
+      const upcoming = patientAppointments.filter(apt => apt.status !== 'completed' && apt.status !== 'cancelled');
+      if (upcoming.length === 0) {
+        upcomingList.innerHTML = '<p>No upcoming appointments.</p>';
+      } else {
+        upcomingList.innerHTML = upcoming.map(apt => {
+          const doctor = doctors.find(d => d.id === apt.doctorId);
+          return `
+            <div class="appointment-item">
+              <div class="appointment-info">
+                <h3>${doctor ? doctor.name : 'Unknown Doctor'}</h3>
+                <p><strong>Date:</strong> ${apt.date}</p>
+                <p><strong>Time:</strong> ${apt.time}</p>
+                <p><strong>Reason:</strong> ${apt.reason}</p>
+              </div>
+              <div class="appointment-actions">
+                <button class="cancel-btn" onclick="cancelAppointment('${apt.id}')">Cancel</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Appointment history
+      const historyList = document.getElementById('history-list');
+      const history = patientAppointments.filter(apt => apt.status === 'completed' || apt.status === 'cancelled');
+      if (history.length === 0) {
+        historyList.innerHTML = '<p>No appointment history.</p>';
+      } else {
+        historyList.innerHTML = history.map(apt => {
+          const doctor = doctors.find(d => d.id === apt.doctorId);
+          return `
+            <div class="appointment-item">
+              <div class="appointment-info">
+                <h3>${doctor ? doctor.name : 'Unknown Doctor'}</h3>
+                <p><strong>Date:</strong> ${apt.date}</p>
+                <p><strong>Time:</strong> ${apt.time}</p>
+                <p><strong>Status:</strong> ${apt.status}</p>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function showTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(tabName + '-tab').classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    function cancelAppointment(appointmentId) {
+      if (!confirm('Are you sure you want to cancel this appointment?')) return;
+      
+      const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+      const index = appointments.findIndex(apt => apt.id === appointmentId);
+      if (index !== -1) {
+        appointments[index].status = 'cancelled';
+        localStorage.setItem('appointments', JSON.stringify(appointments));
+        loadAppointments();
+      }
+    }
+
+    document.querySelector('.appointment-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const patientId = localStorage.getItem('patientId') || 'P-12345';
+      const doctorId = document.getElementById('doctor').value;
+      const date = document.getElementById('date').value;
+      const time = document.getElementById('time').value;
+      const reason = document.getElementById('reason').value;
+
+      const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
+      const newAppointment = {
+        id: 'APT-' + Date.now(),
+        patientId,
+        doctorId,
+        date,
+        time,
+        reason,
+        status: 'scheduled'
+      };
+      
+      appointments.push(newAppointment);
+      localStorage.setItem('appointments', JSON.stringify(appointments));
+      alert('Appointment booked successfully!');
+      document.querySelector('.appointment-form').reset();
+      loadAppointments();
+      showTab('upcoming');
+    });
+  </script>
+</body>
+</html>

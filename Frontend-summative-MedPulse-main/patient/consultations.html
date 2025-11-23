@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Medical Records - MedPulse</title>
+  <link rel="stylesheet" href="patient.css" />
+  <style>
+    /* Navbar Styles with logo */
+    .navbar {
+      background-color: #fff;
+      border-bottom: 1px solid #ddd;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #007bff;
+    }
+    .nav-brand img {
+      height: 40px;
+      margin-right: 10px;
+    }
+    .nav-links a {
+      margin-left: 20px;
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+    }
+    .nav-links a:hover {
+      color: #007bff;
+    }
+
+    /* Card Styles */
+    .consultations-card {
+      background-color: #f8f9fa;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .consultations-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .consultations-header h3 {
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+      color: #333;
+    }
+    .consultations-details p {
+      margin: 6px 0;
+      line-height: 1.4;
+      font-size: 0.95rem;
+    }
+    .consultations-details p strong {
+      color: #222;
+    }
+    .consultations-details button {
+      margin-top: 10px;
+      margin-right: 8px;
+      padding: 6px 12px;
+      font-size: 0.9rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    .consultations-details button.view-btn {
+      background-color: #007bff;
+      color: #fff;
+    }
+    .consultations-details button.view-btn:hover {
+      background-color: #0056b3;
+    }
+    .consultations-details button.download-btn {
+      background-color: #28a745;
+      color: #fff;
+    }
+    .consultations-details button.download-btn:hover {
+      background-color: #1e7e34;
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none; 
+      position: fixed; 
+      z-index: 1000; 
+      left: 0;
+      top: 0;
+      width: 100%; 
+      height: 100%; 
+      overflow: auto; 
+      background-color: rgba(0,0,0,0.5); 
+    }
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto; 
+      padding: 20px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 600px;
+      position: relative;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+      cursor: pointer;
+    }
+    .modal-content p {
+      margin: 8px 0;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand">
+      <img src="logo.jpeg" alt="MedPulse Logo" />
+      MedPulse
+    </div>
+    <div class="nav-links">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="qr-code.html">My QR Code</a>
+      <a href="../index.html">Logout</a>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <h2>My Medical Records</h2>
+    <div class="consultations-section">
+      <div class="filter-bar">
+        <input type="text" placeholder="Search medical records..." class="search-input" id="searchInput" />
+      </div>
+      <div class="consultations-list" id="consultations-list"></div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="recordModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <h3>Medical Record Details</h3>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    const patientId = localStorage.getItem('patientId');
+    const token = localStorage.getItem('authToken');
+    const consultationsList = document.getElementById('consultations-list');
+    const modal = document.getElementById('recordModal');
+    const modalBody = document.getElementById('modalBody');
+    const closeBtn = modal.querySelector('.close-btn');
+
+    if (!token || !patientId) {
+      alert("You are not logged in. Please login first.");
+      window.location.href = "../index.html";
+    }
+
+    async function fetchMedicalRecords() {
+      try {
+        const response = await fetch(`http://localhost:8080/patients_portal_auth/patients/${patientId}/records`, {
+          method: 'GET',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            alert("Session expired. Please login again.");
+            localStorage.clear();
+            window.location.href = "../index.html";
+          } else { throw new Error(`Error: ${response.status} ${response.statusText}`); }
+        }
+
+        const data = await response.json();
+        const records = data.medical_records || [];
+        displayRecords(records);
+
+      } catch (error) {
+        consultationsList.innerHTML = `<p class="error">${error.message}</p>`;
+        console.error('Failed to fetch medical records:', error);
+      }
+    }
+
+    function displayRecords(records) {
+      consultationsList.innerHTML = '';
+      if (!records.length) { consultationsList.innerHTML = '<p>No medical records found.</p>'; return; }
+
+      records.forEach(record => {
+        const card = document.createElement('div');
+        card.className = 'consultations-card';
+        card.innerHTML = `
+          <div class="consultations-header">
+            <h3>Record Date: ${new Date(record.record_date).toLocaleDateString()}</h3>
+          </div>
+          <div class="consultations-details">
+            <p><strong>Doctor:</strong> ${record.created_by || 'N/A'}</p>
+            <p><strong>Hospital:</strong> ${record.hospital_name || 'N/A'}</p>
+            <p><strong>Diagnosis:</strong> ${record.diagnosis || 'N/A'}</p>
+            <p><strong>Treatment:</strong> ${record.treatment || 'N/A'}</p>
+            <p><strong>Notes:</strong> ${record.notes || 'N/A'}</p>
+            <p><strong>Follow-up Date:</strong> ${record.follow_up_date ? new Date(record.follow_up_date).toLocaleDateString() : 'N/A'}</p>
+            <button class="view-btn">View Full Record</button>
+            <button class="download-btn">Download PDF</button>
+          </div>
+        `;
+
+        card.querySelector('.view-btn').addEventListener('click', () => {
+          modalBody.innerHTML = `
+            <p><strong>Doctor:</strong> ${record.created_by || 'N/A'}</p>
+            <p><strong>Hospital:</strong> ${record.hospital_name || 'N/A'}</p>
+            <p><strong>Diagnosis:</strong> ${record.diagnosis || 'N/A'}</p>
+            <p><strong>Treatment:</strong> ${record.treatment || 'N/A'}</p>
+            <p><strong>Notes:</strong> ${record.notes || 'N/A'}</p>
+            <p><strong>Follow-up Date:</strong> ${record.follow_up_date ? new Date(record.follow_up_date).toLocaleDateString() : 'N/A'}</p>
+          `;
+          modal.style.display = 'block';
+        });
+
+        card.querySelector('.download-btn').addEventListener('click', () => {
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF();
+          const pageHeight = doc.internal.pageSize.height;
+          let y = 50, pageNum = 1;
+
+          const addHeader = () => {
+            const img = new Image();
+            img.src = 'logo.png';
+            img.onload = () => doc.addImage(img, 'PNG', 20, 10, 20, 20);
+            doc.setFontSize(16);
+            doc.setFont(undefined,'bold');
+            doc.text("MedPulse", 105, 20, {align:'center'});
+            doc.setFontSize(14);
+            doc.setFont(undefined,'normal');
+            doc.text("Medical Record Report", 105, 28, {align:'center'});
+            doc.setLineWidth(0.5);
+            doc.line(20, 35, 190, 35);
+          };
+
+          const addFooter = (pageNum) => {
+            doc.setFontSize(10);
+            doc.setFont(undefined,'normal');
+            doc.text(`Page ${pageNum}`, 105, pageHeight - 10, {align:'center'});
+          };
+
+          const recordLines = [
+            {label:"Doctor",value:record.created_by||"N/A"},
+            {label:"Hospital",value:record.hospital_name||"N/A"},
+            {label:"Diagnosis",value:record.diagnosis||"N/A"},
+            {label:"Treatment",value:record.treatment||"N/A"},
+            {label:"Notes",value:record.notes||"N/A"},
+            {label:"Follow-up Date",value:record.follow_up_date?new Date(record.follow_up_date).toLocaleDateString():"N/A"},
+          ];
+
+          addHeader();
+          recordLines.forEach(line=>{
+            const splitText = doc.splitTextToSize(line.value,110);
+            splitText.forEach(textLine=>{
+              if(y + 10 > pageHeight - 20){
+                addFooter(pageNum);
+                doc.addPage();
+                pageNum++;
+                y = 50;
+                addHeader();
+              }
+              doc.setFont(undefined,'bold');
+              doc.text(`${line.label}:`,20,y);
+              doc.setFont(undefined,'normal');
+              doc.text(textLine,70,y);
+              y+=10;
+            });
+            y+=2;
+          });
+          addFooter(pageNum);
+          const filename = `Medical_Record_${new Date(record.record_date).toISOString().split('T')[0]}.pdf`;
+          doc.save(filename);
+        });
+
+        consultationsList.appendChild(card);
+      });
+    }
+
+    closeBtn.addEventListener('click',()=>modal.style.display='none');
+    window.addEventListener('click',e=>{if(e.target==modal) modal.style.display='none';});
+    document.getElementById('searchInput').addEventListener('input',function(){
+      const query=this.value.toLowerCase();
+      document.querySelectorAll('.consultations-card').forEach(card=>{
+        const text=card.innerText.toLowerCase();
+        card.style.display=text.includes(query)?'block':'none';
+      });
+    });
+
+    fetchMedicalRecords();
+  </script>
+</body>
+</html>

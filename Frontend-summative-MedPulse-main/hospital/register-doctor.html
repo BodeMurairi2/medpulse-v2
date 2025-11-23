@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register Doctor - MedPulse</title>
+  <link rel="stylesheet" href="hospital.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <h1 class="nav-brand">MedPulse</h1>
+      <div class="nav-links">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="doctors.html">Manage Doctors</a>
+        <a href="#" onclick="logout()">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <h2>Register New Doctor</h2>
+
+    <div class="form-section">
+      <form class="registration-form" id="doctorForm">
+        <div class="form-group">
+          <label for="firstName">First Name</label>
+          <input type="text" id="firstName" name="firstName" required />
+        </div>
+
+        <div class="form-group">
+          <label for="lastName">Last Name</label>
+          <input type="text" id="lastName" name="lastName" required />
+        </div>
+
+        <div class="form-group">
+          <label for="gender">Gender</label>
+          <select id="gender" name="gender" required>
+            <option value="" disabled selected>Select gender</option>
+            <option value="female">Female</option>
+            <option value="male">Male</option>
+            <option value="prefer-not-to-say">Prefer not to say</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="department">Department</label>
+          <select id="department" name="department" required>
+            <option value="" disabled selected>Select department</option>
+            <option value="general">General Medicine</option>
+            <option value="cardiology">Cardiology</option>
+            <option value="pediatrics">Pediatrics</option>
+            <option value="radiology">Radiology</option>
+            <option value="surgery">Surgery</option>
+            <option value="orthopedics">Orthopedics</option>
+            <option value="neurology">Neurology</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="phoneNumber">Phone Number</label>
+          <input type="tel" id="phoneNumber" name="phoneNumber" required />
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" required />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required />
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <input type="password" id="confirmPassword" name="confirmPassword" required />
+        </div>
+
+        <button type="submit" class="submit-btn">Register Doctor</button>
+      </form>
+
+      <div id="success-message" class="success-message" style="display: none;">
+        <h3>Doctor Registered Successfully!</h3>
+        <p><strong>Doctor ID:</strong> <span id="generatedDoctorId"></span></p>
+        <p>Please share this ID with the doctor for login.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Check login
+    window.addEventListener('DOMContentLoaded', () => {
+      const token = localStorage.getItem('hospitalToken');
+      const loggedIn = localStorage.getItem('hospitalLoggedIn');
+      if (!token || loggedIn !== 'true') {
+        alert('You must log in first.');
+        window.location.href = 'login.html';
+      }
+    });
+
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('hospitalToken');
+        localStorage.removeItem('hospitalId');
+        localStorage.removeItem('hospitalName');
+        localStorage.removeItem('hospitalLoggedIn');
+        window.location.href = 'login.html';
+      }
+    }
+
+    document.getElementById('doctorForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      if (password !== confirmPassword) {
+        alert('Passwords do not match!');
+        return;
+      }
+
+      const token = localStorage.getItem('hospitalToken');
+
+      const doctorData = {
+        first_name: document.getElementById('firstName').value,
+        last_name: document.getElementById('lastName').value,
+        gender: document.getElementById('gender').value,
+        department: document.getElementById('department').value,
+        phone_number: document.getElementById('phoneNumber').value,
+        email: document.getElementById('email').value,
+        password: password
+      };
+
+      try {
+        const res = await fetch('http://localhost:8080/doctor/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(doctorData)
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          alert(errorData.detail || 'Failed to add doctor');
+          return;
+        }
+
+        const data = await res.json();
+        document.getElementById('success-message').style.display = 'block';
+        document.getElementById('generatedDoctorId').textContent = data.doctor_id;
+        document.getElementById('doctorForm').reset();
+      } catch (err) {
+        console.error(err);
+        alert('Server error. Try again later.');
+      }
+    });
+  </script>
+</body>
+</html>
