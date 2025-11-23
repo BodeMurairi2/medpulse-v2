@@ -1,8 +1,3 @@
-Perfect! Here's an enhanced, **GitHub-ready version of the README.md** for MedPulse, now including a **Table of Contents** and example **badges** for Docker, build status, and Python version. You can update the badge URLs with your actual CI/CD or Docker Hub links later.
-
----
-
-````markdown
 # MedPulse
 
 ![Docker](https://img.shields.io/badge/Docker-Ready-blue?logo=docker)
