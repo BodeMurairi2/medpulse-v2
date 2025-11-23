@@ -17,66 +17,60 @@ The system comprises three interconnected portals:
 
 ## Table of Contents
 
-- [Demo Video Orientation] (#demo-video)
+- [Demo Video](#demo-video)
 - [Technical Overview](#technical-overview)
-- [Docker Deployment](#docker-deployment)
-  - [Quick Deployment (One Command)](#quick-deployment-one-command)
-  - [Local Build from Source](#local-build-from-source)
-- [Check Logs](#check-logs)
-- [Stop Services](#stop-services)
+- [Run the Application](#run-the-application)
+  - [Pull Docker Images](#pull-docker-images)
+  - [Start Services](#start-services)
+  - [Stop Services](#stop-services)
 - [Access the Application](#access-the-application)
-- [Notes](#notes)
 - [Author](#author)
 
 ---
 
 ## Demo Video
 
+Clone the repository:
+
+```bash
 git clone https://github.com/BodeMurairi2/medpulse-v2.git
-Inside the repository, find demo.mp4
+````
+
+Inside the repository, you will find:
+
+```
 medpulse-v2/demo.mp4
+```
 
 ---
 
-## Technical Overview
+## Run the Application
 
-- **Backend:** FastAPI RESTful API with JWT-based authentication, password hashing, and access controls.  
-- **Database:** PostgreSQL using SQLAlchemy ORM for secure and structured data management.  
-- **Frontend:** Responsive interface built with HTML, CSS, and JavaScript.  
-- **Additional Features:** PDF generation, QR code integration for patient ID and records sharing.  
-- **Development Methodology:** Agile, with iterative testing, continuous feedback, and collaborative improvement.  
+### Pull Docker Images
 
-Challenges such as backend–frontend communication, database synchronization, and secure authentication were addressed using middleware, ORM relationships, transaction management, and rigorous testing.  
-
-MedPulse improves efficiency, data security, and continuity of care, enabling healthcare providers to make informed decisions while empowering patients with control over their health information. It demonstrates a scalable, user-centered solution to modernize healthcare record management in resource-limited settings.
-
----
-
-## Run the application
-To run the application, pull the docker images
+```bash
 docker pull bodemurairi2/postgres:15
 docker pull bodemurairi2/medpulse-v2_backend:latest
 docker pull bodemurairi2/medpulse-v2_frontend:latest
+```
 
+### Start Services
 
+From inside the `medpulse-v2/` directory:
+
+```bash
 # Start all services in detached mode
-inside mepulse-v2/
-docker-compose up
 docker-compose up -d
-````
+```
 
 This will:
 
-* Pull the latest **backend** and **frontend** images
+* Pull the latest **backend** and **frontend** images if needed
 * Start PostgreSQL on **host port 5433**
 * Start FastAPI backend on **host port 8080**
 * Start NGINX frontend on **host port 8000**
 
 ---
-
-
----
-
 
 ### Stop Services
 
@@ -86,7 +80,7 @@ Stop all running containers:
 docker-compose down
 ```
 
-Remove containers **and volumes**:
+Stop and remove containers **and volumes**:
 
 ```bash
 docker-compose down -v
@@ -101,20 +95,20 @@ docker-compose down -v
 
 ---
 
-## Author  
+## Author
 
-### Name & Email
+### Backend Team
 
-- Backend Team:
+* **Louis Pascal Nsigo** – [p.nsigo@alustudent.com](mailto:p.nsigo@alustudent.com)
+* **Faith Irakoze** – [f.irakoze2@alustudent.com](mailto:f.irakoze2@alustudent.com)
+* **Bode Murairi** – [b.murairi@alustudent.com](mailto:b.murairi@alustudent.com)
 
-* **Louis Pascal Nsigo <p.nsigo@alustudent.com>**
-* **Faith Irakoze <f.irakoze2@alustudent.com>**
-* **Bode Murairi <b.murairi@alustudent.com>**
+### Frontend Team
 
-- Frontend Team:
-
-* **Laura Kwizera <l.kwizera1@alustudent.com>**
-* **Maurice Nshimyumukiza <m.nshimyumu@alustudent.com**
-* **Vanessa Umwari <v.umwari@alustudent.com>**
+* **Laura Kwizera** – [l.kwizera1@alustudent.com](mailto:l.kwizera1@alustudent.com)
+* **Maurice Nshimyumukiza** – [m.nshimyumu@alustudent.com](mailto:m.nshimyumu@alustudent.com)
+* **Vanessa Umwari** – [v.umwari@alustudent.com](mailto:v.umwari@alustudent.com)
 
 ```
+
+---
