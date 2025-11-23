@@ -10,13 +10,14 @@ services:
       POSTGRES_PASSWORD: bodemurairi2
       POSTGRES_DB: medpulse_db
     ports:
-      - "5433:5432"  # host port 5433 maps to container 5432
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
   backend:
     build:
       context: ./api
+      dockerfile: Dockerfile   # explicitly specify the Dockerfile name
     container_name: medpulse_backend
     restart: always
     env_file:
@@ -35,6 +36,7 @@ services:
   frontend:
     build:
       context: ./Frontend-summative-MedPulse-main
+      dockerfile: Dockerfile   # explicitly specify the Dockerfile name
     container_name: medpulse_frontend
     restart: always
     ports:
