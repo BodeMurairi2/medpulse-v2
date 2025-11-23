@@ -17,6 +17,7 @@ The system comprises three interconnected portals:
 
 ## Table of Contents
 
+- [Demo Video Orientation] (#demo-video)
 - [Technical Overview](#technical-overview)
 - [Docker Deployment](#docker-deployment)
   - [Quick Deployment (One Command)](#quick-deployment-one-command)
@@ -26,6 +27,14 @@ The system comprises three interconnected portals:
 - [Access the Application](#access-the-application)
 - [Notes](#notes)
 - [Author](#author)
+
+---
+
+## Demo Video
+
+git clone https://github.com/BodeMurairi2/medpulse-v2.git
+Inside the repository, find demo.mp4
+medpulse-v2/demo.mp4
 
 ---
 
@@ -169,13 +178,20 @@ docker-compose down -v
 
 ---
 
-### Author
+## Author  
 
-**Louis Pascal Nsigo <p.nsigo@alustudent.com>**
-**Faith Irakoze <f.irakoze2@alustudent.com>**
-**Bode Murairi <b.murairi@alustudent.com>**
-**Laura Kwizera <l.kwizera1@alustudent.com>**
-**Maurice Nshimyumukiza <m.nshimyumu@alustudent.com**
-**Vanessa Umwari <v.umwari@alustudent.com>**
+### Name & Email
+
+- Backend Team:
+
+* **Louis Pascal Nsigo <p.nsigo@alustudent.com>**
+* **Faith Irakoze <f.irakoze2@alustudent.com>**
+* **Bode Murairi <b.murairi@alustudent.com>**
+
+- Frontend Team:
+
+* **Laura Kwizera <l.kwizera1@alustudent.com>**
+* **Maurice Nshimyumukiza <m.nshimyumu@alustudent.com**
+* **Vanessa Umwari <v.umwari@alustudent.com>**
 
 ```
