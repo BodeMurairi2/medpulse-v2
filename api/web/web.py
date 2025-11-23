@@ -11,6 +11,8 @@ from controler.patient_controller import router as patient_router
 from web.patient_routes import router as patient_router_auth
 from web.patient_routes_create import router as patient_router_create
 import uvicorn
+from sqlalchemy.exc import OperationalError
+from time import sleep
 
 load_dotenv()
 
@@ -47,10 +49,18 @@ app.include_router(patient_router)
 app.include_router(patient_router_auth)
 app.include_router(patient_router_create)
 
-# Create tables on startup
+# Create tables on startup, retry until DB is ready
 @app.on_event("startup")
 def on_startup():
-    Base.metadata.create_all(bind=engine)
+    connected = False
+    while not connected:
+        try:
+            Base.metadata.create_all(bind=engine)
+            connected = True
+            print("All tables created successfully")
+        except OperationalError:
+            print("Database not ready yet, retrying in 2 seconds...")
+            sleep(4)
 
 @app.get("/")
 async def root():

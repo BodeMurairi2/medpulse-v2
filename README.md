@@ -52,24 +52,16 @@ MedPulse improves efficiency, data security, and continuity of care, enabling he
 
 ---
 
-## Docker Deployment
+## Run the application
+To run the application, pull the docker images
+docker pull bodemurairi2/postgres:15
+docker pull bodemurairi2/medpulse-v2_backend:latest
+docker pull bodemurairi2/medpulse-v2_frontend:latest
 
-MedPulse can be deployed using **Docker Compose**. There are two workflows:
-
-1. **Quick setup:** Pull prebuilt Docker images from Docker Hub  
-2. **Build locally:** Build Docker images from the source code
-
----
-
-### Quick Deployment (One Command)
-
-If you want to deploy **without building**, you can use the following commands:
-
-```bash
-# Pull the latest images
-docker-compose pull
 
 # Start all services in detached mode
+inside mepulse-v2/
+docker-compose up
 docker-compose up -d
 ````
 
@@ -82,70 +74,9 @@ This will:
 
 ---
 
-### Local Build from Source
-
-If you want to **build the images locally** (for development or custom changes), use `build:` in `docker-compose.yml`:
-
-```yaml
-backend:
-  build:
-    context: ./api
-    dockerfile: Dockerfile
-  container_name: medpulse_backend
-  restart: always
-  env_file:
-    - ./api/.env
-  environment:
-    POSTGRES_USER: medpulse_user
-    POSTGRES_PASSWORD: bodemurairi2
-    POSTGRES_DB: medpulse_db
-    DATABASE_URL: postgresql+psycopg2://medpulse_user:bodemurairi2@db/medpulse_db
-  ports:
-    - "8080:8080"
-  depends_on:
-    - db
-
-frontend:
-  build:
-    context: ./Frontend-summative-MedPulse-main
-    dockerfile: Dockerfile
-  container_name: medpulse_frontend
-  restart: always
-  ports:
-    - "8000:80"
-  depends_on:
-    - backend
-```
-
-#### **Step 1 — Build Images**
-
-```bash
-docker-compose build --no-cache
-```
-
-#### **Step 2 — Start Services**
-
-```bash
-docker-compose up -d
-```
 
 ---
 
-### Check Logs
-
-Follow logs for all services:
-
-```bash
-docker-compose logs -f
-```
-
-Logs for a specific service (e.g., backend):
-
-```bash
-docker-compose logs -f backend
-```
-
----
 
 ### Stop Services
 
@@ -167,14 +98,6 @@ docker-compose down -v
 
 * **Frontend:** [http://localhost:8000](http://localhost:8000)
 * **Backend API docs:** [http://localhost:8080/docs](http://localhost:8080/docs)
-
----
-
-### Notes
-
-* Ensure your `.env` file exists in `api/` if using environment variables.
-* For development, modify code in `api/` or `Frontend-summative-MedPulse-main/` and rebuild locally.
-* The system is designed for **secure, cloud-based operation**, centralizing patient records and ensuring continuity of care with QR code integration.
 
 ---
 
