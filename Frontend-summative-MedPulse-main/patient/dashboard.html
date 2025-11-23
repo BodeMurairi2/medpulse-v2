@@ -13,14 +13,14 @@
       <div class="nav-links">
         <a href="dashboard.html" class="active">Dashboard</a>
         <a href="form-patient.html">My Form</a>
-        <a href="../index.html">Logout</a>
+        <a href="../index.html" onclick="logout()">Logout</a>
       </div>
     </div>
   </nav>
 
   <div class="dashboard-container">
     <div class="welcome-section">
-      <h2>Welcome, <span id="patientName">Patient Name</span></h2>
+      <h2>Welcome, <span id="patientName">Dear Patient</span></h2>
       <p class="patient-id">Patient ID: <span id="patientId">P-12345</span></p>
     </div>
 
@@ -79,17 +79,44 @@
       </div>
     </div>
   </div>
+
   <script>
-    // Load patient information from localStorage
+    async function fetchPatientInfo() {
+      const token = localStorage.getItem('patient_token'); // should be saved after login
+      if (!token) return;
+
+      try {
+        const response = await fetch('http://localhost:8080/patients_portal_auth/general_info', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch patient info');
+        }
+
+        const data = await response.json();
+        document.getElementById('patientName').textContent = data.patient_name || 'Patient Name';
+        document.getElementById('patientId').textContent = data.patient_id || 'P-12345';
+        localStorage.setItem('patientId', data.patient_id); // optional: save locally
+
+      } catch (error) {
+        console.error('Error fetching patient info:', error);
+      }
+    }
+
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('patient_token');
+        localStorage.removeItem('patientId');
+        window.location.href = '../index.html';
+      }
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
-      const patientId = localStorage.getItem('patientId') || 'P-12345';
-      document.getElementById('patientId').textContent = patientId;
-      
-      // In real app, patient name would come from backend
-      const patientName = 'Patient Name'; // This would be fetched from backend
-      document.getElementById('patientName').textContent = patientName;
+      fetchPatientInfo();
     });
   </script>
 </body>
 </html>
-

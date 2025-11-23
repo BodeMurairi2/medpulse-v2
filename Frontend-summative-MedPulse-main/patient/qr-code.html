@@ -5,7 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My QR Code - MedPulse</title>
   <link rel="stylesheet" href="patient.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    /* Responsive QR code */
+    #qrcode-img {
+      width: 50%;        /* scales to 50% of container width */
+      max-width: 250px;  /* max width to maintain readability */
+      height: auto;      /* keeps aspect ratio */
+    }
+
+    .qr-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .download-btn {
+      padding: 8px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      border-radius: 6px;
+      background-color: #007bff;
+      color: white;
+    }
+
+    .download-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
 </head>
 <body>
   <nav class="navbar">
@@ -22,10 +50,12 @@
   <div class="dashboard-container">
     <div class="qr-section">
       <h2>My QR Code</h2>
-      <p class="qr-description">Share this QR code with authorized doctors for quick access to your medical information.</p>
+      <p class="qr-description">
+        Share this QR code with authorized doctors for quick access to your basic information.
+      </p>
       
       <div class="qr-container">
-        <div id="qrcode"></div>
+        <img id="qrcode-img" alt="Patient QR Code" />
         <p class="qr-info">Patient ID: <span id="displayPatientId">P-12345</span></p>
         <button class="download-btn" onclick="downloadQR()">Download QR Code</button>
       </div>
@@ -43,58 +73,60 @@
   </div>
 
   <script>
-    // Generate QR code on page load
-    window.addEventListener('DOMContentLoaded', () => {
-      const patientId = localStorage.getItem('patientId') || 'P-12345';
-      document.getElementById('displayPatientId').textContent = patientId;
-      
-      // Store patient ID in localStorage if not already set
-      if (!localStorage.getItem('patientId')) {
-        localStorage.setItem('patientId', patientId);
-      }
-      
-      // Generate QR code with patient ID
-      const qrData = JSON.stringify({
-        type: 'patient',
-        patientId: patientId,
-        timestamp: new Date().toISOString()
-      });
-      
-      // Clear any existing QR code
-      document.getElementById("qrcode").innerHTML = '';
-      
-      // Generate new QR code
-      new QRCode(document.getElementById("qrcode"), {
-        text: qrData,
-        width: 256,
-        height: 256,
-        colorDark: "#000000",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.H
-      });
-    });
+    const token = localStorage.getItem('authToken');
+    const patientId = localStorage.getItem('patientId');
 
-    function downloadQR() {
-      const qrContainer = document.getElementById('qrcode');
-      const canvas = qrContainer.querySelector('canvas');
-      if (canvas) {
-        const url = canvas.toDataURL();
-        const link = document.createElement('a');
-        link.download = 'medpulse-qr-code.png';
-        link.href = url;
-        link.click();
-      } else {
-        // Fallback: try to get img if library uses img instead
-        const img = qrContainer.querySelector('img');
-        if (img) {
-          const link = document.createElement('a');
-          link.download = 'medpulse-qr-code.png';
-          link.href = img.src;
-          link.click();
+    if (!token || !patientId) {
+      alert("You are not logged in. Please login first.");
+      window.location.href = "../index.html";
+    }
+
+    async function fetchEncryptedQRCode() {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/patients_portal_auth/patients/${patientId}/qrcode`,
+          {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            alert("Session expired. Please login again.");
+            localStorage.clear();
+            window.location.href = "../index.html";
+          } else {
+            throw new Error(`Error fetching QR code: ${response.status} ${response.statusText}`);
+          }
         }
+
+        const data = await response.json();
+        const qrBase64 = data.qr_code_base64;
+
+        document.getElementById('displayPatientId').textContent = patientId;
+        document.getElementById('qrcode-img').src = `data:image/png;base64,${qrBase64}`;
+
+      } catch (error) {
+        console.error(error);
+        alert("Failed to fetch QR code. Check console for details.");
       }
     }
+
+    function downloadQR() {
+      const img = document.getElementById('qrcode-img');
+      if (img && img.src) {
+        const link = document.createElement('a');
+        link.download = 'medpulse-qr-code.png';
+        link.href = img.src;
+        link.click();
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', fetchEncryptedQRCode);
   </script>
 </body>
 </html>
-

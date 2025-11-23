@@ -31,12 +31,12 @@
       <!-- Book Appointment Tab -->
       <div id="book-tab" class="tab-content active">
         <form class="appointment-form">
-        <div class="form-group">
-          <label for="doctor">Select Doctor</label>
-          <select id="doctor" required>
-            <option value="">Choose a doctor...</option>
-          </select>
-        </div>
+          <div class="form-group">
+            <label for="doctor">Select Doctor</label>
+            <select id="doctor" required>
+              <option value="">Choose a doctor...</option>
+            </select>
+          </div>
 
           <div class="form-group">
             <label for="date">Select Date</label>
@@ -67,41 +67,15 @@
 
       <!-- Upcoming Appointments Tab -->
       <div id="upcoming-tab" class="tab-content">
-        <div class="appointments-list">
-          <div class="appointment-item">
-            <div class="appointment-info">
-              <h3>Dr. Sarah Johnson</h3>
-              <p><strong>Date:</strong> January 20, 2024</p>
-              <p><strong>Time:</strong> 10:00 AM</p>
-              <p><strong>Department:</strong> General Medicine</p>
-            </div>
-            <div class="appointment-actions">
-              <button class="cancel-btn">Cancel</button>
-              <button class="reschedule-btn">Reschedule</button>
-            </div>
-          </div>
+        <div class="appointments-list" id="upcoming-list">
+          <!-- Loaded dynamically -->
         </div>
       </div>
 
       <!-- Appointment History Tab -->
       <div id="history-tab" class="tab-content">
-        <div class="appointments-list">
-          <div class="appointment-item">
-            <div class="appointment-info">
-              <h3>Dr. Michael Brown</h3>
-              <p><strong>Date:</strong> January 15, 2024</p>
-              <p><strong>Time:</strong> 2:00 PM</p>
-              <p><strong>Status:</strong> Completed</p>
-            </div>
-          </div>
-          <div class="appointment-item">
-            <div class="appointment-info">
-              <h3>Dr. Emily Davis</h3>
-              <p><strong>Date:</strong> January 10, 2024</p>
-              <p><strong>Time:</strong> 11:00 AM</p>
-              <p><strong>Status:</strong> Completed</p>
-            </div>
-          </div>
+        <div class="appointments-list" id="history-list">
+          <!-- Loaded dynamically -->
         </div>
       </div>
     </div>
@@ -109,9 +83,54 @@
 
   <script>
     window.addEventListener('DOMContentLoaded', () => {
+      initializeStaticData();
       loadDoctors();
       loadAppointments();
     });
+
+    function initializeStaticData() {
+      // Sample static doctors
+      if (!localStorage.getItem('doctors')) {
+        localStorage.setItem('doctors', JSON.stringify([
+          { id: 'D1', name: 'Dr. Sarah Johnson', specialization: 'General Medicine', departmentId: 'DEP1' },
+          { id: 'D2', name: 'Dr. Michael Brown', specialization: 'Cardiology', departmentId: 'DEP2' },
+          { id: 'D3', name: 'Dr. Emily Davis', specialization: 'Dermatology', departmentId: 'DEP3' },
+          { id: 'D4', name: 'Dr. John Lee', specialization: 'Neurology', departmentId: 'DEP4' },
+          { id: 'D5', name: 'Dr. Anna Smith', specialization: 'Pediatrics', departmentId: 'DEP5' }
+        ]));
+      }
+
+      // Sample static departments
+      if (!localStorage.getItem('departments')) {
+        localStorage.setItem('departments', JSON.stringify([
+          { id: 'DEP1', name: 'General Medicine' },
+          { id: 'DEP2', name: 'Cardiology' },
+          { id: 'DEP3', name: 'Dermatology' },
+          { id: 'DEP4', name: 'Neurology' },
+          { id: 'DEP5', name: 'Pediatrics' }
+        ]));
+      }
+
+      // Sample static appointments: 5 upcoming and 5 history
+      if (!localStorage.getItem('appointments')) {
+        const patientId = localStorage.getItem('patientId') || 'P-12345';
+        localStorage.setItem('appointments', JSON.stringify([
+          // Upcoming appointments
+          { id: 'APT1', patientId, doctorId: 'D1', date: '2025-11-25', time: '09:00 AM', reason: 'General checkup', status: 'scheduled' },
+          { id: 'APT2', patientId, doctorId: 'D2', date: '2025-11-26', time: '10:00 AM', reason: 'Heart review', status: 'scheduled' },
+          { id: 'APT3', patientId, doctorId: 'D3', date: '2025-11-27', time: '11:00 AM', reason: 'Skin allergy', status: 'scheduled' },
+          { id: 'APT4', patientId, doctorId: 'D4', date: '2025-11-28', time: '14:00 PM', reason: 'Headache', status: 'scheduled' },
+          { id: 'APT5', patientId, doctorId: 'D5', date: '2025-11-29', time: '15:00 PM', reason: 'Child consultation', status: 'scheduled' },
+
+          // Appointment history
+          { id: 'APT6', patientId, doctorId: 'D1', date: '2025-11-15', time: '09:00 AM', reason: 'Flu', status: 'completed' },
+          { id: 'APT7', patientId, doctorId: 'D2', date: '2025-11-14', time: '10:00 AM', reason: 'Chest pain', status: 'completed' },
+          { id: 'APT8', patientId, doctorId: 'D3', date: '2025-11-13', time: '11:00 AM', reason: 'Skin rash', status: 'completed' },
+          { id: 'APT9', patientId, doctorId: 'D4', date: '2025-11-12', time: '14:00 PM', reason: 'Migraine', status: 'completed' },
+          { id: 'APT10', patientId, doctorId: 'D5', date: '2025-11-11', time: '15:00 PM', reason: 'Routine check', status: 'completed' }
+        ]));
+      }
+    }
 
     function loadDoctors() {
       const doctors = JSON.parse(localStorage.getItem('doctors') || '[]');
@@ -122,21 +141,20 @@
         const dept = departments.find(d => d.id === doctor.departmentId);
         const option = document.createElement('option');
         option.value = doctor.id;
-        option.textContent = `${doctor.name || doctor.doctorName} - ${doctor.specialization || 'N/A'}${dept ? ' (' + dept.name + ')' : ''}`;
+        option.textContent = `${doctor.name} - ${doctor.specialization}${dept ? ' (' + dept.name + ')' : ''}`;
         select.appendChild(option);
       });
     }
 
     function loadAppointments() {
-      const patientId = localStorage.getItem('patientId');
+      const patientId = localStorage.getItem('patientId') || 'P-12345';
       const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
       const patientAppointments = appointments.filter(apt => apt.patientId === patientId);
       const doctors = JSON.parse(localStorage.getItem('doctors') || '[]');
-      
-      // Load upcoming appointments
-      const upcomingList = document.querySelector('#upcoming-tab .appointments-list');
+
+      // Upcoming appointments
+      const upcomingList = document.getElementById('upcoming-list');
       const upcoming = patientAppointments.filter(apt => apt.status !== 'completed' && apt.status !== 'cancelled');
-      
       if (upcoming.length === 0) {
         upcomingList.innerHTML = '<p>No upcoming appointments.</p>';
       } else {
@@ -145,10 +163,10 @@
           return `
             <div class="appointment-item">
               <div class="appointment-info">
-                <h3>${doctor ? (doctor.name || doctor.doctorName) : 'Unknown Doctor'}</h3>
+                <h3>${doctor ? doctor.name : 'Unknown Doctor'}</h3>
                 <p><strong>Date:</strong> ${apt.date}</p>
                 <p><strong>Time:</strong> ${apt.time}</p>
-                <p><strong>Reason:</strong> ${apt.reason || 'N/A'}</p>
+                <p><strong>Reason:</strong> ${apt.reason}</p>
               </div>
               <div class="appointment-actions">
                 <button class="cancel-btn" onclick="cancelAppointment('${apt.id}')">Cancel</button>
@@ -158,10 +176,9 @@
         }).join('');
       }
 
-      // Load history
-      const historyList = document.querySelector('#history-tab .appointments-list');
+      // Appointment history
+      const historyList = document.getElementById('history-list');
       const history = patientAppointments.filter(apt => apt.status === 'completed' || apt.status === 'cancelled');
-      
       if (history.length === 0) {
         historyList.innerHTML = '<p>No appointment history.</p>';
       } else {
@@ -170,7 +187,7 @@
           return `
             <div class="appointment-item">
               <div class="appointment-info">
-                <h3>${doctor ? (doctor.name || doctor.doctorName) : 'Unknown Doctor'}</h3>
+                <h3>${doctor ? doctor.name : 'Unknown Doctor'}</h3>
                 <p><strong>Date:</strong> ${apt.date}</p>
                 <p><strong>Time:</strong> ${apt.time}</p>
                 <p><strong>Status:</strong> ${apt.status}</p>
@@ -203,7 +220,7 @@
     document.querySelector('.appointment-form').addEventListener('submit', (e) => {
       e.preventDefault();
       
-      const patientId = localStorage.getItem('patientId');
+      const patientId = localStorage.getItem('patientId') || 'P-12345';
       const doctorId = document.getElementById('doctor').value;
       const date = document.getElementById('date').value;
       const time = document.getElementById('time').value;
@@ -212,41 +229,21 @@
       const appointments = JSON.parse(localStorage.getItem('appointments') || '[]');
       const newAppointment = {
         id: 'APT-' + Date.now(),
-        patientId: patientId,
-        doctorId: doctorId,
-        date: date,
-        time: time,
-        reason: reason,
-        status: 'scheduled',
-        createdAt: new Date().toISOString()
+        patientId,
+        doctorId,
+        date,
+        time,
+        reason,
+        status: 'scheduled'
       };
       
       appointments.push(newAppointment);
       localStorage.setItem('appointments', JSON.stringify(appointments));
-
-      // Create notification for doctor
-      createDoctorNotification(doctorId, 'New appointment scheduled', `Patient has booked an appointment for ${date} at ${time}.`);
-
       alert('Appointment booked successfully!');
       document.querySelector('.appointment-form').reset();
       loadAppointments();
       showTab('upcoming');
     });
-
-    function createDoctorNotification(doctorId, title, message) {
-      const notifications = JSON.parse(localStorage.getItem('doctorNotifications') || '[]');
-      notifications.unshift({
-        id: 'NOTIF-' + Date.now(),
-        doctorId: doctorId,
-        type: 'appointment',
-        title: title,
-        message: message,
-        read: false,
-        timestamp: new Date().toISOString()
-      });
-      localStorage.setItem('doctorNotifications', JSON.stringify(notifications));
-    }
   </script>
 </body>
 </html>
-

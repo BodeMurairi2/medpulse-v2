@@ -60,19 +60,19 @@
           <div id="consultation-fields" class="record-fields">
             <div class="form-group">
               <label for="diagnosis">Diagnosis</label>
-              <input type="text" id="diagnosis" placeholder="Enter diagnosis" />
+              <input type="text" id="diagnosis" placeholder="Diagnosis..." />
             </div>
             <div class="form-group">
               <label for="treatment">Treatment</label>
-              <input type="text" id="treatment" placeholder="Enter treatment" />
+              <input type="text" id="treatment" placeholder="Treatment..." />
             </div>
             <div class="form-group">
               <label for="follow-up-date">Follow-up Date</label>
               <input type="date" id="follow-up-date" />
             </div>
             <div class="form-group">
-              <label for="notes">Doctor Notes</label>
-              <textarea id="notes" rows="3"></textarea>
+              <label for="notes">Notes</label>
+              <textarea id="notes" rows="3" placeholder="Doctor notes or additional info..."></textarea>
             </div>
           </div>
 
@@ -80,23 +80,23 @@
           <div id="prescription-fields" class="record-fields">
             <div class="form-group">
               <label for="medicine-name">Medicine Name</label>
-              <input type="text" id="medicine-name" placeholder="Enter medicine name" />
+              <input type="text" id="medicine-name" placeholder="Medicine name..." />
             </div>
             <div class="form-group">
-              <label for="dosage">Dosage Information</label>
-              <input type="text" id="dosage" placeholder="Enter dosage" />
+              <label for="dosage">Dosage</label>
+              <input type="text" id="dosage" placeholder="Dosage details..." />
             </div>
             <div class="form-group">
-              <label for="frequency">Dosage Frequency</label>
-              <input type="text" id="frequency" placeholder="Enter frequency" />
+              <label for="frequency">Frequency</label>
+              <input type="text" id="frequency" placeholder="Frequency..." />
             </div>
             <div class="form-group">
               <label for="duration">Duration</label>
-              <input type="text" id="duration" placeholder="Enter duration" />
+              <input type="text" id="duration" placeholder="Duration..." />
             </div>
             <div class="form-group">
-              <label for="prescription-notes">Additional Notes</label>
-              <textarea id="prescription-notes" rows="3"></textarea>
+              <label for="prescription-notes">Notes</label>
+              <textarea id="prescription-notes" rows="3" placeholder="Additional notes..."></textarea>
             </div>
           </div>
 
@@ -104,23 +104,20 @@
           <div id="lab-test-fields" class="record-fields">
             <div class="form-group">
               <label for="test-name">Test Name</label>
-              <input type="text" id="test-name" placeholder="Enter test name" />
+              <input type="text" id="test-name" placeholder="Test name..." />
             </div>
             <div class="form-group">
-              <label for="result-value">Result Value</label>
-              <input type="text" id="result-value" placeholder="Enter result value" />
-            </div>
-            <div class="form-group">
-              <label for="result-date">Result Date</label>
-              <input type="date" id="result-date" />
+              <label for="result-value">Result</label>
+              <input type="text" id="result-value" placeholder="Result value..." />
             </div>
             <div class="form-group">
               <label for="lab-notes">Notes</label>
-              <textarea id="lab-notes" rows="3"></textarea>
+              <textarea id="lab-notes" rows="3" placeholder="Notes or observations..."></textarea>
             </div>
             <div class="form-group">
-              <label for="lab-files">Attach Files (optional)</label>
-              <input type="file" id="lab-files" multiple />
+              <label for="lab-file">Attach File</label>
+              <input type="file" id="lab-file" />
+              <button type="button" class="btn-primary" id="upload-file-btn">Upload</button>
             </div>
           </div>
 
@@ -148,13 +145,16 @@
 
   <script>
     let currentPatientId = null;
+    let lastLabTestId = null; // To store the most recently created lab test id
 
-    document.getElementById('record-type').addEventListener('change', () => {
+    document.getElementById('record-type').addEventListener('change', async () => {
       const type = document.getElementById('record-type').value;
       document.querySelectorAll('.record-fields').forEach(f => f.style.display = 'none');
       if(type==='consultation') document.getElementById('consultation-fields').style.display='block';
       if(type==='prescription') document.getElementById('prescription-fields').style.display='block';
       if(type==='lab-test') document.getElementById('lab-test-fields').style.display='block';
+
+      if(currentPatientId) await loadPatientRecords(currentPatientId, type);
     });
 
     async function submitRecord(e){
@@ -177,8 +177,8 @@
             doctor_id: doctorId,
             diagnosis: document.getElementById('diagnosis').value,
             treatment: document.getElementById('treatment').value,
-            notes: document.getElementById('notes').value,
             follow_up_date: document.getElementById('follow-up-date').value,
+            notes: document.getElementById('notes').value,
             created_by: doctorName
           };
           response = await fetch(`${baseUrl}/new_consultation/${currentPatientId}`, {
@@ -210,7 +210,6 @@
             doctor_id: doctorId,
             test_name: document.getElementById('test-name').value,
             result_value: document.getElementById('result-value').value,
-            result_date: document.getElementById('result-date').value,
             notes: document.getElementById('lab-notes').value,
             doctor_name: doctorName
           };
@@ -220,28 +219,14 @@
             body: JSON.stringify(data)
           });
 
-          if(!response.ok) throw new Error("Failed to save lab test.");
-          const labTest = await response.json();
-          const labTestId = labTest.test_id;
-          if(!labTestId) throw new Error("Lab Test ID missing from server response.");
-
-          const files = document.getElementById('lab-files').files;
-          for(let i=0;i<files.length;i++){
-            const formData = new FormData();
-            formData.append("file", files[i]);
-            const uploadResponse = await fetch(`${baseUrl}/lab_test/${labTestId}/upload_file`, {
-              method: "POST",
-              headers: { "Authorization": `Bearer ${token}` },
-              body: formData
-            });
-            if(!uploadResponse.ok) throw new Error("Failed to upload lab test file.");
-          }
+          const result = await response.json();
+          lastLabTestId = result.lab_test_id; // Capture the last lab test id for file upload
         }
 
         if(!response.ok) throw new Error("Failed to save record.");
         alert("Record saved successfully!");
         document.getElementById('medical-record-form').reset();
-        loadPatientRecords(currentPatientId);
+        await loadPatientRecords(currentPatientId, type);
 
       } catch(err){
         console.error(err);
@@ -249,14 +234,38 @@
       }
     }
 
-    async function loadPatientRecords(patientId) {
+    document.getElementById('upload-file-btn').addEventListener('click', async () => {
+      if(!lastLabTestId) return alert("No lab test record found to attach file.");
+      const fileInput = document.getElementById('lab-file');
+      if(!fileInput.files.length) return alert("Please select a file to upload.");
+
+      const token = localStorage.getItem('doctor_token');
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+
+      try {
+        const response = await fetch(`http://localhost:8080/doctor_portal/patients/lab_test/${lastLabTestId}/upload_file`, {
+          method: 'POST',
+          headers: { "Authorization": `Bearer ${token}` },
+          body: formData
+        });
+        if(!response.ok) throw new Error("Failed to upload file.");
+        alert("File uploaded successfully!");
+        fileInput.value = '';
+      } catch(err){
+        console.error(err);
+        alert(err.message);
+      }
+    });
+
+    async function loadPatientRecords(patientId, filterType) {
       const token = localStorage.getItem('doctor_token');
       try {
         const response = await fetch(`http://localhost:8080/doctor_portal/patients/${patientId}/records`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         if (!response.ok) throw new Error("Failed to fetch patient records.");
-        const records = await response.json();
+        let records = await response.json();
         const tbody = document.getElementById('records-list');
         tbody.innerHTML = '';
 
@@ -267,14 +276,24 @@
           return;
         }
 
-        records.forEach(r => {
-          let date='-', type='', description='', doctor='-';
-          if(r.diagnosis){ type='Consultation'; date=r.record_date||'-'; description=`Diagnosis: ${r.diagnosis}, Treatment: ${r.treatment||'-'}`; doctor=r.created_by||'-'; }
-          else if(r.medicine_name){ type='Prescription'; date=r.prescription_date||'-'; description=`Medicine: ${r.medicine_name}, Dosage: ${r.dosage||'-'}, Frequency: ${r.frequency||'-'}, Duration: ${r.duration||'-'}`; doctor=r.prescribed_by||'-'; }
-          else if(r.test_name){ type='Lab Test'; date=r.result_date||'-'; description=`Test: ${r.test_name}, Result: ${r.result_value||'-'}`; doctor=r.doctor_name||'-'; }
+        // Filter by selected type
+        records = records.filter(r => r.type.toLowerCase().replace(' ','-') === filterType);
 
-          const tr=document.createElement('tr');
-          tr.innerHTML=`<td>${date}</td><td>${type}</td><td>${description}</td><td>${doctor}</td><td>-</td>`;
+        // Sort descending by date (safely handling invalid/missing dates)
+        records.sort((a, b) => {
+          const dateA = a.date ? new Date(a.date) : new Date(0);
+          const dateB = b.date ? new Date(b.date) : new Date(0);
+          return dateB - dateA;
+        });
+
+        // Append to table
+        records.forEach(r => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${r.date || '-'}</td>
+                          <td>${r.type || '-'}</td>
+                          <td>${r.description || '-'}</td>
+                          <td>${r.doctor || '-'}</td>
+                          <td>${r.action || '-'}</td>`;
           tbody.appendChild(tr);
         });
 
@@ -313,7 +332,7 @@
     }
 
     function selectPatient(patient){
-      currentPatientId = patient.patient_id; // corrected: use patient_id
+      currentPatientId = patient.patient_id;
       document.getElementById('patient-id').value = patient.patient_id;
       document.getElementById('patient-name-display').textContent = `${patient.first_name} ${patient.second_name}`;
       document.getElementById('record-form-section').style.display='block';
@@ -321,7 +340,8 @@
       document.getElementById('search-results').innerHTML='';
       document.getElementById('search-results').style.display='none';
       document.getElementById('patient-search').value='';
-      loadPatientRecords(currentPatientId);
+      const type = document.getElementById('record-type').value;
+      if(type) loadPatientRecords(currentPatientId, type);
     }
 
     document.getElementById('medical-record-form').addEventListener('submit', submitRecord);

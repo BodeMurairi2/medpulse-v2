@@ -33,15 +33,7 @@
         <p>Scan patient QR code for quick access</p>
         <a href="qr-scanner.html" class="card-link">Scan Now →</a>
       </div>
-      <!--
-      
-      <div class="dashboard-card">
-        <div class="card-icon">🔍</div>
-        <h3>Search Patient</h3>
-        <p>Search patients by name or ID</p>
-        <a href="patient-search.html" class="card-link">Search Now →</a>
-      </div>
-      -->
+
       <div class="dashboard-card">
         <div class="card-icon">📋</div>
         <h3>My Patients</h3>
@@ -71,31 +63,38 @@
       </div>
     </div>
   </div>
+
   <script>
-    // Load doctor information from localStorage
-    window.addEventListener('DOMContentLoaded', () => {
-      const doctorId = localStorage.getItem('doctorId') || 'D-12345';
-      document.getElementById('doctorId').textContent = doctorId;
-      
-      // Load doctor data
-      const doctors = JSON.parse(localStorage.getItem('doctors')) || [];
-      const doctor = doctors.find(d => d.id === doctorId);
-      
-      if (doctor) {
-        document.getElementById('doctorName').textContent = doctor.name || doctor.doctorName || 'Dr. Name';
-        
-        // Get department name
-        const departments = JSON.parse(localStorage.getItem('departments')) || [];
-        const dept = departments.find(d => d.id === doctor.departmentId);
-        document.getElementById('hospitalName').textContent = dept ? dept.name : 'Department';
-      } else {
-        document.getElementById('doctorName').textContent = 'Dr. Name';
-        document.getElementById('hospitalName').textContent = 'Hospital Name';
+    async function loadDoctorInfo() {
+      const token = localStorage.getItem("doctor_token");
+      if (!token) return;
+
+      try {
+        const response = await fetch("http://localhost:8080/doctor_portal/doctor_info", {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error("Failed to fetch doctor info");
+
+        const data = await response.json();
+        localStorage.setItem("doctorName", data.doctor_name);
+        localStorage.setItem("hospitalName", data.hospital_name);
+        localStorage.setItem("doctorId", data.doctor_id);
+
+        document.getElementById("doctorName").textContent = data.doctor_name;
+        document.getElementById("hospitalName").textContent = data.hospital_name;
+        document.getElementById("doctorId").textContent = data.doctor_id;
+
+      } catch (err) {
+        console.error(err);
+        // fallback values
+        document.getElementById("doctorName").textContent = "Dr. Name";
+        document.getElementById("hospitalName").textContent = "Hospital Name";
+        document.getElementById("doctorId").textContent = "D-12345";
       }
 
       // Load notification count
       updateNotificationBadge();
-    });
+    }
 
     function updateNotificationBadge() {
       const notifications = JSON.parse(localStorage.getItem('doctorNotifications') || '[]');
@@ -113,9 +112,13 @@
       if (confirm('Are you sure you want to logout?')) {
         localStorage.removeItem('doctorLoggedIn');
         localStorage.removeItem('doctorId');
+        localStorage.removeItem('doctorName');
+        localStorage.removeItem('hospitalName');
         window.location.href = '../index.html';
       }
     }
+
+    window.addEventListener('DOMContentLoaded', loadDoctorInfo);
   </script>
 </body>
 </html>

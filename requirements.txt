@@ -21,4 +21,6 @@ redis
 botocore
 boto3
 celery
-
+qrcode
+pillow
+cryptography

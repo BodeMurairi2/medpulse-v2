@@ -15,6 +15,17 @@ class Record:
 
     def __init__(self):
         pass
+    #.......................GET doctor general info..........
+    def get_doctor_info(self, doctor_id:int):
+        """get doctor general info"""
+        with SessionLocal() as db:
+            doctor_info = db.query(Doctor).filter(Doctor.doctor_id == doctor_id).first()
+            hospital_name = db.query(Hospital).filter(Hospital.hospital_id == doctor_info.hospital_id).first()
+            return {
+                "doctor_id":doctor_id,
+                "doctor_name":f"Dr.{doctor_info.first_name} {doctor_info.last_name}",
+                "hospital_name":hospital_name.hospital_name
+            }
 
     # ----------------------- GET / SEARCH -----------------------
     def get_patients(self, doctor_id: int):
@@ -64,9 +75,9 @@ class Record:
             })
         return doctors_list
 
-    def get_patient_medical_history(patient_id: int, db: Session):
+    def get_patient_medical_history(self, patient_id: int):
         """Fetch all medical records (consultations, prescriptions, lab tests) for a patient."""
-        
+        db = SessionLocal()
         # Fetch consultations
         consultations = db.query(MedicalRecord).filter(MedicalRecord.patient_id == patient_id).all()
         consultation_records = [
@@ -74,7 +85,8 @@ class Record:
                 "date": c.record_date or date.today(),
                 "type": "Consultation",
                 "description": f"Diagnosis: {c.diagnosis}, Treatment: {c.treatment}, Notes: {c.notes or '-'}",
-                "doctor": c.created_by
+                "doctor": c.created_by,
+                "action": c.treatment
             }
             for c in consultations
         ]
@@ -86,7 +98,8 @@ class Record:
                 "date": p.prescription_date or date.today(),
                 "type": "Prescription",
                 "description": f"Medicine: {p.medicine_name}, Dosage: {p.dosage}, Frequency: {p.frequency}, Duration: {p.duration}, Notes: {p.notes or '-'}",
-                "doctor": p.prescribed_by
+                "doctor": p.prescribed_by,
+                "action":p.notes
             }
             for p in prescriptions
         ]
@@ -98,7 +111,8 @@ class Record:
                 "date": l.result_date or date.today(),
                 "type": "Lab Test",
                 "description": f"Test: {l.test_name}, Result: {l.result_value}, Notes: {l.notes or '-'}",
-                "doctor": l.doctor_name
+                "doctor": l.doctor_name,
+                "action": l.notes
             }
             for l in lab_tests
         ]
@@ -297,3 +311,4 @@ class Record:
             lab_test_file.file_url = public_url
             session.commit()
         return public_url
+

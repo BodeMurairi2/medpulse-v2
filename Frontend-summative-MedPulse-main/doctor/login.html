@@ -74,9 +74,11 @@
 
         const data = await response.json();
 
-        // Save token + doctor ID
+        // Save token + doctor info
         localStorage.setItem("doctor_token", data.access_token);
         localStorage.setItem("doctorId", data.doctor_id);
+        localStorage.setItem("doctorName", data.doctor_name);
+        localStorage.setItem("hospitalName", data.hospital_name);
 
         // Redirect
         window.location.href = "dashboard.html";

@@ -66,6 +66,12 @@ def change_password(
     db.refresh(doctor)
     return {"message": "Password changed successfully"}
 
+#........................DOCTOR GENERAL INFORMATION......
+@doctor_portal_router.get("/doctor_info")
+def get_doctor_infos(doctor_id:int=Depends(get_current_doctor)):
+    """get doctor general information"""
+    return record.get_doctor_info(doctor_id=doctor_id)
+
 # ----------------------- PATIENTS -----------------------
 @doctor_portal_router.get("/patients")
 def get_patients(doctor_id: int = Depends(get_current_doctor)):
@@ -79,14 +85,14 @@ def get_patient(patient_name: str, _: int = Depends(get_current_doctor)):
 def get_all_doctors( _: int = Depends(get_current_doctor)):
     return record.get_doctors()
 
-"""
+
 @doctor_portal_router.get("/patients/{patient_id}/records")
 def get_records(
     patient_id: int,
     doctor_id: int = Depends(get_current_doctor)
 ):
-    return record.get_patient_medical_history(patient_id=patient_id, doctor_id=doctor_id)
-"""
+    return record.get_patient_medical_history(patient_id=patient_id)
+
 # ----------------------- CREATE -----------------------
 @doctor_portal_router.post("/patients/new_consultation/{patient_id}")
 def create_new_consultation(
@@ -152,3 +158,7 @@ def update_lab_test_file(
     doctor_id: int = Depends(get_current_doctor)
 ):
     return record.update_lab_test_file(lab_test_file_id=lab_test_file_id, new_file=new_file)
+
+@doctor_portal_router.post("/patients/scan_qr")
+def scan_patient_qr(encrypted_qr: str = Body(...), doctor_id: int = Depends(get_current_doctor)):
+    return record.add_patient_via_qr(encrypted_qr=encrypted_qr, doctor_id=doctor_id)
