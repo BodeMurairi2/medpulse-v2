@@ -50,12 +50,35 @@
   </div>
 
   <script>
-    let logs = JSON.parse(localStorage.getItem('auditLogs')) || [];
+    // Add manual sample audit logs
+    let logs = [
+      { timestamp: '2025-11-23T08:15:00', user: 'Admin', action: 'Patient Registered', details: 'Patient ID: PAT-001, Name: John Doe' },
+      { timestamp: '2025-11-23T08:20:00', user: 'Admin', action: 'Patient Registered', details: 'Patient ID: PAT-002, Name: Jane Smith' },
+      { timestamp: '2025-11-23T08:35:00', user: 'Nurse1', action: 'Patient Record Updated', details: 'Patient ID: PAT-003, Updated DOB' },
+      { timestamp: '2025-11-23T08:50:00', user: 'Admin', action: 'Patient Deleted', details: 'Patient ID: PAT-004, Name: Emily Davis' },
+      { timestamp: '2025-11-23T09:00:00', user: 'Admin', action: 'Doctor Registered', details: 'Doctor ID: DOC-001, Name: Michael Johnson' },
+      { timestamp: '2025-11-23T09:10:00', user: 'Nurse2', action: 'Patient Registered', details: 'Patient ID: PAT-005, Name: Daniel Wilson' },
+      { timestamp: '2025-11-23T09:15:00', user: 'Admin', action: 'Doctor Deleted', details: 'Doctor ID: DOC-002, Name: Olivia Brown' },
+      { timestamp: '2025-11-23T09:25:00', user: 'Admin', action: 'Patient Record Updated', details: 'Patient ID: PAT-006, Updated phone number' },
+      { timestamp: '2025-11-23T09:35:00', user: 'Nurse1', action: 'Patient Registered', details: 'Patient ID: PAT-007, Name: Matthew Taylor' },
+      { timestamp: '2025-11-23T09:50:00', user: 'Admin', action: 'Patient Deleted', details: 'Patient ID: PAT-008, Name: Sophia Martinez' },
+      { timestamp: '2025-11-23T10:00:00', user: 'Admin', action: 'Doctor Registered', details: 'Doctor ID: DOC-003, Name: Christopher Anderson' },
+      { timestamp: '2025-11-23T10:05:00', user: 'Nurse2', action: 'Patient Record Updated', details: 'Patient ID: PAT-009, Updated email' },
+      { timestamp: '2025-11-23T10:15:00', user: 'Admin', action: 'Patient Registered', details: 'Patient ID: PAT-010, Name: Ava Thomas' },
+      { timestamp: '2025-11-23T10:20:00', user: 'Admin', action: 'Patient Deleted', details: 'Patient ID: PAT-011, Name: Joshua Jackson' },
+      { timestamp: '2025-11-23T10:30:00', user: 'Nurse1', action: 'Patient Registered', details: 'Patient ID: PAT-012, Name: Mia White' },
+      { timestamp: '2025-11-23T10:40:00', user: 'Admin', action: 'Patient Record Updated', details: 'Patient ID: PAT-013, Updated gender' },
+      { timestamp: '2025-11-23T10:50:00', user: 'Admin', action: 'Doctor Deleted', details: 'Doctor ID: DOC-004, Name: Isabella Martin' },
+      { timestamp: '2025-11-23T11:00:00', user: 'Nurse2', action: 'Patient Registered', details: 'Patient ID: PAT-014, Name: Ryan Thompson' },
+      { timestamp: '2025-11-23T11:10:00', user: 'Admin', action: 'Patient Record Updated', details: 'Patient ID: PAT-015, Updated phone number' },
+      { timestamp: '2025-11-23T11:20:00', user: 'Admin', action: 'Patient Deleted', details: 'Patient ID: PAT-016, Name: Charlotte Garcia' }
+    ];
+
+    localStorage.setItem('auditLogs', JSON.stringify(logs));
 
     window.addEventListener('DOMContentLoaded', () => {
       loadLogs();
       loadUsers();
-      
       document.getElementById('search-logs').addEventListener('input', filterLogs);
       document.getElementById('filter-user').addEventListener('change', filterLogs);
     });

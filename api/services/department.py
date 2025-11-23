@@ -15,7 +15,7 @@ class DepartmentService:
     """Service class for Department Operations"""
 
     def get_departments(self) -> list[dept]:
-        """Get all departments."""
+        """Get all departments"""
         with SessionLocal() as db:
             return db.query(dept).all()
 

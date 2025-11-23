@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
 from fastapi.routing import APIRouter
-from fastapi import HTTPException, Query
+from fastapi import Depends, HTTPException, Query
 from services.department import DepartmentService
 from schemas.department import Department
+from auth.dependencies import get_current_hospital
 
 department_router = APIRouter(prefix="/department",
                               tags=["Departments"]

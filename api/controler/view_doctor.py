@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
 from fastapi.routing import APIRouter
-from fastapi import HTTPException, Query
+from fastapi import HTTPException, Query, Depends
 from services.view_doctor import View_doctor
+from auth.dependencies import get_current_hospital
 
 router = APIRouter(prefix="/doctorsList",
                               tags=["ListDoctors"]
@@ -15,7 +16,7 @@ async def doctors_home():
     return {"message":"Welcome to Doctors page"}
 
 @router.get("/list")
-async def get_doctors_list():
+async def get_doctors_list(hospital_id: int = Depends(get_current_hospital)):
     return service.get_doctors()
 
 @router.get("/list/{doctor_name}")
