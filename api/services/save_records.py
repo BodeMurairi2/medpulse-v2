@@ -79,10 +79,12 @@ class Record:
         """Fetch all medical records (consultations, prescriptions, lab tests) for a patient."""
         db = SessionLocal()
         # Fetch consultations
+        patient = db.query(Patient).filter(Patient.patient_id == patient_id).first()
         consultations = db.query(MedicalRecord).filter(MedicalRecord.patient_id == patient_id).all()
         consultation_records = [
             {
                 "date": c.record_date or date.today(),
+                "full_name": f"{patient.first_name} {patient.second_name or ''}",
                 "type": "Consultation",
                 "description": f"Diagnosis: {c.diagnosis}, Treatment: {c.treatment}, Notes: {c.notes or '-'}",
                 "doctor": c.created_by,

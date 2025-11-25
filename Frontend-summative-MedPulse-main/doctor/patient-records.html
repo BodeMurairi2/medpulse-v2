@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Patient Records - MedPulse</title>
+<link rel="stylesheet" href="doctor.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  body { font-family: Arial, sans-serif; background-color: #f5f6fa; margin:0; padding:0; }
+  .container { max-width: 900px; margin:30px auto; padding:20px; background:#fff; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
+  h1, h2 { color:#1a73e8; }
+  h2 { margin-top:30px; border-bottom:2px solid #ccc; padding-bottom:5px; }
+  .record-card { border:1px solid #ddd; border-radius:8px; padding:15px; margin-bottom:15px; background:#fdfdfd; box-shadow:0 2px 5px rgba(0,0,0,0.05); transition: transform 0.2s; }
+  .record-card:hover { transform: translateY(-2px); box-shadow:0 5px 10px rgba(0,0,0,0.1); }
+  .record-type { font-weight:bold; font-size:1.1em; color:#1a73e8; }
+  .highlight { background-color: yellow; }
+  .no-records { font-style: italic; color:#555; }
+  #patient-id { font-weight:bold; margin-bottom:20px; font-size:1.2em; text-align:center; }
+  #filter-container { display:flex; justify-content:center; margin-bottom:20px; }
+  #search-input { padding:8px 12px; width:100%; max-width:400px; border-radius:5px; border:1px solid #ccc; font-size:1em; }
+  #back-btn { display:block; margin:30px auto 0; padding:10px 20px; background-color:#1a73e8; color:white; font-weight:bold; border:none; border-radius:5px; cursor:pointer; transition:0.2s; text-align:center; }
+  #back-btn:hover { background-color:#155bb5; }
+  #loading-spinner { display:none; margin:20px auto; border:6px solid #f3f3f3; border-top:6px solid #1a73e8; border-radius:50%; width:40px; height:40px; animation: spin 1s linear infinite; }
+  @keyframes spin { 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }
+  .tabs { display:flex; gap:10px; justify-content:center; margin-bottom:15px; }
+  .tab-btn { padding:8px 16px; border:none; border-radius:5px; background:#e0e0e0; cursor:pointer; font-weight:bold; transition:0.2s; }
+  .tab-btn.active { background:#1a73e8; color:white; }
+  .download-btn { margin-top:10px; padding:6px 12px; background:#34a853; color:white; border:none; border-radius:4px; cursor:pointer; }
+  .download-btn:hover { background:#2a7f42; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Patient Medical Records</h1>
+  <p id="patient-id"></p>
+
+  <div id="filter-container">
+    <input type="text" id="search-input" placeholder="Filter records..." oninput="filterRecords()" />
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showSection('Consultation')">Consultations</button>
+    <button class="tab-btn" onclick="showSection('Prescription')">Prescriptions</button>
+    <button class="tab-btn" onclick="showSection('Lab Test')">Lab Tests</button>
+  </div>
+
+  <div id="loading-spinner"></div>
+
+  <div id="consultations-section">
+    <h2>Consultations</h2>
+    <div id="consultations"></div>
+  </div>
+
+  <div id="prescriptions-section" style="display:none;">
+    <h2>Prescriptions</h2>
+    <div id="prescriptions"></div>
+  </div>
+
+  <div id="lab-tests-section" style="display:none;">
+    <h2>Lab Tests</h2>
+    <div id="lab-tests"></div>
+  </div>
+
+  <button id="back-btn" onclick="goBack()">Back to QR Scanner</button>
+</div>
+
+<script>
+const { jsPDF } = window.jspdf;
+let allRecords = [];
+let currentSection = 'Consultation';
+const params = new URLSearchParams(window.location.search);
+const patientId = params.get('patientId');
+// Remove reading patientName from URL
+let patientName = 'Unknown'; // We'll extract this from the API response
+
+const doctorToken = localStorage.getItem('doctor_token');
+if(!doctorToken){ alert('Doctor not logged in.'); }
+else {
+  document.getElementById('loading-spinner').style.display='block';
+  fetch(`http://localhost:8080/doctor_portal/patients/${patientId}/records`,{
+    method:'GET',
+    headers:{ 'Authorization':`Bearer ${doctorToken}`, 'Content-Type':'application/json' }
+  })
+  .then(res=>res.json())
+  .then(records=>{
+    allRecords = records;
+    // Extract full_name from the first consultation record
+    const consult = records.find(r => r.type === 'Consultation');
+    if (consult && consult.full_name) {
+      patientName = consult.full_name;
+    } else {
+      patientName = 'Unknown';
+    }
+    document.getElementById('patient-id').innerText = `Patient: ${patientName} (ID: ${patientId})`;
+    displayRecords(allRecords);
+  })
+  .catch(err=>{ console.error(err); alert('Failed to fetch patient records.'); })
+  .finally(()=>{ document.getElementById('loading-spinner').style.display='none'; });
+}
+
+function highlightText(text, keyword){
+  if(!keyword) return text;
+  const regex = new RegExp(`(${keyword})`,'gi');
+  return text.replace(regex,'<span class="highlight">$1</span>');
+}
+
+function displayRecords(records, keyword=''){
+  const consultationsDiv=document.getElementById('consultations');
+  const prescriptionsDiv=document.getElementById('prescriptions');
+  const labTestsDiv=document.getElementById('lab-tests');
+  consultationsDiv.innerHTML=''; prescriptionsDiv.innerHTML=''; labTestsDiv.innerHTML='';
+
+  if(!records || records.length===0){
+    const msg='<p class="no-records">No records found for this patient.</p>';
+    consultationsDiv.innerHTML=msg; prescriptionsDiv.innerHTML=msg; labTestsDiv.innerHTML=msg;
+    return;
+  }
+
+  records.sort((a,b)=>new Date(b.date)-new Date(a.date));
+
+  ['Consultation','Prescription','Lab Test'].forEach(type=>{
+    const sectionDiv=type==='Consultation'?consultationsDiv:type==='Prescription'?prescriptionsDiv:labTestsDiv;
+    const typeRecords=records.filter(r=>r.type===type);
+    if(typeRecords.length===0){ sectionDiv.innerHTML=`<p class="no-records">No ${type.toLowerCase()}s found.</p>`; }
+    else {
+      typeRecords.forEach(record=>{
+        const card=document.createElement('div');
+        card.className='record-card';
+        card.innerHTML=`
+          <p class="record-type">${highlightText(record.type, keyword)}</p>
+          <p><strong>Date:</strong> ${highlightText(record.date, keyword)}</p>
+          <p><strong>Description:</strong> ${highlightText(record.description, keyword)}</p>
+          <p><strong>Doctor:</strong> ${highlightText(record.doctor, keyword)}</p>
+          <button class="download-btn" onclick="downloadPDF(${JSON.stringify(record).replace(/"/g,"'")})">Download PDF</button>
+        `;
+        sectionDiv.appendChild(card);
+      });
+    }
+  });
+
+  showSection(currentSection);
+}
+
+function filterRecords(){
+  const keyword=document.getElementById('search-input').value.toLowerCase();
+  const filtered=allRecords.filter(r=>
+    r.description.toLowerCase().includes(keyword)||
+    r.doctor.toLowerCase().includes(keyword)||
+    r.type.toLowerCase().includes(keyword)
+  );
+  displayRecords(filtered, keyword);
+}
+
+function showSection(section){
+  currentSection=section;
+  document.getElementById('consultations-section').style.display=section==='Consultation'?'block':'none';
+  document.getElementById('prescriptions-section').style.display=section==='Prescription'?'block':'none';
+  document.getElementById('lab-tests-section').style.display=section==='Lab Test'?'block':'none';
+  document.querySelectorAll('.tab-btn').forEach(btn=>btn.classList.remove('active'));
+  const activeBtn=Array.from(document.querySelectorAll('.tab-btn')).find(btn=>btn.textContent.includes(section));
+  if(activeBtn) activeBtn.classList.add('active');
+}
+
+function downloadPDF(record){
+  const doc=new jsPDF();
+  // Logo placeholder (replace with URL or base64 if needed)
+  doc.setFillColor(26,115,232); doc.rect(0,0,210,25,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(16);
+  doc.text('Hospital Logo - MedPulse', 10, 16);
+
+  // Patient & Record Info
+  doc.setFontSize(14); doc.setTextColor(0,0,0);
+  doc.text(`Patient: ${patientName}`,10,40);
+  doc.text(`Patient ID: ${patientId}`,10,50);
+  doc.text(`Record Type: ${record.type}`,10,60);
+  doc.text(`Date: ${record.date}`,10,70);
+  doc.text(`Doctor: ${record.doctor}`,10,80);
+  doc.text('Description:',10,90);
+  const lines=doc.splitTextToSize(record.description,190);
+  doc.text(lines,10,100);
+
+  doc.save(`PatientRecord_${record.type}_${record.date}.pdf`);
+}
+
+function goBack(){ window.location.href='qr-scanner.html'; }
+</script>
+</body>
+</html>

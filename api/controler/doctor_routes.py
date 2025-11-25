@@ -18,8 +18,8 @@ def add_doctor(
     existing_doctor = db.query(Doctor).filter(Doctor.email == doctor_data.email).first()
     if existing_doctor:
         raise HTTPException(status_code=400, detail="Doctor with this email already exists")
-    generated_password = f"doctor-{generate_otp()}"
-    hashed_password = hash_password(generated_password)
+    generated_password = doctor_data.password
+    hashed_password = hash_password(doctor_data.password)
 
     new_doctor = Doctor(
         first_name=doctor_data.first_name,

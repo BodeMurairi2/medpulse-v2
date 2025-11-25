@@ -6,32 +6,35 @@
   <title>My QR Code - MedPulse</title>
   <link rel="stylesheet" href="patient.css" />
   <style>
-    /* Responsive QR code */
-    #qrcode-img {
-      width: 50%;        /* scales to 50% of container width */
-      max-width: 250px;  /* max width to maintain readability */
-      height: auto;      /* keeps aspect ratio */
-    }
-
+    /* Center QR image inside container */
     .qr-container {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
     }
 
-    .download-btn {
-      padding: 8px 16px;
-      font-size: 14px;
-      cursor: pointer;
-      border: none;
-      border-radius: 6px;
-      background-color: #007bff;
-      color: white;
+    #qrImage {
+      width: 256px;
+      height: 256px;
+      display: none;
+      margin-bottom: 10px;
     }
 
-    .download-btn:hover {
-      background-color: #0056b3;
+    /* Spinner styling */
+    .spinner {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #007BFF;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+      margin: 20px 0;
+      display: none;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   </style>
 </head>
@@ -51,13 +54,14 @@
     <div class="qr-section">
       <h2>My QR Code</h2>
       <p class="qr-description">
-        Share this QR code with authorized doctors for quick access to your basic information.
+        Share this QR code with authorized doctors for quick access to your medical information.
       </p>
-      
+
       <div class="qr-container">
-        <img id="qrcode-img" alt="Patient QR Code" />
-        <p class="qr-info">Patient ID: <span id="displayPatientId">P-12345</span></p>
-        <button class="download-btn" onclick="downloadQR()">Download QR Code</button>
+        <div class="spinner" id="spinner"></div>
+        <img id="qrImage" src="" alt="QR Code">
+        <p class="qr-info">Patient ID: <span id="displayPatientId">...</span></p>
+        <button class="download-btn" id="downloadBtn">Download QR Code</button>
       </div>
 
       <div class="qr-instructions">
@@ -73,60 +77,79 @@
   </div>
 
   <script>
-    const token = localStorage.getItem('authToken');
-    const patientId = localStorage.getItem('patientId');
+    async function loadQRCode() {
+      const patientId = localStorage.getItem('patientId') || '1';
+      const token = localStorage.getItem('authToken');
 
-    if (!token || !patientId) {
-      alert("You are not logged in. Please login first.");
-      window.location.href = "../index.html";
-    }
+      const spinner = document.getElementById('spinner');
+      const qrImage = document.getElementById('qrImage');
 
-    async function fetchEncryptedQRCode() {
+      spinner.style.display = 'block';
+      qrImage.style.display = 'none';
+
+      if (!token) {
+        alert("No authorization token found. Please log in.");
+        spinner.style.display = 'none';
+        return;
+      }
+
       try {
-        const response = await fetch(
-          `http://localhost:8080/patients_portal_auth/patients/${patientId}/qrcode`,
-          {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
+        const response = await fetch(`http://localhost:8080/patients_portal_auth/${patientId}/generate-qr`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
           }
-        );
+        });
 
         if (!response.ok) {
-          if (response.status === 401) {
-            alert("Session expired. Please login again.");
-            localStorage.clear();
-            window.location.href = "../index.html";
-          } else {
-            throw new Error(`Error fetching QR code: ${response.status} ${response.statusText}`);
-          }
+          throw new Error(`Failed to fetch QR. Status: ${response.status}`);
         }
 
         const data = await response.json();
-        const qrBase64 = data.qr_code_base64;
+        console.log("QR Response:", data);
 
-        document.getElementById('displayPatientId').textContent = patientId;
-        document.getElementById('qrcode-img').src = `data:image/png;base64,${qrBase64}`;
+        document.getElementById("displayPatientId").textContent = data.id;
 
-      } catch (error) {
-        console.error(error);
-        alert("Failed to fetch QR code. Check console for details.");
+        qrImage.src = data.qr_code_url + `?t=${Date.now()}`;
+        qrImage.onload = () => {
+          spinner.style.display = 'none';
+          qrImage.style.display = 'block';
+        }
+
+        document.getElementById("downloadBtn").onclick = () => downloadQR(data.qr_code_url);
+
+        localStorage.setItem('patientId', data.id);
+
+      } catch (err) {
+        console.error("Error loading QR:", err);
+        document.getElementById("displayPatientId").textContent = "Error loading patient data";
+        spinner.style.display = 'none';
       }
     }
 
-    function downloadQR() {
-      const img = document.getElementById('qrcode-img');
-      if (img && img.src) {
-        const link = document.createElement('a');
-        link.download = 'medpulse-qr-code.png';
-        link.href = img.src;
-        link.click();
+    function downloadQR(url) {
+      if (!url) {
+        alert("QR code not loaded yet.");
+        return;
       }
+
+      fetch(url)
+        .then(resp => resp.blob())
+        .then(blob => {
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = "medpulse-qr-code.png";
+          link.click();
+          URL.revokeObjectURL(link.href);
+        })
+        .catch(err => {
+          console.error("Error downloading QR:", err);
+          alert("Failed to download QR code.");
+        });
     }
 
-    window.addEventListener('DOMContentLoaded', fetchEncryptedQRCode);
+    window.addEventListener('DOMContentLoaded', loadQRCode);
   </script>
 </body>
 </html>

@@ -44,36 +44,67 @@
 
   <script>
     // Generate QR code on page load
-    window.addEventListener('DOMContentLoaded', () => {
-      const patientId = localStorage.getItem('patientId') || 'P-12345';
-      document.getElementById('displayPatientId').textContent = patientId;
-      
-      // Store patient ID in localStorage if not already set
-      if (!localStorage.getItem('patientId')) {
-        localStorage.setItem('patientId', patientId);
+    window.addEventListener('DOMContentLoaded', async () => {
+      const patientId = localStorage.getItem('patientId') || '1'; // fallback if patient not logged in
+      const token = localStorage.getItem('authToken'); // your saved auth token
+
+      if (!token) {
+        alert("No authorization token found. Please log in.");
+        return;
       }
-      
-      // Generate QR code with patient ID
-      const qrData = JSON.stringify({
-        type: 'patient',
-        patientId: patientId,
-        timestamp: new Date().toISOString()
-      });
-      
-      // Clear any existing QR code
-      document.getElementById("qrcode").innerHTML = '';
-      
-      // Generate new QR code
-      new QRCode(document.getElementById("qrcode"), {
-        text: qrData,
-        width: 256,
-        height: 256,
-        colorDark: "#000000",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.H
-      });
+
+      try {
+        // 1. MAKE THE REQUEST TO BACKEND API WITH AUTHORIZATION HEADER
+        const response = await fetch(`http://localhost:8080/patients_portal_auth/${patientId}/generate-qr`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch patient data');
+        }
+
+        const data = await response.json();
+        console.log("Patient Data:", data);
+
+        // 2. Display patient ID
+        document.getElementById('displayPatientId').textContent = data.id;
+
+        // 3. Store patient ID in localStorage
+        localStorage.setItem('patientId', data.id);
+
+        // 4. Prepare QR content using API data (can include full patient info)
+        const qrData = JSON.stringify({
+          type: 'patient',
+          patientId: data.id,
+          full_name: data.full_name,
+          email: data.email,
+          timestamp: new Date().toISOString()
+        });
+
+        // Clear any existing QR code
+        document.getElementById("qrcode").innerHTML = '';
+
+        // 5. Generate the QR code
+        new QRCode(document.getElementById("qrcode"), {
+          text: qrData,
+          width: 256,
+          height: 256,
+          colorDark: "#000000",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.H
+        });
+
+      } catch (error) {
+        console.error("QR Load Error:", error);
+        document.getElementById('displayPatientId').textContent = "Error loading patient";
+      }
     });
 
+    // Download QR button logic
     function downloadQR() {
       const qrContainer = document.getElementById('qrcode');
       const canvas = qrContainer.querySelector('canvas');
@@ -84,7 +115,6 @@
         link.href = url;
         link.click();
       } else {
-        // Fallback: try to get img if library uses img instead
         const img = qrContainer.querySelector('img');
         if (img) {
           const link = document.createElement('a');
@@ -97,4 +127,3 @@
   </script>
 </body>
 </html>
-

@@ -6,6 +6,55 @@
   <title>QR Scanner - MedPulse</title>
   <link rel="stylesheet" href="doctor.css" />
   <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@latest/dist/html5-qrcode.min.js"></script>
+  <style>
+    .dashboard-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    #qr-reader {
+      margin-top: 20px;
+      width: 100%;
+      max-width: 700px;
+    }
+    .manual-input {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      max-width: 500px;
+    }
+    .manual-input input {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    .manual-input button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 5px;
+      background-color: #1a73e8;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .manual-input button:hover {
+      background-color: #155bb5;
+    }
+    .scan-success {
+      margin-top: 10px;
+      color: green;
+      font-weight: bold;
+    }
+    #patient-id-display {
+      margin-top: 10px;
+      font-weight: bold;
+      color: #1a73e8;
+    }
+  </style>
 </head>
 <body>
   <nav class="navbar">
@@ -22,89 +71,60 @@
 
   <div class="dashboard-container">
     <h2>Scan Patient QR Code</h2>
-    
-    <div class="scanner-section">
-      <div class="scanner-instructions">
-        <h3>Instructions:</h3>
-        <ol>
-          <li>Click "Start Scanner" to activate your camera</li>
-          <li>Point your camera at the patient's QR code</li>
-          <li>Once scanned, you'll be prompted to enter your Doctor ID</li>
-          <li>After verification, you'll be redirected to the patient's information</li>
-        </ol>
-      </div>
+    <div id="qr-reader"></div>
 
-      <div class="scanner-container">
-        <div id="qr-reader" style="width: 100%; max-width: 500px; margin: 0 auto;"></div>
-        <div id="qr-reader-results"></div>
-      </div>
-
-      <div id="verification-section" class="verification-section" style="display: none;">
-        <h3>Doctor Verification Required</h3>
-        <p>QR code scanned successfully. Please enter your Doctor ID to access patient information.</p>
-        <form id="verification-form">
-          <div class="form-group">
-            <label for="doctorIdVerify">Doctor ID</label>
-            <input type="text" id="doctorIdVerify" required placeholder="Enter your Doctor ID" />
-          </div>
-          <button type="submit" class="verify-btn">Verify & Access Patient</button>
-        </form>
-      </div>
+    <div class="manual-input">
+      <input type="text" id="manual-url" placeholder="Paste QR link here if camera fails" />
+      <button onclick="handleManualUrl()">Fetch Records</button>
     </div>
+
+    <div id="qr-reader-results"></div>
+    <p id="patient-id-display"></p>
   </div>
 
   <script>
     let html5QrcodeScanner;
-    let scannedPatientData = null;
 
-    function onScanSuccess(decodedText, decodedResult) {
-      // Stop scanning
-      html5QrcodeScanner.clear();
-      
-      // Parse QR code data
+    function onScanSuccess(decodedText) {
+      console.log("QR Scanned:", decodedText);
+      processQrUrl(decodedText);
+    }
+
+    function handleManualUrl() {
+      const url = document.getElementById('manual-url').value.trim();
+      if (!url) return alert("Please enter a URL.");
+      processQrUrl(url);
+    }
+
+    function processQrUrl(urlString) {
       try {
-        scannedPatientData = JSON.parse(decodedText);
-        document.getElementById('qr-reader-results').innerHTML = 
-          `<div class="scan-success">QR Code scanned successfully! Patient ID: ${scannedPatientData.patientId}</div>`;
-        
-        // Show verification section
-        document.getElementById('verification-section').style.display = 'block';
+        const url = new URL(urlString);
+        const parts = url.pathname.split('/');
+        const patientId = parts[2];
+
+        // Optional: show success message before redirect
+        document.getElementById('qr-reader-results').innerHTML =
+          `<div class="scan-success">QR Code processed successfully! Redirecting...</div>`;
+        document.getElementById('patient-id-display').innerText = `Patient ID: ${patientId}`;
+
+        // Redirect to the patient records page
+        setTimeout(() => {
+          window.location.href = `patient-records.html?patientId=${patientId}`;
+        }, 800); // small delay to show success message
       } catch (e) {
-        alert('Invalid QR code format');
+        console.error("Invalid QR URL:", e);
+        alert('Invalid QR code URL or manual link.');
       }
     }
 
-    function onScanFailure(error) {
-      // Handle scan failure, ignored for now
-    }
-
-    // Start scanner when page loads
     window.addEventListener('DOMContentLoaded', () => {
       html5QrcodeScanner = new Html5Qrcode("qr-reader");
-      
       html5QrcodeScanner.start(
         { facingMode: "environment" },
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 250 }
-        },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
         onScanSuccess,
-        onScanFailure
+        (err) => { console.warn("QR scan error:", err); }
       );
-    });
-
-    // Handle verification form submission
-    document.getElementById('verification-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const doctorId = document.getElementById('doctorIdVerify').value;
-      
-      // Verify doctor ID (in real app, this would check against database)
-      if (doctorId && scannedPatientData) {
-        // Redirect to patient search with patient ID
-        window.location.href = `patient-search.html?patientId=${scannedPatientData.patientId}&verified=true`;
-      } else {
-        alert('Please enter a valid Doctor ID');
-      }
     });
   </script>
 </body>

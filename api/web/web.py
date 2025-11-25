@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from data.database import Base, engine
@@ -48,6 +49,9 @@ app.include_router(doctor_router)
 app.include_router(patient_router)
 app.include_router(patient_router_auth)
 app.include_router(patient_router_create)
+
+# mount static files
+app.mount("/qrcodes", StaticFiles(directory="qrcodes"), name="qrcodes")
 
 # Create tables on startup, retry until DB is ready
 @app.on_event("startup")

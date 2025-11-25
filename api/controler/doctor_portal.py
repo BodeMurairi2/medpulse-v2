@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from fastapi import APIRouter, HTTPException, Depends, Header, status, Body, UploadFile, File
+from fastapi import APIRouter, HTTPException, Depends, Header, Query, status, Body, UploadFile, File
 from sqlalchemy.orm import Session
 from data.database import get_db
 from data.hospital_model import Doctor
@@ -159,6 +159,14 @@ def update_lab_test_file(
 ):
     return record.update_lab_test_file(lab_test_file_id=lab_test_file_id, new_file=new_file)
 
-@doctor_portal_router.post("/patients/scan_qr")
-def scan_patient_qr(encrypted_qr: str = Body(...), doctor_id: int = Depends(get_current_doctor)):
-    return record.add_patient_via_qr(encrypted_qr=encrypted_qr, doctor_id=doctor_id)
+@doctor_portal_router.get("/patients/qr_access")
+def get_patient_via_qr(
+    patient_id: int = Query(...),
+    token: str = Query(...),
+    doctor_id: int = Depends(get_current_doctor)
+):
+    """
+    Access patient medical history via the QR code link.
+    The link contains patient_id and token.
+    """
+    return record.get_patient_medical_history(patient_id=patient_id)
